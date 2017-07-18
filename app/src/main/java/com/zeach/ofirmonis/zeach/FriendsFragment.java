@@ -16,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -48,17 +49,20 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-
+    private android.support.v4.app.FragmentManager fragmentManager;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView =inflater.inflate(R.layout.fragment_friends,container,false);
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getActivity().getSupportFragmentManager());
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mViewPager = (ViewPager) rootView.findViewById(R.id.friends_container);
+
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.friends_tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
 
 
 
@@ -107,13 +111,16 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+
         }
 
         @Override
         public Fragment getItem(int position) {
+
             switch (position) {
                 case 0:
                     FriendsListFragment friendsList = new FriendsListFragment();
+
                     return friendsList;
                 case 1:
                     SignInFragment SignIn= new SignInFragment();

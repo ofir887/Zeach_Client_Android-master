@@ -37,26 +37,28 @@ import java.net.URL;
  */
 
 public class FriendsListFragment extends Fragment implements View.OnClickListener{
-    Button btn;
-    private EditText Name;
-    private EditText Gender;
-    private Button getFromGallery;
-    private static int RESULT_LOAD_IMAGE = 1;
-    private static final int RESULT_OK = -1;
-    private ImageView image;
-    private UserNew ZeachUser;
+
     private View rootView;
-    private Bitmap bit=null;
+    private UserNew ZeachUser;
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView  =inflater.inflate(R.layout.friends_list_fragment,container,false);
-
+        this.ZeachUser = AppSavedObjects.getInstance().getUser();
+        Log.d("friends = ",this.ZeachUser.getFriendsList().toString());
         return this.rootView;
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (this.isVisible())
+            if (!isVisibleToUser){
+                Log.d("not","visible anymore");
+            }
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -89,6 +91,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDetach() {
         Log.d("nir","nir1222");
+
         super.onDetach();
     }
 }
