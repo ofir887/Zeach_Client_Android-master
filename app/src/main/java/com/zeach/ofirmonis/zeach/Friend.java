@@ -10,17 +10,26 @@ public class Friend implements Serializable{
     private String Name;
     private String UID;
     private String PhotoUrl;
+    private String CurrentBeach;
 
     public Friend(){
 
     }
 
-    public Friend(String name, String UID,String photoUrl) {
+    public Friend(String name, String UID,String photoUrl,String currentBeach) {
         this.Name = name;
         this.UID = UID;
         this.PhotoUrl = photoUrl;
+        this.CurrentBeach = currentBeach;
     }
 
+    public String getCurrentBeach() {
+        return CurrentBeach;
+    }
+
+    public void setCurrentBeach(String currentBeach) {
+        CurrentBeach = currentBeach;
+    }
 
     public String getName() {
         return Name;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -7,24 +7,44 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:id="@+id/circle_photo"
-        />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
-    <TextView
-        android:id="@+id/friend_name"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_weight="0.15"
-        android:clickable="true"
-        android:ems="10"
-        android:textAlignment="center"
-        android:textIsSelectable="false"
-        android:textSize="30sp"
-        android:textStyle="bold" />
+
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+        <TextView
+            android:id="@+id/friend_name"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.15"
+            android:clickable="true"
+            android:ems="10"
+            android:textAlignment="center"
+            android:textIsSelectable="false"
+            android:textSize="30sp"
+            android:textStyle="bold"
+
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/circle_photo" />
+
+        <TextView
+            android:id="@+id/friend_current_beach"
+            android:layout_width="150dp"
+            android:layout_height="20dp"
+            android:textAlignment="center"
+            android:layout_below="@+id/friend_name"
+            android:layout_toEndOf="@+id/circle_photo" />
+
 
     <Button
         android:id="@+id/add_friend_unfriend"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="40dp"
-        android:text="Add" />
+        android:text="Add"
+        android:layout_alignBottom="@+id/friend_current_beach"
+        android:layout_toEndOf="@+id/friend_name"
+        android:layout_marginStart="50dp"
+        android:layout_marginBottom="10dp"/>
 
-</LinearLayout>
+</RelativeLayout>

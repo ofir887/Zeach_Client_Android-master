@@ -3,6 +3,7 @@ package com.zeach.ofirmonis.zeach;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +28,8 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        final ViewHolder holder;
 
         if (convertView == null){
 
@@ -37,6 +38,7 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
             holder.friendName = (TextView)convertView.findViewById(R.id.friend_name);
             holder.friendPhoto = (ImageView) convertView.findViewById(R.id.circle_photo);
             holder.AddFriendUnfriend = (Button)convertView.findViewById(R.id.add_friend_unfriend);
+            holder.CurrentBeach = (TextView)convertView.findViewById(R.id.friend_current_beach);
             convertView.setTag(holder);
         }
         else {
@@ -45,6 +47,14 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
         holder.friendName.setText(friends.get(position).getName());
         holder.friendPhoto.setImageURI(Uri.parse(friends.get(position).getPhotoUrl()));
         holder.AddFriendUnfriend.setText("Unfriend");
+        holder.CurrentBeach.setText(friends.get(position).getCurrentBeach());
+        holder.AddFriendUnfriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("clicked",friends.get(position).getName());
+
+            }
+        });
         return convertView;
     }
 
@@ -53,6 +63,7 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
         ImageView friendPhoto;
         TextView friendName;
         Button AddFriendUnfriend;
+        TextView CurrentBeach;
     }
 
 

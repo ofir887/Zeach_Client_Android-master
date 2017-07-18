@@ -84,7 +84,7 @@ public class AppSavedObjects {
                                         Log.d("found",dataSnapshot.toString());
                                         UserNew desired = dataSnapshot.getValue(UserNew.class);
                                      //   try {
-                                            User.AddFriendToList(desired.getUID(),desired.getName(),desired.getProfilePictureUri());
+                                            User.AddFriendToList(desired.getUID(),desired.getName(),desired.getProfilePictureUri(),desired.getCurrentBeach());
                                       //  } catch (JSONException e) {
                                         //    e.printStackTrace();
                                      //   }

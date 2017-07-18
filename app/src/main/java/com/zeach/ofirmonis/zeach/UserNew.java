@@ -97,8 +97,8 @@ public class UserNew  implements Serializable {
         ProfilePictureUri = profilePictureUri;
     }
     //not good need to think about child in has map it is in the same key!!
-    public void AddFriendToList(String uid,String name,String photoUrl){
-        Friend friend = new Friend(name,uid,photoUrl);
+    public void AddFriendToList(String uid,String name,String photoUrl,String currentBeach){
+        Friend friend = new Friend(name,uid,photoUrl,currentBeach);
         this.FriendsList.put(uid,friend);
         //this.FriendsList.put("FriendName",name);
     }
