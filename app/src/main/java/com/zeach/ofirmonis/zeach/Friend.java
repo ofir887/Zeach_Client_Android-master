@@ -9,11 +9,16 @@ import java.io.Serializable;
 public class Friend implements Serializable{
     private String Name;
     private String UID;
+    private String PhotoUrl;
 
-    public Friend(String name, String UID) {
-        Name = name;
+    public Friend(){
+
+    }
+
+    public Friend(String name, String UID,String photoUrl) {
+        this.Name = name;
         this.UID = UID;
-
+        this.PhotoUrl = photoUrl;
     }
 
 
@@ -33,7 +38,22 @@ public class Friend implements Serializable{
         this.UID = UID;
     }
 
+    public String getPhotoUrl() {
+        return PhotoUrl;
+    }
 
+    public void setPhotoUrl(String photoUrl) {
+        PhotoUrl = photoUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "Friend{" +
+                "Name='" + Name + '\'' +
+                ", UID='" + UID + '\'' +
+                ", PhotoUrl='" + PhotoUrl + '\'' +
+                '}';
+    }
 }
 
 

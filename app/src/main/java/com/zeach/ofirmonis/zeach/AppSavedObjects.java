@@ -83,11 +83,11 @@ public class AppSavedObjects {
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                         Log.d("found",dataSnapshot.toString());
                                         UserNew desired = dataSnapshot.getValue(UserNew.class);
-                                        try {
-                                            User.AddFriendToList(desired.getUID(),data1.getJSONObject(finalI).getString("name"));
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
+                                     //   try {
+                                            User.AddFriendToList(desired.getUID(),desired.getName(),desired.getProfilePictureUri());
+                                      //  } catch (JSONException e) {
+                                        //    e.printStackTrace();
+                                     //   }
 
 
                                     }

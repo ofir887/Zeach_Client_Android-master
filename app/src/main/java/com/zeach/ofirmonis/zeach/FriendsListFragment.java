@@ -17,11 +17,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by ofirmonis on 31/05/2017.
@@ -40,15 +49,53 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
 
     private View rootView;
     private UserNew ZeachUser;
+    private ArrayList friends = new ArrayList();
+    private FriendListAdapter friendListAdapter;
+    private ListView friendsListView;
+    private DatabaseReference data;
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView  =inflater.inflate(R.layout.friends_list_fragment,container,false);
+        this.friendsListView = (ListView)rootView.findViewById(R.id.friends_list);
+
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
-        Log.d("friends = ",this.ZeachUser.getFriendsList().toString());
+        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/friendsList/");
+     //   this.friends.addAll(this.ZeachUser.getFriendsList().values());
+      //  this.friendListAdapter = new FriendListAdapter(getContext(),this.friends,getActivity());
+      //  this.friendListAdapter.notifyDataSetChanged();
+      //  this.friendsListView.setAdapter(this.friendListAdapter);
+      //  this.friendListAdapter.notifyDataSetChanged();
+       // Log.d("new frinds ar",this.friends.toString());
+       // Log.d("friends = ",this.ZeachUser.getFriendsList().toString());
+        getFriendsFromServer();
         return this.rootView;
+    }
+    public void getFriendsFromServer(){
+        friendListAdapter = new FriendListAdapter(getContext(),friends,getActivity());
+        this.data.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                friendListAdapter.clear();
+
+                friendListAdapter.notifyDataSetChanged();
+                for(DataSnapshot friend: dataSnapshot.getChildren()){
+                    friends.add(friend.getValue(Friend.class));
+                  //  Log.d("fgf",friend.toString());
+                }
+
+
+                friendsListView.setAdapter(friendListAdapter);
+                friendListAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

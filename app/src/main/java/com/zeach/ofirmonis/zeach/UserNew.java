@@ -18,7 +18,7 @@ public class UserNew  implements Serializable {
     private boolean importFacebookFriends = true;
     private String Provider;
     private String ProfilePictureUri;
-    private Map<String,String> FriendsList = new HashMap<>();
+    private Map<String,Friend> FriendsList = new HashMap<>();
     private Map<String,String> FavoriteBeachesList;
     private String CurrentBeach;
     private boolean isProfilePrivate;
@@ -97,15 +97,16 @@ public class UserNew  implements Serializable {
         ProfilePictureUri = profilePictureUri;
     }
     //not good need to think about child in has map it is in the same key!!
-    public void AddFriendToList(String uid,String name){
-        this.FriendsList.put(uid,name);
+    public void AddFriendToList(String uid,String name,String photoUrl){
+        Friend friend = new Friend(name,uid,photoUrl);
+        this.FriendsList.put(uid,friend);
         //this.FriendsList.put("FriendName",name);
     }
-    public Map<String, String> getFriendsList() {
+    public Map<String, Friend> getFriendsList() {
         return FriendsList;
     }
 
-    public void setFriendsList(Map<String, String> friendsList) {
+    public void setFriendsList(Map<String, Friend> friendsList) {
         FriendsList = friendsList;
     }
     public void AddBeachToList(String beachUid){
