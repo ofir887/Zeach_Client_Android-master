@@ -11,6 +11,7 @@ public class Beach implements Serializable{
     private long Latitude;
     private long Longitude;
     private String BeachUID;
+    private String Status;
 
 
 }

@@ -1,14 +1,8 @@
 package com.zeach.ofirmonis.zeach;
-import android.support.v4.app.Fragment;
+
 import android.support.v4.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -19,72 +13,37 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.zeach.ofirmonis.zeach.R.layout.content_main;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private Button LogoutButton;
-    private FirebaseAuth mAuth;
-   // private DatabaseReference data;
-    //private UserNew ZeachUser;
+    private UserNew zeachUser;
+
     private ProgressBar spinner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //getSupportFragmentManager().beginTransaction().replace(R.id.content_frame,new MapFragment());
-        this.mAuth = FirebaseAuth.getInstance();
-      //  this.data = FirebaseDatabase.getInstance().getReference();
+
         this.spinner = (ProgressBar)findViewById(R.id.progress_bar);
-        this.spinner.setVisibility(View.GONE);
-      //  this.ZeachUser = AppSavedObjects.getInstance().getUser();
+       // this.spinner.setVisibility(View.VISIBLE);
+      //  getUser();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame,new MapFragment()).commit();
-
-
-        mAuth = FirebaseAuth.getInstance();
+        //mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
         setSupportActionBar(toolbar);
-
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
         TextView navigationName = (TextView)header.findViewById(R.id.userName);
@@ -96,7 +55,15 @@ public class MainActivity extends AppCompatActivity
       //  TextView navigationName = (TextView).findViewById(R.id.userName);
       //  navigationName.setText(AppSavedObjects.getInstance().getUser().getName());
     }
+    public void getUser(){
+        //this.zeachUser = AppSavedObjects.getInstance().getUser();
+        while (this.zeachUser == null){
+            this.zeachUser = AppSavedObjects.getInstance().getUser();
+            this.spinner.setVisibility(View.VISIBLE);
+        }
+        this.spinner.setVisibility(View.GONE);
 
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -162,6 +129,7 @@ public class MainActivity extends AppCompatActivity
             fragmentManager.beginTransaction().replace(R.id.content_frame,new ProfileFragment()).commit();
 
         } else if (id == R.id.friends) {
+                fragmentManager.beginTransaction().replace(R.id.content_frame,new FriendsFragment()).commit();
 
         } else if (id == R.id.profile) {
                 Log.d("fragment", "favorite fragment pressed");
@@ -170,7 +138,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.feedback) {
 
         } else if (id == R.id.nav_send) {
-//4564
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
