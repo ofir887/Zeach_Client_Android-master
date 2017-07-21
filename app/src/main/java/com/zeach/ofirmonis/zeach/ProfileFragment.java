@@ -44,7 +44,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int RESULT_OK = -1;
     private ImageView image;
-    private UserNew ZeachUser;
+    private ZeachUser ZeachUser;
     private View rootView;
     private Bitmap bit=null;
 

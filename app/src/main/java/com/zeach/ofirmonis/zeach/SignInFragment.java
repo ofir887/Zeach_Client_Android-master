@@ -61,8 +61,8 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
     private Button SignInButton;
     private TextView EmailTextView;
     private TextView PasswordTextView;
-    private User ZeachUser;
-    private UserNew User;
+
+    private ZeachUser User;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -80,8 +80,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
             public void onSuccess(LoginResult loginResult) {
                 Log.d("ok","yesss" + loginResult.getAccessToken().getToken().toString());
                 Profile profile  = Profile.getCurrentProfile();
-                ZeachUser = new User(profile.getName(),profile.getId(),profile.getFirstName());
-                User = new UserNew(profile.getName(),null,null,null,profile.getProfilePictureUri(200,200).toString(),profile.getId());
+                User = new ZeachUser(profile.getName(),null,null,null,profile.getProfilePictureUri(200,200).toString(),profile.getId());
                 Log.d("Profile", profile.getName() + " " + profile.getId());
 
                 GraphRequest request = GraphRequest.newMeRequest(
@@ -139,11 +138,9 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            ZeachUser = new User(user.getEmail(),user.getUid(),user.getProviderId());
                             User.setEmail(user.getEmail());
                             User.setUID(user.getUid());
                             User.setProvider(user.getProviderData().get(0).toString());
-                            Log.d("User",ZeachUser.toString());
                             SendUserAndMoveToProfileActivity();
                         } else {
 
@@ -166,7 +163,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
         this.data = FirebaseDatabase.getInstance().getReference();
       //  User.AddFriendToList("hgg","ofir");
        // User.AddFriendToList("hggfdf","ofihr");
-        Map<String,UserNew> user = new HashMap<String,UserNew>();
+        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
        // user.put(this.User.getUID(),this.User);
         data.child("Users").child(this.User.getUID()).setValue(this.User);
         AppSavedObjects.getInstance().setUser(this.User); // save user in singleton
@@ -186,7 +183,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            User = new UserNew(user.getEmail(),user.getUid(),user.getProviderId());
+                            User = new ZeachUser(user.getEmail(),user.getUid(),user.getProviderId());
                             SendUserAndMoveToProfileActivity();
                         } else {
 

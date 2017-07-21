@@ -23,7 +23,7 @@ import com.google.firebase.auth.UserInfo;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private UserNew zeachUser;
+    private ZeachUser zeachUser;
 
     private ProgressBar spinner;
     @Override
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity
        // this.data = FirebaseDatabase.getInstance().getReference();
         AppSavedObjects.getInstance().setUser(this.ZeachUser);
         Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
-        Map<String,UserNew> user = new HashMap<String,UserNew>();
+        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
         user.put(this.ZeachUser.getUID(),this.ZeachUser);
         this.data.child("Users").child(this.ZeachUser.getUID()).setValue(this.ZeachUser);
         //Add seperate parent ! need to check if this is good or can out this on Users in nested map

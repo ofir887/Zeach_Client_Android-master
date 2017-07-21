@@ -27,15 +27,15 @@ import java.util.Map;
 public class AppSavedObjects {
     private static AppSavedObjects mInstance= null;
 
-    public UserNew User;
+    public ZeachUser User;
 
     protected AppSavedObjects(){}
 
-    public UserNew getUser() {
+    public ZeachUser getUser() {
         return User;
     }
 
-    public void setUser(UserNew user) {
+    public void setUser(ZeachUser user) {
         User = user;
     }
 
@@ -49,7 +49,7 @@ public class AppSavedObjects {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
       //  AppSavedObjects.getInstance().setUser(this.ZeachUser);
        // Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
-        Map<String,UserNew> user = new HashMap<String,UserNew>();
+        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
         user.put(this.User.getUID(),this.User);
         data.child("Users").child(this.User.getUID()).setValue(this.User);
         //Add seperate parent ! need to check if this is good or can out this on Users in nested map
@@ -91,7 +91,7 @@ public class AppSavedObjects {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                         Log.d("found",dataSnapshot.toString());
-                                        UserNew desired = dataSnapshot.getValue(UserNew.class);
+                                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
                                      //   try {
                                             User.AddFriendToList(desired.getUID(),desired.getName(),desired.getProfilePictureUri(),desired.getCurrentBeach());
                                       //  } catch (JSONException e) {

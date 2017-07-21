@@ -49,7 +49,7 @@ import java.util.Collection;
 public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener{
 
     private View rootView;
-    private UserNew ZeachUser;
+    private ZeachUser ZeachUser;
     private ArrayList<Friend> friendsRequests = new ArrayList();
     private FriendsRequestsListAdapter friendsRequestsListAdapter;
     private ListView UsersListView;

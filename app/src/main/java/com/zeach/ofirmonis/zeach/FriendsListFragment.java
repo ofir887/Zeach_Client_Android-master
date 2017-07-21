@@ -48,7 +48,7 @@ import java.util.Collection;
 public class FriendsListFragment extends Fragment implements View.OnClickListener{
 
     private View rootView;
-    private UserNew ZeachUser;
+    private ZeachUser ZeachUser;
     private ArrayList friends = new ArrayList();
     private FriendListAdapter friendListAdapter;
     private ListView friendsListView;
@@ -63,13 +63,6 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
 
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/friendsList/");
-     //   this.friends.addAll(this.ZeachUser.getFriendsList().values());
-      //  this.friendListAdapter = new FriendListAdapter(getContext(),this.friends,getActivity());
-      //  this.friendListAdapter.notifyDataSetChanged();
-      //  this.friendsListView.setAdapter(this.friendListAdapter);
-      //  this.friendListAdapter.notifyDataSetChanged();
-       // Log.d("new frinds ar",this.friends.toString());
-       // Log.d("friends = ",this.ZeachUser.getFriendsList().toString());
         getFriendsFromServer();
         return this.rootView;
     }

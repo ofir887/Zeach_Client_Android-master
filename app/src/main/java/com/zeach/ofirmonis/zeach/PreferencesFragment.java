@@ -46,7 +46,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     Button btn;
     private CheckBox importFacebookFriendsCheckbox;
     private CheckBox isUserPrivate;
-    private UserNew ZeachUser;
+    private ZeachUser ZeachUser;
     private Button SaveButton;
     @Nullable
     @Override

@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by ofirmonis on 24/06/2017.
  */
 
-public class UserNew  implements Serializable {
+public class ZeachUser  implements Serializable {
     private String Name;
     private String Email;
     private String UID;
@@ -25,11 +25,11 @@ public class UserNew  implements Serializable {
     //private CurrentBeach CurrentBeach1;
 
 
-    public UserNew(){
+    public ZeachUser(){
 
     }
     //For facebook signup
-    public UserNew(String name, String email, String UID, String provider, String profilePictureUri,String facebookUID) {
+    public ZeachUser(String name, String email, String UID, String provider, String profilePictureUri,String facebookUID) {
         this.Name = name;
         this.Email = email;
         this.UID = UID;
@@ -43,7 +43,7 @@ public class UserNew  implements Serializable {
         this.importFacebookFriends = true;
     }
     //For Firebase SignUp
-    public UserNew(String email, String UID, String provider) {
+    public ZeachUser(String email, String UID, String provider) {
         this.Email = email;
         this.UID = UID;
         this.Provider = provider;
@@ -160,7 +160,7 @@ public class UserNew  implements Serializable {
 
     @Override
     public String toString() {
-        return "UserNew{" +
+        return "ZeachUser{" +
                 "Name='" + Name + '\'' +
                 ", Email='" + Email + '\'' +
                 ", UID='" + UID + '\'' +

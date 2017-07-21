@@ -18,12 +18,12 @@ import java.util.ArrayList;
  * Created by ofirmonis on 18/07/2017.
  */
 
-public class UserListAdapter extends ArrayAdapter <UserNew>{
+public class UserListAdapter extends ArrayAdapter <ZeachUser>{
 
-    private ArrayList<UserNew> users = new ArrayList<>();
+    private ArrayList<ZeachUser> users = new ArrayList<>();
     private String UserId;
 
-    public UserListAdapter(Context context, ArrayList<UserNew> users,String userId, FragmentActivity activity) {
+    public UserListAdapter(Context context, ArrayList<ZeachUser> users,String userId, FragmentActivity activity) {
         super(context,0, users);
         this.users = users;
         this.UserId = userId;

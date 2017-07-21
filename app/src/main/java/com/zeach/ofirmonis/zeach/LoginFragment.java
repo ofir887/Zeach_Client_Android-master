@@ -54,7 +54,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
     private Button FirebaseLoginButton;
     private TextView EmailTextView;
     private TextView PasswordTextView;
-    private UserNew ZeachUser;
+    private ZeachUser ZeachUser;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -152,9 +152,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
                             ref.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    User user12  = new User();
-                                    user12 = dataSnapshot.getValue(User.class);
-                                    Log.d("userrr",user12.toString());
+
                                 }
 
                                 @Override
@@ -190,7 +188,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener{
             ref.addValueEventListener(new ValueEventListener()
                                       {@Override
                                           public void onDataChange(DataSnapshot dataSnapshot) {
-                                              ZeachUser = dataSnapshot.getValue(UserNew.class);
+                                              ZeachUser = dataSnapshot.getValue(ZeachUser.class);
                                               AppSavedObjects.getInstance().setUser(ZeachUser);
 //                                              Log.d("ofofo",ZeachUser.toString());
 

@@ -50,8 +50,8 @@ import java.util.Collection;
 public class SearchUsersListFragment extends Fragment implements View.OnClickListener,SearchView.OnQueryTextListener{
 
     private View rootView;
-    private UserNew ZeachUser;
-    private ArrayList<UserNew> users = new ArrayList();
+    private ZeachUser ZeachUser;
+    private ArrayList<ZeachUser> users = new ArrayList();
     private UserListAdapter userListAdapter;
     private ListView UsersListView;
     private DatabaseReference data;
@@ -83,8 +83,8 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
                 userListAdapter.notifyDataSetChanged();
                 for(DataSnapshot user: dataSnapshot.getChildren()){
                     if (!user.getKey().equals(ZeachUser.getUID()))
-                        if (user.getValue(UserNew.class).getName().toLowerCase().contains(str))
-                            users.add(user.getValue(UserNew.class));
+                        if (user.getValue(ZeachUser.class).getName().toLowerCase().contains(str))
+                            users.add(user.getValue(ZeachUser.class));
                     //  Log.d("fgf",friend.toString());
                 }
 
