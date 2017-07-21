@@ -123,9 +123,9 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
 
                     return friendsList;
                 case 1:
-                    SignInFragment SignIn= new SignInFragment();
+                    SearchUsersListFragment searchUsersListFragment = new SearchUsersListFragment();
 
-                    return SignIn;
+                    return searchUsersListFragment;
                 default:
                     return null;
             }
