@@ -27,6 +27,11 @@ import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +50,7 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -54,7 +60,6 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView =inflater.inflate(R.layout.fragment_friends,container,false);
-
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mViewPager = (ViewPager) rootView.findViewById(R.id.friends_container);
 
@@ -109,6 +114,7 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
      */
     public static class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
 
@@ -126,6 +132,9 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
                     SearchUsersListFragment searchUsersListFragment = new SearchUsersListFragment();
 
                     return searchUsersListFragment;
+                case 2:
+                    FriendsRequestsListFragment friendsRequestsListFragment = new FriendsRequestsListFragment();
+                    return friendsRequestsListFragment;
                 default:
                     return null;
             }
@@ -134,8 +143,8 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 2;
+            return 3;
+
         }
 
         @Override
@@ -145,6 +154,8 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
                     return "Friends";
                 case 1:
                     return "Search Friends";
+                case 2:
+                    return "Friends Requests";
             }
             return null;
         }

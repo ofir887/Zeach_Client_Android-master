@@ -14,18 +14,15 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
- * Created by ofirmonis on 18/07/2017.
- */
 
-public class UserListAdapter extends ArrayAdapter <UserNew>{
+public class FriendsRequestsListAdapter extends ArrayAdapter<Friend>{
 
-    private ArrayList<UserNew> users = new ArrayList<>();
+    private ArrayList<Friend> friends = new ArrayList<>();
     private String UserId;
 
-    public UserListAdapter(Context context, ArrayList<UserNew> users,String userId, FragmentActivity activity) {
-        super(context,0, users);
-        this.users = users;
+    public FriendsRequestsListAdapter(Context context, ArrayList<Friend> friends,String userId, FragmentActivity activity) {
+        super(context,0,friends);
+        this.friends = friends;
         this.UserId = userId;
     }
 
@@ -39,28 +36,24 @@ public class UserListAdapter extends ArrayAdapter <UserNew>{
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_row, parent, false);
             holder.userName = (TextView)convertView.findViewById(R.id.user_name);
             holder.userPhoto = (ImageView) convertView.findViewById(R.id.user_circle_photo);
-            holder.AddAsFriend = (Button)convertView.findViewById(R.id.add_user_as_friend);
+            holder.Confirm = (Button)convertView.findViewById(R.id.add_user_as_friend);
             convertView.setTag(holder);
         }
         else {
             holder = (ViewHolder) convertView.getTag();
         }
-        if (users.get(position).getName() !=null)
-            holder.userName.setText(users.get(position).getName());
-        if (users.get(position).getProfilePictureUri() !=null)
-            holder.userPhoto.setImageURI(Uri.parse(users.get(position).getProfilePictureUri()));
-        if ((users.get(position).getFriendsList().containsKey(this.UserId))) {
-            holder.AddAsFriend.setText("Already Friend");
-            holder.AddAsFriend.setClickable(false);
+        if (friends.get(position).getName() !=null)
+            holder.userName.setText(friends.get(position).getName());
+        if (friends.get(position).getPhotoUrl() !=null)
+            holder.userPhoto.setImageURI(Uri.parse(friends.get(position).getPhotoUrl()));
 
-        }
         else {
-            holder.AddAsFriend.setText("Add");
-            holder.AddAsFriend.setOnClickListener(new View.OnClickListener() {
+            holder.Confirm.setText("Confirm");
+            holder.Confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d("clicked",users.get(position).getName());
-                    Friend friend = new Friend(users.get(position).getName(),users.get(position).getUID(),users.get(position).getProfilePictureUri());
+                    Log.d("clicked",friends.get(position).getName());
+                    Friend friend = new Friend(friends.get(position).getName(),friends.get(position).getUID(),friends.get(position).getPhotoUrl());
                     AppSavedObjects.getInstance().AddFriendRequest(UserId,friend);
 
                 }
@@ -74,7 +67,8 @@ public class UserListAdapter extends ArrayAdapter <UserNew>{
     static class  ViewHolder{
         ImageView userPhoto;
         TextView userName;
-        Button AddAsFriend;
+        Button Confirm;
+        Button Remove;
 
     }
 

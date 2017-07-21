@@ -60,6 +60,15 @@ public class AppSavedObjects {
         getActivity().finish();
         startActivity(profileActivity);*/
     }
+    //add friend to awaiting aproval.
+    public void AddFriendRequest(String userId,Friend friend){
+        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        //create awaiting confirmation on current user
+        data.child("Users").child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
+        //create awaiting confirmation on current user
+        Friend destinationFriend = new Friend(this.User.getName(),this.User.getUID(),this.User.getProfilePictureUri());
+        data.child("Users").child(friend.getUID()).child("FriendsRequset").child(this.User.getUID()).setValue(destinationFriend);
+    }
     public void getFacebookFriends(){
         //get friends list
         final DatabaseReference data = FirebaseDatabase.getInstance().getReference();

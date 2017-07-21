@@ -29,7 +29,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
@@ -47,50 +46,44 @@ import java.util.Collection;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class SearchUsersListFragment extends Fragment implements View.OnClickListener,SearchView.OnQueryTextListener{
+public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener{
 
     private View rootView;
     private UserNew ZeachUser;
-    private ArrayList<UserNew> users = new ArrayList();
-    private UserListAdapter userListAdapter;
+    private ArrayList<Friend> friendsRequests = new ArrayList();
+    private FriendsRequestsListAdapter friendsRequestsListAdapter;
     private ListView UsersListView;
     private DatabaseReference data;
-    private SearchView searchView;
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        this.rootView  =inflater.inflate(R.layout.fragment_users_list,container,false);
-        this.UsersListView = (ListView)rootView.findViewById(R.id.users_list);
-        this.searchView = (SearchView)rootView.findViewById(R.id.users_search_widget);
+        this.rootView  =inflater.inflate(R.layout.fragment_friends_requests,container,false);
+        this.UsersListView = (ListView)rootView.findViewById(R.id.freinds_requests_list);
+
 
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/");
-        getUsersFromServer("");
-        this.searchView.setOnQueryTextListener(this);
+        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/FriendsRequset/");
+        getFriendsRequestsFromServer();
         return this.rootView;
     }
 
-    public void getUsersFromServer(final String str){
-        userListAdapter = new UserListAdapter(getContext(),this.users,this.ZeachUser.getUID(),getActivity());
-
+    public void getFriendsRequestsFromServer(){
+        this.friendsRequestsListAdapter = new FriendsRequestsListAdapter(getContext(),this.friendsRequests,this.ZeachUser.getUID(),getActivity());
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                userListAdapter.clear();
+                friendsRequests.clear();
 
-                userListAdapter.notifyDataSetChanged();
+                friendsRequestsListAdapter.notifyDataSetChanged();
                 for(DataSnapshot user: dataSnapshot.getChildren()){
-                    if (!user.getKey().equals(ZeachUser.getUID()))
-                        if (user.getValue(UserNew.class).getName().toLowerCase().contains(str))
-                            users.add(user.getValue(UserNew.class));
-                    //  Log.d("fgf",friend.toString());
+                    friendsRequests.add(user.getValue(Friend.class));
                 }
 
 
-                UsersListView.setAdapter(userListAdapter);
-                userListAdapter.notifyDataSetChanged();
+                UsersListView.setAdapter(friendsRequestsListAdapter);
+                friendsRequestsListAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -144,15 +137,5 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         super.onDetach();
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        searchView.clearFocus();
-        return false;
-    }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        getUsersFromServer(newText);
-        return false;
-    }
 }

@@ -15,6 +15,12 @@ public class Friend implements Serializable{
     public Friend(){
 
     }
+    public Friend(String name, String UID,String photoUrl) {
+        this.Name = name;
+        this.UID = UID;
+        this.PhotoUrl = photoUrl;
+        this.CurrentBeach = null;
+    }
 
     public Friend(String name, String UID,String photoUrl,String currentBeach) {
         this.Name = name;
@@ -54,6 +60,7 @@ public class Friend implements Serializable{
     public void setPhotoUrl(String photoUrl) {
         PhotoUrl = photoUrl;
     }
+
 
     @Override
     public String toString() {
