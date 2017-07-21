@@ -4,15 +4,23 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Address;
 import android.location.Criteria;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,8 +44,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -46,6 +56,13 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -64,7 +81,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private Button SearchButton;
     private AutoCompleteTextView autoCompleteSearch;
     private LocationManager locationManager;
-    private LocationListener listener;
+    private LatLng userLocation;
+
 
 
     @Nullable
@@ -72,9 +90,10 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
         this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
-        this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
-        this.autoCompleteSearch.setOnClickListener(this);
+        //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
+//        this.autoCompleteSearch.setOnClickListener(this);
         locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
+
         return this.rootView;
     }
 
@@ -105,53 +124,53 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         mGoogleMap = googleMap;
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        CameraPosition cameraPosition = CameraPosition.builder().target(new LatLng(32.144053, 34.791247)).zoom(16).bearing(0).tilt(45).build();
-        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        /*
-        // checkPermission(); //check permission to get user location
-        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        // CameraPosition cameraPosition = CameraPosition.builder().target(new LatLng(32.144053, 34.791247)).zoom(16).bearing(0).tilt(45).build();
+        // googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        //
+
+        ///
+        checkPermissions();
+        try {
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+
+                }
+                locationManager.requestLocationUpdates("gps", 5000, 1000, this);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        mGoogleMap.setMyLocationEnabled(true);*/
-       // getUserLocation();
-
+        //
     }
 
-    public void getUserLocation() {
-        LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        String bestProvider = locationManager.getBestProvider(criteria, true);
-        // checkPermission();
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        Location location = locationManager.getLastKnownLocation(bestProvider);
-
-
-    }
-    public void checkPermission(){
-
-
-    }
 
     @Override
     public void onLocationChanged(Location location) {
-        //Log.d("location", location.getLatitude() + " " + location.getLongitude());
+        Log.d("location",location.toString());
+        this.userLocation = new LatLng(location.getLatitude(),location.getLongitude());
+        mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(this.userLocation).zoom(16).bearing(0).tilt(45).build()));
+
+        /*
+        URL url = null;
+        Bitmap myBitmap = null;
+
+        try {
+            url = new URL("https://graph.facebook.com/807063519471323/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            myBitmap = BitmapFactory.decodeStream(input);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */
+
+
+        mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title("my location")));
     }
 
     @Override
@@ -166,7 +185,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        startActivity(i);
     }
 
     @Override
@@ -175,4 +195,25 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             this.autoCompleteSearch.setText("");
         }
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case 10:
+                checkPermissions();
+                break;
+            default:
+                break;
+        }
+    }
+    public void checkPermissions(){
+        // first check for permissions
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.INTERNET}
+                        ,10);
+            }
+            return;
+        }
+    }
+
 }
