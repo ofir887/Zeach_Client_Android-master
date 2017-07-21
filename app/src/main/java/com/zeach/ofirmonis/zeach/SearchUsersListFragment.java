@@ -46,7 +46,7 @@ import java.util.Collection;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class SearchUsersListFragment extends Fragment implements View.OnClickListener{
+public class SearchUsersListFragment extends Fragment implements View.OnClickListener,SearchView.OnQueryTextListener{
 
     private View rootView;
     private UserNew ZeachUser;
@@ -63,13 +63,16 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         this.rootView  =inflater.inflate(R.layout.fragment_users_list,container,false);
         this.UsersListView = (ListView)rootView.findViewById(R.id.users_list);
         this.searchView = (SearchView)rootView.findViewById(R.id.users_search_widget);
+
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/");
-        getUsersFromServer();
+        getUsersFromServer("");
+        this.searchView.setOnQueryTextListener(this);
         return this.rootView;
     }
-    public void getUsersFromServer(){
-        userListAdapter = new UserListAdapter(getContext(),this.users,getActivity());
+
+    public void getUsersFromServer(final String str){
+        userListAdapter = new UserListAdapter(getContext(),this.users,this.ZeachUser.getUID(),getActivity());
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -78,7 +81,8 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
                 userListAdapter.notifyDataSetChanged();
                 for(DataSnapshot user: dataSnapshot.getChildren()){
                     if (!user.getKey().equals(ZeachUser.getUID()))
-                        users.add(user.getValue(UserNew.class));
+                        if (user.getValue(UserNew.class).getName().toLowerCase().contains(str))
+                            users.add(user.getValue(UserNew.class));
                     //  Log.d("fgf",friend.toString());
                 }
 
@@ -136,5 +140,17 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         Log.d("nir","nir1222");
 
         super.onDetach();
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        searchView.clearFocus();
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        getUsersFromServer(newText);
+        return false;
     }
 }

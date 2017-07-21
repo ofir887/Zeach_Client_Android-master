@@ -21,10 +21,12 @@ import java.util.ArrayList;
 public class UserListAdapter extends ArrayAdapter <UserNew>{
 
     private ArrayList<UserNew> users = new ArrayList<>();
+    private String UserId;
 
-    public UserListAdapter(Context context, ArrayList<UserNew> users, FragmentActivity activity) {
+    public UserListAdapter(Context context, ArrayList<UserNew> users,String userId, FragmentActivity activity) {
         super(context,0, users);
         this.users = users;
+        this.UserId = userId;
     }
 
     @Override
@@ -47,14 +49,22 @@ public class UserListAdapter extends ArrayAdapter <UserNew>{
             holder.userName.setText(users.get(position).getName());
         if (users.get(position).getProfilePictureUri() !=null)
             holder.userPhoto.setImageURI(Uri.parse(users.get(position).getProfilePictureUri()));
-        holder.AddAsFriend.setText("Add");
-        holder.AddAsFriend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("clicked",users.get(position).getName());
+        if ((users.get(position).getFriendsList().containsKey(this.UserId))) {
+            holder.AddAsFriend.setText("Already Friend");
+            holder.AddAsFriend.setClickable(false);
 
-            }
-        });
+        }
+        else {
+            holder.AddAsFriend.setText("Add");
+            holder.AddAsFriend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("clicked",users.get(position).getName());
+
+                }
+            });
+        }
+
         return convertView;
     }
 
