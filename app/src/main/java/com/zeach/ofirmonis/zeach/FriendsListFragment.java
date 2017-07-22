@@ -55,14 +55,14 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     private DatabaseReference data;
 
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView  =inflater.inflate(R.layout.friends_list_fragment,container,false);
         this.friendsListView = (ListView)rootView.findViewById(R.id.friends_list);
-
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/friendsList/");
+        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/friendsList/");;
         getFriendsFromServer();
         return this.rootView;
     }
@@ -75,7 +75,9 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
 
                 friendListAdapter.notifyDataSetChanged();
                 for(DataSnapshot friend: dataSnapshot.getChildren()){
-                    friends.add(friend.getValue(Friend.class));
+                    final Friend friend1 = friend.getValue(Friend.class);
+
+                    friends.add(friend1);
                   //  Log.d("fgf",friend.toString());
                 }
 

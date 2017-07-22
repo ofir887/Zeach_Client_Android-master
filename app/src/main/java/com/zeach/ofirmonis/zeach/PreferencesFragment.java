@@ -120,7 +120,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
         if (v == this.SaveButton){
             AppSavedObjects.getInstance().setUser(this.ZeachUser);
             if (AppSavedObjects.getInstance().getUser().isImportFacebookFriends()) {
-                AppSavedObjects.getInstance().getFacebookFriends();
+               AppSavedObjects.getInstance().getFacebookFriends();
             }
             AppSavedObjects.getInstance().UpdateUserInfo();
             if (checkOnWhatActivityUserIs()==1){

@@ -1,6 +1,10 @@
 package com.zeach.ofirmonis.zeach;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -17,6 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -135,5 +142,36 @@ public class AppSavedObjects {
                 }
         ).executeAsync();
         //
+    }
+    public static class DownloadImageTask extends AsyncTask<String,Void,Bitmap> {
+
+        ImageView imageView = null;
+
+        public DownloadImageTask(ImageView friendPhoto) {
+            this.imageView = friendPhoto;
+        }
+
+
+        @SuppressWarnings("WrongThread")
+        @Override
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            imageView.setImageBitmap(bitmap);
+        }
+
+
     }
 }

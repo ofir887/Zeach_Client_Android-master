@@ -137,7 +137,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     return;
 
                 }
-                locationManager.requestLocationUpdates("gps", 5000, 1000, this);
+                locationManager.requestLocationUpdates("gps", 1000, 1000, this);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -155,7 +155,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         /*
         URL url = null;
         Bitmap myBitmap = null;
-
         try {
             url = new URL("https://graph.facebook.com/807063519471323/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

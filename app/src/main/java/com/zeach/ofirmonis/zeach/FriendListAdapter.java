@@ -1,6 +1,8 @@
 package com.zeach.ofirmonis.zeach;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -12,6 +14,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -45,7 +50,7 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
             holder = (ViewHolder) convertView.getTag();
         }
         holder.friendName.setText(friends.get(position).getName());
-        holder.friendPhoto.setImageURI(Uri.parse(friends.get(position).getPhotoUrl()));
+        new AppSavedObjects.DownloadImageTask(holder.friendPhoto).execute(friends.get(position).getPhotoUrl().toString());
         holder.AddFriendUnfriend.setText("Unfriend");
         holder.CurrentBeach.setText(friends.get(position).getCurrentBeach());
         holder.AddFriendUnfriend.setOnClickListener(new View.OnClickListener() {

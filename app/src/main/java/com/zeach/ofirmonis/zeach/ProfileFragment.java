@@ -71,6 +71,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         if (this.ZeachUser.getName().length() > 0){
             this.Name.setText(this.ZeachUser.getName());
         }
+        if (this.ZeachUser.getProfilePictureUri() !=null){
+            new AppSavedObjects.DownloadImageTask(this.image).execute(this.ZeachUser.getProfilePictureUri().toString());
+        }
 
     }
 
