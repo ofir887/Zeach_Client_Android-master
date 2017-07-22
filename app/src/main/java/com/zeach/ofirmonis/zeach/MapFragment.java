@@ -1,11 +1,16 @@
 package com.zeach.ofirmonis.zeach;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Path;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -55,6 +60,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.koushikdutta.ion.Ion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +69,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -82,7 +89,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private AutoCompleteTextView autoCompleteSearch;
     private LocationManager locationManager;
     private LatLng userLocation;
-
+    private BroadcastReceiver broadcastReceiver;
+    private LatLng CurrentUserLocation;
 
 
     @Nullable
@@ -94,7 +102,36 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 //        this.autoCompleteSearch.setOnClickListener(this);
         locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
+        checkPermissions();
+        Intent intent = new Intent(getActivity(),StartService.class);
+        getActivity().startService(intent);
+
+
         return this.rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        /*
+        if (broadcastReceiver == null){
+            broadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    CurrentUserLocation = (LatLng) intent.getExtras().get("coordinates");
+                    Log.d("gps ofir",CurrentUserLocation.toString());
+                }
+            };
+        }
+        getActivity().registerReceiver(broadcastReceiver,new IntentFilter("location_update"));*/
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (broadcastReceiver !=null){
+            getActivity().unregisterReceiver(broadcastReceiver);
+        }
     }
 
     @Override
@@ -130,6 +167,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
         ///
         checkPermissions();
+
         try {
             if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
@@ -143,6 +181,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             e.printStackTrace();
         }
         //
+
+
+
     }
 
 
@@ -152,25 +193,22 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         this.userLocation = new LatLng(location.getLatitude(),location.getLongitude());
         mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(this.userLocation).zoom(16).bearing(0).tilt(45).build()));
 
-        /*
-        URL url = null;
-        Bitmap myBitmap = null;
+
         try {
-            url = new URL("https://graph.facebook.com/807063519471323/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            myBitmap = BitmapFactory.decodeStream(input);
-        } catch (MalformedURLException e) {
+            Bitmap bmp = Ion.with(getApplicationContext()).load(AppSavedObjects.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
+            bmp = AppSavedObjects.SetCircleMarkerIcon(bmp);
+            bmp = AppSavedObjects.addBorderToCircularBitmap(bmp,5, Color.WHITE);
+            bmp = AppSavedObjects.addShadowToCircularBitmap(bmp,4, Color.LTGRAY);
+            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        */
 
-
-        mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title("my location")));
+        //mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title("my location")));
     }
+
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {

@@ -64,7 +64,7 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
         mViewPager = (ViewPager) rootView.findViewById(R.id.friends_container);
 
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
+        //mViewPager.beginFakeDrag(); //one solution for disable swipe
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.friends_tabs);
         tabLayout.setupWithViewPager(mViewPager);
 

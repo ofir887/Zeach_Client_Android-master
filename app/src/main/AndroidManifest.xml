@@ -55,12 +55,14 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAxdGaT8LhRVYR-pKQjaSWzhbhA80c1C-Q" />
+            android:value="AIzaSyA6ijHmrM6uZUi19xuROcNSQyQlxfkW2JQ" />
 
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <service android:name=".GpsService"/>
+        <service android:name=".StartService"/>
     </application>
 
 </manifest>

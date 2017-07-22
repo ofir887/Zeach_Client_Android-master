@@ -2,6 +2,10 @@ package com.zeach.ofirmonis.zeach;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
@@ -174,4 +178,109 @@ public class AppSavedObjects {
 
 
     }
+
+    public static Bitmap SetCircleMarkerIcon(Bitmap bitmap) {
+
+        final int width = bitmap.getWidth();
+        final int height = bitmap.getHeight();
+        final Bitmap outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        final Path path = new Path();
+        path.addCircle(
+                (float)(width / 2)
+                , (float)(height / 2)
+                , (float) Math.min(width, (height / 2))
+                , Path.Direction.CCW);
+
+        final Canvas canvas = new Canvas(outputBitmap);
+        canvas.clipPath(path);
+        canvas.drawBitmap(bitmap, 0, 0, null);
+        return outputBitmap;
+    }
+    public static Bitmap addBorderToCircularBitmap(Bitmap srcBitmap, int borderWidth, int borderColor){
+        // Calculate the circular bitmap width with border
+        int dstBitmapWidth = srcBitmap.getWidth()+borderWidth*2;
+
+        // Initialize a new Bitmap to make it bordered circular bitmap
+        Bitmap dstBitmap = Bitmap.createBitmap(dstBitmapWidth,dstBitmapWidth, Bitmap.Config.ARGB_8888);
+
+        // Initialize a new Canvas instance
+        Canvas canvas = new Canvas(dstBitmap);
+        // Draw source bitmap to canvas
+        canvas.drawBitmap(srcBitmap, borderWidth, borderWidth, null);
+
+        // Initialize a new Paint instance to draw border
+        Paint paint = new Paint();
+        paint.setColor(borderColor);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(borderWidth);
+        paint.setAntiAlias(true);
+
+        /*
+            public void drawCircle (float cx, float cy, float radius, Paint paint)
+                Draw the specified circle using the specified paint. If radius is <= 0, then nothing
+                will be drawn. The circle will be filled or framed based on the Style in the paint.
+
+            Parameters
+                cx : The x-coordinate of the center of the cirle to be drawn
+                cy : The y-coordinate of the center of the cirle to be drawn
+                radius : The radius of the cirle to be drawn
+                paint : The paint used to draw the circle
+        */
+        // Draw the circular border around circular bitmap
+        canvas.drawCircle(
+                canvas.getWidth() / 2, // cx
+                canvas.getWidth() / 2, // cy
+                canvas.getWidth()/2 - borderWidth / 2, // Radius
+                paint // Paint
+        );
+
+        // Free the native object associated with this bitmap.
+        srcBitmap.recycle();
+
+        // Return the bordered circular bitmap
+        return dstBitmap;
+    }
+    public static Bitmap addShadowToCircularBitmap(Bitmap srcBitmap, int shadowWidth, int shadowColor){
+
+        // Calculate the circular bitmap width with shadow
+        int dstBitmapWidth = srcBitmap.getWidth()+shadowWidth*2;
+        Bitmap dstBitmap = Bitmap.createBitmap(dstBitmapWidth,dstBitmapWidth, Bitmap.Config.ARGB_8888);
+
+        // Initialize a new Canvas instance
+        Canvas canvas = new Canvas(dstBitmap);
+        canvas.drawBitmap(srcBitmap, shadowWidth, shadowWidth, null);
+
+        // Paint to draw circular bitmap shadow
+        Paint paint = new Paint();
+        paint.setColor(shadowColor);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(shadowWidth);
+        paint.setAntiAlias(true);
+
+        // Draw the shadow around circular bitmap
+        canvas.drawCircle(
+                dstBitmapWidth / 2, // cx
+                dstBitmapWidth / 2, // cy
+                dstBitmapWidth / 2 - shadowWidth / 2, // Radius
+                paint // Paint
+        );
+
+        /*
+            public void recycle ()
+                Free the native object associated with this bitmap, and clear the reference to the
+                pixel data. This will not free the pixel data synchronously; it simply allows it to
+                be garbage collected if there are no other references. The bitmap is marked as
+                "dead", meaning it will throw an exception if getPixels() or setPixels() is called,
+                and will draw nothing. This operation cannot be reversed, so it should only be
+                called if you are sure there are no further uses for the bitmap. This is an advanced
+                call, and normally need not be called, since the normal GC process will free up this
+                memory when there are no more references to this bitmap.
+        */
+        srcBitmap.recycle();
+
+        // Return the circular bitmap with shadow
+        return dstBitmap;
+    }
+
 }

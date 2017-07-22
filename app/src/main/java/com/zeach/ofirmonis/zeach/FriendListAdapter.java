@@ -19,6 +19,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 /**
  * Created by ofirmonis on 18/07/2017.
  */
@@ -41,7 +43,7 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
             holder = new ViewHolder();
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.friend_row, parent, false);
             holder.friendName = (TextView)convertView.findViewById(R.id.friend_name);
-            holder.friendPhoto = (ImageView) convertView.findViewById(R.id.circle_photo);
+            holder.friendPhoto = (CircleImageView) convertView.findViewById(R.id.circle_photo);
             holder.AddFriendUnfriend = (Button)convertView.findViewById(R.id.add_friend_unfriend);
             holder.CurrentBeach = (TextView)convertView.findViewById(R.id.friend_current_beach);
             convertView.setTag(holder);
