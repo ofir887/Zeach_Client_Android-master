@@ -26,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,14 +98,18 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
-        this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
+
+      //  this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
+        this.autoCompleteSearch = (AutoCompleteTextView)rootView.findViewById(R.id.autoCompleteSearchTextView);
         //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
 //        this.autoCompleteSearch.setOnClickListener(this);
+
         locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
+
         checkPermissions();
-        Intent intent = new Intent(getActivity(),StartService.class);
-        getActivity().startService(intent);
+     //   Intent intent = new Intent(getActivity(),StartService.class);
+     //   getActivity().startService(intent);
 
 
         return this.rootView;

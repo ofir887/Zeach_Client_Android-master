@@ -33,4 +33,7 @@
         android:text="Enter Beach Name"
         android:layout_toStartOf="@+id/beach_search_button" />
 
+
+
+
 </RelativeLayout>
