@@ -1,9 +1,6 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,9 +11,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Objects.Friend;
+import com.zeach.ofirmonis.zeach.R;
+
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;

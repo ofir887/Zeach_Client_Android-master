@@ -1,6 +1,4 @@
-package com.zeach.ofirmonis.zeach;
-
-import android.content.Intent;
+package com.zeach.ofirmonis.zeach.Objects;
 
 import com.google.android.gms.maps.model.LatLng;
 

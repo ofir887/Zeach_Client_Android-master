@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,6 +30,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.zeach.ofirmonis.zeach.R;
 
 import java.util.concurrent.Executor;
 

@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Adapters;
 
 import android.content.Context;
 import android.net.Uri;
@@ -11,6 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Objects.Friend;
+import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
 import java.util.ArrayList;
 

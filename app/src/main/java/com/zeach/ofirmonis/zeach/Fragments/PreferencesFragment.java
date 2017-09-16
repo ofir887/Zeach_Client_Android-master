@@ -1,42 +1,20 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Fragments;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.Profile;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FacebookAuthProvider;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import java.util.concurrent.Executor;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.facebook.GraphRequest.TAG;
+import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Activities.MainActivity;
+import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
+import com.zeach.ofirmonis.zeach.R;
 
 /**
  * Created by ofirmonis on 31/05/2017.
@@ -46,7 +24,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     Button btn;
     private CheckBox importFacebookFriendsCheckbox;
     private CheckBox isUserPrivate;
-    private ZeachUser ZeachUser;
+    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
     private Button SaveButton;
     @Nullable
     @Override

@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -62,6 +62,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.koushikdutta.ion.Ion;
+import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.R;
 
 import java.io.IOException;
 import java.io.InputStream;

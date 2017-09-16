@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SignInLogInActivity"
+            android:name=".Activities.SignInLogInActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -42,7 +42,7 @@
             android:value="@string/facebook_app_id" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
         <!--
@@ -58,11 +58,11 @@
             android:value="AIzaSyA6ijHmrM6uZUi19xuROcNSQyQlxfkW2JQ" />
 
         <activity
-            android:name=".ProfileActivity"
+            android:name=".Activities.ProfileActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <service android:name=".GpsService"/>
-        <service android:name=".StartService"/>
+        <service android:name=".Services.GpsService"/>
+        <service android:name=".Services.StartService"/>
     </application>
 
 </manifest>
