@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Services;
 
 import android.app.Service;
 import android.content.Context;
@@ -7,14 +7,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by ofirmonis on 27/05/2017.

@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Activities;
 
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -19,6 +19,12 @@ import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
+import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
+import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
+import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
 
 public class MainActivity extends AppCompatActivity

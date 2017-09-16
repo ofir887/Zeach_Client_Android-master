@@ -1,15 +1,12 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Picture;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,19 +15,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
+import com.zeach.ofirmonis.zeach.R;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Created by ofirmonis on 31/05/2017.
@@ -44,7 +33,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int RESULT_OK = -1;
     private ImageView image;
-    private ZeachUser ZeachUser;
+    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
     private View rootView;
     private Bitmap bit=null;
 

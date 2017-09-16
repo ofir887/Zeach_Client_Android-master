@@ -1,11 +1,12 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Services;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.zeach.ofirmonis.zeach.Services.GpsService;
 
 import java.util.Timer;
 import java.util.TimerTask;

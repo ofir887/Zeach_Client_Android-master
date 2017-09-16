@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Objects;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -1,6 +1,4 @@
-package com.zeach.ofirmonis.zeach;
-
-import android.net.Uri;
+package com.zeach.ofirmonis.zeach.Objects;
 
 import java.io.Serializable;
 import java.util.HashMap;
