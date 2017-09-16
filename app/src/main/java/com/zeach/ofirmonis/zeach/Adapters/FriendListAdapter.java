@@ -30,6 +30,7 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
     public FriendListAdapter(Context context, ArrayList<Friend> friends, FragmentActivity activity) {
         super(context,0, friends);
         this.friends = friends;
+        //
     }
 
     @Override
