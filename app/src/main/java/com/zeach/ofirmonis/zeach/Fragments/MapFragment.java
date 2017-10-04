@@ -64,6 +64,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.koushikdutta.ion.Ion;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Services.StartService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,8 +102,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
 
-      //  this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
-        this.autoCompleteSearch = (AutoCompleteTextView)rootView.findViewById(R.id.autoCompleteSearchTextView);
+        //  this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
+        this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
         //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
 //        this.autoCompleteSearch.setOnClickListener(this);
 
@@ -110,8 +111,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
 
         checkPermissions();
-     //   Intent intent = new Intent(getActivity(),StartService.class);
-     //   getActivity().startService(intent);
+        //  Intent intent = new Intent(getActivity(),StartService.class);
+        //  getActivity().startService(intent);
 
 
         return this.rootView;
@@ -136,7 +137,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (broadcastReceiver !=null){
+        if (broadcastReceiver != null) {
             getActivity().unregisterReceiver(broadcastReceiver);
         }
     }
@@ -182,13 +183,12 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     return;
 
                 }
-                locationManager.requestLocationUpdates("gps", 1000, 1000, this);
+                locationManager.requestLocationUpdates("gps", 1000 * 60, 0, this);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         //
-
 
 
     }
@@ -196,16 +196,16 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.d("location",location.toString());
-        this.userLocation = new LatLng(location.getLatitude(),location.getLongitude());
+        Log.d("location", location.toString());
+        this.userLocation = new LatLng(location.getLatitude(), location.getLongitude());
         mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(this.userLocation).zoom(16).bearing(0).tilt(45).build()));
 
 
         try {
             Bitmap bmp = Ion.with(getApplicationContext()).load(AppSavedObjects.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
             bmp = AppSavedObjects.SetCircleMarkerIcon(bmp);
-            bmp = AppSavedObjects.addBorderToCircularBitmap(bmp,5, Color.WHITE);
-            bmp = AppSavedObjects.addShadowToCircularBitmap(bmp,4, Color.LTGRAY);
+            bmp = AppSavedObjects.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
+            bmp = AppSavedObjects.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
             mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -235,13 +235,14 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onClick(View v) {
-        if (v == autoCompleteSearch){
+        if (v == autoCompleteSearch) {
             this.autoCompleteSearch.setText("");
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
+        switch (requestCode) {
             case 10:
                 checkPermissions();
                 break;
@@ -249,12 +250,13 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                 break;
         }
     }
-    public void checkPermissions(){
+
+    public void checkPermissions() {
         // first check for permissions
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,android.Manifest.permission.ACCESS_FINE_LOCATION,android.Manifest.permission.INTERNET}
-                        ,10);
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
+                        , 10);
             }
             return;
         }
