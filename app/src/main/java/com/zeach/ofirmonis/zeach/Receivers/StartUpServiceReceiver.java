@@ -17,10 +17,10 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+        // if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");
-            Intent service = new Intent(context, StartService.class);
-            context.startService(service);
-        }
+        //     Intent service = new Intent(context, StartService.class);
+        //   context.startService(service);
+        // }
     }
 }
