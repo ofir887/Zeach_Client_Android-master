@@ -24,7 +24,7 @@ public class ZeachUser  implements Serializable {
 
 
     public ZeachUser(){
-
+        //
     }
     //For facebook signup
     public ZeachUser(String name, String email, String UID, String provider, String profilePictureUri,String facebookUID) {
