@@ -64,7 +64,12 @@
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <service android:name=".Services.GpsService"/>
-        <service android:name=".Services.StartService"/>
+        <service
+            android:name=".Services.StartService"
+            android:process=":convertprc" />
+        <service
+            android:name=".Services.BackgroundService"
+            android:process=":convertprc" />
 
         <receiver
             android:name=".Receivers.StartUpServiceReceiver"

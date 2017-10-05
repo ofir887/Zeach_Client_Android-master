@@ -1,79 +1,93 @@
 package com.zeach.ofirmonis.zeach.Services;
 
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.zeach.ofirmonis.zeach.Constants.GpsConstants;
-import com.zeach.ofirmonis.zeach.Handlers.ResponseHandler;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
+import java.util.TimerTask;
 
 /**
- * Created by ofirmonis on 27/05/2017.
+ * Created by ofirmonis on 05/10/2017.
  */
 
-public class GpsService extends Service {
+public class BackgroundService extends Service {
 
     private static final String TAG = "ZeachGpsService";
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 0;
+    private Location location;
     private Timer timer;
-    private class LocationListener implements android.location.LocationListener
-    {
+
+    private class LocationListener implements android.location.LocationListener {
         Location mLastLocation;
 
-        public LocationListener(String provider)
-        {
+        public LocationListener(String provider) {
             Log.e(TAG, "LocationListener " + provider);
             mLastLocation = new Location(provider);
         }
 
-        @Override
-        public void onLocationChanged(Location location)
-        {
-            Log.e(TAG, "onLocationChanged: " + location);
-            LatLng userCurrentLocation = new LatLng(location.getLatitude(),location.getLongitude());
-            Intent i = new Intent("location_update");
-            i.putExtra("coordinates",userCurrentLocation);
-            sendBroadcast(i);
-            mLastLocation.set(location);
-            stopService(new Intent(getApplicationContext(),GpsService.class));
+        public String getCountry(Location location) {
+            Geocoder geocoder = new Geocoder(getApplication());
+            try {
+                List<Address> address = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                if (address.size() > 0) {
+                    return address.get(0).getCountryName();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
         @Override
-        public void onProviderDisabled(String provider)
-        {
+        public void onLocationChanged(Location location) {
+            Log.e(TAG, "onLocationChanged: " + location);
+            LatLng userCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            //this.location = location;
+            //getCountry(location); not working
+            //remove location update
+            for (int i = 0; i < mLocationListeners.length; i++) {
+                try {
+                    mLocationManager.removeUpdates(mLocationListeners[i]);
+                } catch (Exception ex) {
+                    Log.i(TAG, "fail to remove location listners, ignore", ex);
+                }
+            }
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
             Log.e(TAG, "onProviderDisabled: " + provider);
         }
 
         @Override
-        public void onProviderEnabled(String provider)
-        {
+        public void onProviderEnabled(String provider) {
             Log.e(TAG, "onProviderEnabled: " + provider);
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
+        public void onStatusChanged(String provider, int status, Bundle extras) {
             Log.e(TAG, "onStatusChanged: " + provider);
         }
     }
 
-    LocationListener[] mLocationListeners = new LocationListener[] {
+    LocationListener[] mLocationListeners = new LocationListener[]{
             new LocationListener(LocationManager.GPS_PROVIDER),
             new LocationListener(LocationManager.NETWORK_PROVIDER)
     };
@@ -88,37 +102,26 @@ public class GpsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
-        //super.onStartCommand(intent, flags, startId);
-        /*
-        Runnable r = new Runnable() {
+        getLocation();
+
+        //
+
+        /*timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-
-                for (int i = 0; i < 1; i++)
-                {
-                    long endTime = System.currentTimeMillis() +
-                            3*1000;
-
-                    while (System.currentTimeMillis() < endTime) {
-                        synchronized (this) {
-                            try {
-                                wait(endTime -
-                                        System.currentTimeMillis());
-                               // startService(new Intent(getApplicationContext(), MyService.class));
-                                Log.d("test","just testing");
-                            } catch (Exception e) {
-                            }
-                        }
-                    }
-                    Log.i(TAG, "Service running ");
-                }
-                stopSelf();
+                Looper.prepare();
+                int i=0;
+                Log.d(BackgroundService.class.getSimpleName(), "gps running at" + i + "time");  // display the data
+                i++;
+                getLocation();
             }
-        };
+        }, 1000, 1000 * 60);*/
+        //
 
-        Thread t = new Thread(r);
-        t.start();*/
+
         return START_STICKY;
     }
+
     private void initializeLocationManager() {
         Log.e(TAG, "initializeLocationManager");
         if (mLocationManager == null) {
@@ -126,13 +129,33 @@ public class GpsService extends Service {
         }
     }
 
+    public void getLocation() {
+        initializeLocationManager();
+        try {
+            mLocationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
+                    mLocationListeners[1]);
+        } catch (java.lang.SecurityException ex) {
+            Log.i(TAG, "fail to request location update, ignore", ex);
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "network provider does not exist, " + ex.getMessage());
+        }
+        try {
+            mLocationManager.requestLocationUpdates(
+                    "gps", LOCATION_INTERVAL, LOCATION_DISTANCE,
+                    mLocationListeners[0]);
+        } catch (java.lang.SecurityException ex) {
+            Log.i(TAG, "fail to request location update, ignore", ex);
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "gps provider does not exist " + ex.getMessage());
+        }
+    }
 
     @Override
-    public void onCreate()
-    {
+    public void onCreate() {
 
         Log.e(TAG, "onCreate");
-        initializeLocationManager();
+        /*initializeLocationManager();
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
@@ -150,7 +173,7 @@ public class GpsService extends Service {
             Log.i(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
             Log.d(TAG, "gps provider does not exist " + ex.getMessage());
-        }
+        }*/
     }
 
     @Override

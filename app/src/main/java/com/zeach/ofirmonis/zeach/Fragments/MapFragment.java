@@ -64,6 +64,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.koushikdutta.ion.Ion;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 import com.zeach.ofirmonis.zeach.Services.StartService;
 
 import java.io.IOException;
@@ -113,6 +114,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         checkPermissions();
         //  Intent intent = new Intent(getActivity(),StartService.class);
         //  getActivity().startService(intent);
+        Intent intent = new Intent(getActivity(), BackgroundService.class);
+        getActivity().startService(intent);
 
 
         return this.rootView;
@@ -137,9 +140,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (broadcastReceiver != null) {
-            getActivity().unregisterReceiver(broadcastReceiver);
-        }
+
     }
 
     @Override
@@ -176,7 +177,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         ///
         checkPermissions();
 
-        try {
+        /*try {
             if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
                 if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -187,7 +188,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
         //
 
 

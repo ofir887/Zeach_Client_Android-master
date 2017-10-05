@@ -6,11 +6,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
+import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.google.firebase.database.ChildEventListener;
@@ -36,6 +38,8 @@ import java.util.Map;
 
 public class AppSavedObjects {
     private static AppSavedObjects mInstance = null;
+
+    public static JSONArray arr;
 
     public ZeachUser User;
 
@@ -95,48 +99,9 @@ public class AppSavedObjects {
                     public void onCompleted(GraphResponse response) {
                         JSONObject json = response.getJSONObject();
                         try {
-                            final JSONArray data1 = json.getJSONArray("data");
-                            final String[] uid = new String[1];
-                            for (int i = 0; i < data1.length(); i++) {
-                                DatabaseReference searchUserId = data.getDatabase().getReference();
-                                Query UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
-                                final int finalI = i;
-                                UserId.addChildEventListener(new ChildEventListener() {
-                                    @Override
-                                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                        Log.d("found", dataSnapshot.toString());
-                                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
-                                        //   try {
-                                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
-                                        //  } catch (JSONException e) {
-                                        //    e.printStackTrace();
-                                        //   }
-
-
-                                    }
-
-                                    @Override
-                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                                    }
-
-                                    @Override
-                                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                                    }
-
-                                    @Override
-                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                                //    ZeachUser.AddFriendToList(String.valueOf(uid[0]),data1.getJSONObject(i).getString("name"));
-                            }
+                            JSONArray data1 = json.getJSONArray("data");
+                            arr = data1;
+                            addFacebookFriends(data1);
 
 
                         } catch (JSONException e) {
@@ -148,7 +113,59 @@ public class AppSavedObjects {
                     }
                 }
         ).executeAsync();
-        //
+
+
+    }
+
+    public void addFacebookFriends(JSONArray data1) {
+        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference searchUserId = data.getDatabase().getReference();
+        for (int i = 0; i < data1.length(); i++) {
+            //  DatabaseReference searchUserId = data.getDatabase().getReference();
+            Query UserId = null;
+            try {
+                UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
+                final int finalI = i;
+                UserId.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Log.d("found", dataSnapshot.toString());
+                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
+                        //   try {
+                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        //  } catch (JSONException e) {
+                        //    e.printStackTrace();
+                        //   }
+
+
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                //    ZeachUser.AddFriendToList(String.valueOf(uid[0]),data1.getJSONObject(i).getString("name"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     public static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
