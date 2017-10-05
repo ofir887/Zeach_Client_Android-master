@@ -17,7 +17,6 @@ import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.zeach.ofirmonis.zeach.Constants.GpsConstants;
-import com.zeach.ofirmonis.zeach.Handlers.ResponseHandler;
 
 import java.util.Timer;
 

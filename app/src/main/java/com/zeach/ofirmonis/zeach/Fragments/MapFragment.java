@@ -114,8 +114,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         checkPermissions();
         //  Intent intent = new Intent(getActivity(),StartService.class);
         //  getActivity().startService(intent);
-        Intent intent = new Intent(getActivity(), BackgroundService.class);
-        getActivity().startService(intent);
+        //Intent intent = new Intent(getActivity(), BackgroundService.class);
+        // getActivity().startService(intent);
 
 
         return this.rootView;
