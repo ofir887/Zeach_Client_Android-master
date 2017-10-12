@@ -34,18 +34,18 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         // if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
         Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");
-        Intent service = new Intent(context, GpsService.class);
+        Intent service = new Intent(context, BackgroundService.class);
         // context.startService(service);
 
 
-        /*Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long interval = 1000 * 60*3;
         PendingIntent pendingIntent = PendingIntent.getService(context, BackgroundService.ID,
                 service, PendingIntent.FLAG_CANCEL_CURRENT);
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), interval, pendingIntent);*/
+                calendar.getTimeInMillis(), interval, pendingIntent);
 
 
     }

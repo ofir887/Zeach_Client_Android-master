@@ -29,14 +29,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
-import com.zeach.ofirmonis.zeach.Constants.GpsConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.UserAtBeach;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
-import com.zeach.ofirmonis.zeach.Singletons.Beaches;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +47,7 @@ import java.util.Timer;
 public class BackgroundService extends Service {
 
     private static final String TAG = BackgroundService.class.getSimpleName();
+    public static final int ID = 0;
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 0;
@@ -74,11 +72,14 @@ public class BackgroundService extends Service {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             mLastLocation.set(location);
-            updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
+            //    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
             for (int i = 0; i < beaches.size(); i++) {
                 boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
+                Log.d(TAG, "checking against:" + beaches.get(i).getBeachName());
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
+                    Log.d(TAG, "ofir is here fucking worikng !!!");
+                    onDestroy();
 
                 }
             }
@@ -120,6 +121,28 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
 
+        //
+        FirebaseApp.initializeApp(this);
+        this.data = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mAuth.getCurrentUser();
+        getUserDetailsFromServer();
+        beaches = new ArrayList<Beach>();
+        getBeachesFromFirebase();
+
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (checkPermission(getApplicationContext())) {
+                    initializeLocationManager();
+                    getMultipleLocationUpdates();
+                }
+            }
+        };
+        handler.postDelayed(runnable, 1000 * 5);
+        //
+
         return START_STICKY;
     }
 
@@ -142,7 +165,6 @@ public class BackgroundService extends Service {
     }
 
     public void getSingleLocationUpdate() {
-        // initializeLocationManager();
         Looper looper = null;
         try {
             mLocationManager.requestSingleUpdate(
@@ -198,7 +220,7 @@ public class BackgroundService extends Service {
                     String mBeachKey = (String) beach.child("BeachID").getValue();
                     String mBeachName = (String) beach.child("BeachName").getValue();
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
-                    long currentPeople = (long) beach.child("Current People").getValue();
+                    //  long currentPeople = (long) beach.child("CurrentPeople").getValue();
                     long currentOccupationEstimation = (long) beach.child("Result").getValue();
                     long res = (long) currentOccupationEstimation;
                     // int beachMaxCapacity = (int)beach.child("Capacity").getValue();
@@ -212,7 +234,7 @@ public class BackgroundService extends Service {
                         beachCoords.add(latlng);
                         Log.d("Beach1", latlng.toString());
                     }
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, res, beachCoords, mBeachName, currentPeople);
+                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, res, beachCoords, mBeachName, 500);
                     beaches.add(beach1);
                     Handler handler = new Handler();
                     Runnable runnable = new Runnable() {
@@ -267,7 +289,7 @@ public class BackgroundService extends Service {
             public void run() {
                 if (checkPermission(getApplicationContext())) {
                     initializeLocationManager();
-                    getSingleLocationUpdate();
+                    getMultipleLocationUpdates();
                 }
             }
         };
