@@ -14,6 +14,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 
@@ -70,6 +71,10 @@
             android:process=":convertprc" />
         <service
             android:name=".Services.BackgroundService"
+            android:process=":convertprc"
+            android:exported="false" />
+        <service
+            android:name=".Services.newService"
             android:process=":convertprc"
             android:exported="false" />
 

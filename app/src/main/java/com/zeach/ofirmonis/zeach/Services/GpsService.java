@@ -46,10 +46,10 @@ public class GpsService extends Service {
         {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(),location.getLongitude());
-            Intent i = new Intent("location_update");
-            i.putExtra("coordinates",userCurrentLocation);
-            sendBroadcast(i);
-            mLastLocation.set(location);
+            //   Intent i = new Intent("location_update");
+            //   i.putExtra("coordinates",userCurrentLocation);
+            //   sendBroadcast(i);
+            //   mLastLocation.set(location);
             stopService(new Intent(getApplicationContext(),GpsService.class));
         }
 

@@ -190,7 +190,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    public void getBeachesFromFirebase() {
+    /*public void getBeachesFromFirebase() {
         DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
@@ -228,7 +228,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-    }
+    }*/
 
     @Override
     public void onStart() {
@@ -256,7 +256,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
             //this.ZeachUser = new User()
 
-            getBeachesFromFirebase();
+            //getBeachesFromFirebase();
             Intent mainActivity = new Intent(getActivity(), MainActivity.class);
             startActivity(mainActivity);
             getActivity().finish();

@@ -17,7 +17,7 @@ public class Beach implements Serializable {
     private ArrayList<LatLng> BeachCoords;
     private long CurrentPeopleEstimation;
     private HashMap<String, Friend> Friends;
-    private int CurrentPeople;
+    private long CurrentPeople;
     private int MaxCapacity;
 
     //Constructor for using service
@@ -32,12 +32,13 @@ public class Beach implements Serializable {
 
     }
 
-    public Beach(String key, String beachListenerID, long currentPeopleEstimation, ArrayList<LatLng> beachCoords, String beachName) {
+    public Beach(String key, String beachListenerID, long currentPeopleEstimation, ArrayList<LatLng> beachCoords, String beachName, long currentPeople) {
         this.BeachKey = key;
         this.BeachListenerID = beachListenerID;
         this.CurrentPeopleEstimation = currentPeopleEstimation;
         this.BeachCoords = beachCoords;
         this.BeachName = beachName;
+        this.CurrentPeople = currentPeople;
     }
 
     //Constructor for using in app
@@ -48,6 +49,26 @@ public class Beach implements Serializable {
         this.CurrentPeople = currentPeople;
         this.MaxCapacity = maxCapacity;
         this.Friends = new HashMap<>();
+    }
+
+    public ArrayList<LatLng> getBeachCoordinates() {
+        return this.BeachCoords;
+    }
+
+    public String getBeachName() {
+        return BeachName;
+    }
+
+    public String getBeachKey() {
+        return BeachKey;
+    }
+
+    public String getBeachListenerID() {
+        return BeachListenerID;
+    }
+
+    public long getCurrentPeople() {
+        return CurrentPeople;
     }
 
     @Override
