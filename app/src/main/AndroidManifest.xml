@@ -73,10 +73,6 @@
             android:name=".Services.BackgroundService"
             android:process=":convertprc"
             android:exported="false" />
-        <service
-            android:name=".Services.newService"
-            android:process=":convertprc"
-            android:exported="false" />
 
         <receiver
             android:name=".Receivers.StartUpServiceReceiver"

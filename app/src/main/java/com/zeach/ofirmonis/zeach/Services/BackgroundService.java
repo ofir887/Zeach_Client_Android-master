@@ -2,19 +2,23 @@ package com.zeach.ofirmonis.zeach.Services;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -29,13 +33,18 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.UserAtBeach;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -57,6 +66,21 @@ public class BackgroundService extends Service {
     private FirebaseAuth mAuth;
     private FirebaseUser mFirebaseUser;
     private ZeachUser mUser;
+    private LatLng mLocation;
+
+    //
+    private static final String ACTION_STRING_SERVICE = "ToService";
+    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
+    private static final String ACTION_BEACHES = "Beaches";
+    private static final String ACTION_USER = "User";
+
+    private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //sendBroadcast();
+        }
+    };
+    //
 
 
     private class LocationListener implements android.location.LocationListener {
@@ -72,6 +96,9 @@ public class BackgroundService extends Service {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             mLastLocation.set(location);
+            mLocation = userCurrentLocation;
+            //
+            sendBroadcast(ACTION_STRING_ACTIVITY);
             //    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
             for (int i = 0; i < beaches.size(); i++) {
                 boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
@@ -79,14 +106,11 @@ public class BackgroundService extends Service {
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
                     Log.d(TAG, "ofir is here fucking worikng !!!");
-                    onDestroy();
+                    // onDestroy();
 
                 }
             }
-            //   Intent i = new Intent("location_update");
-            //   i.putExtra("coordinates",userCurrentLocation);
-            //   sendBroadcast(i);
-            //   mLastLocation.set(location);
+
         }
 
         @Override
@@ -114,35 +138,13 @@ public class BackgroundService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "Service binded");
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
-
-        //
-        FirebaseApp.initializeApp(this);
-        this.data = FirebaseDatabase.getInstance().getReference();
-        mAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mAuth.getCurrentUser();
-        getUserDetailsFromServer();
-        beaches = new ArrayList<Beach>();
-        getBeachesFromFirebase();
-
-        Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (checkPermission(getApplicationContext())) {
-                    initializeLocationManager();
-                    getMultipleLocationUpdates();
-                }
-            }
-        };
-        handler.postDelayed(runnable, 1000 * 5);
-        //
-
         return START_STICKY;
     }
 
@@ -185,7 +187,6 @@ public class BackgroundService extends Service {
     }
 
     public void getMultipleLocationUpdates() {
-        // initializeLocationManager();
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
@@ -244,6 +245,7 @@ public class BackgroundService extends Service {
                         }
                     };
                     handler.postDelayed(runnable, 1000);
+                    sendBroadcast(ACTION_BEACHES);
                 }
             }
 
@@ -260,6 +262,7 @@ public class BackgroundService extends Service {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(ZeachUser.class);
+                sendBroadcast(ACTION_USER);
 
             }
 
@@ -268,6 +271,7 @@ public class BackgroundService extends Service {
 
             }
         });
+
     }
 
 
@@ -275,10 +279,19 @@ public class BackgroundService extends Service {
     public void onCreate() {
 
         Log.e(TAG, "onCreate");
+        //
+        if (serviceReceiver != null) {
+            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_SERVICE);
+            intentFilter.addAction(ACTION_BEACHES);
+            intentFilter.addAction(ACTION_USER);
+            registerReceiver(serviceReceiver, intentFilter);
+        }
+        //
         FirebaseApp.initializeApp(this);
         this.data = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser();
+
         getUserDetailsFromServer();
         beaches = new ArrayList<Beach>();
         getBeachesFromFirebase();
@@ -298,19 +311,53 @@ public class BackgroundService extends Service {
 
     }
 
+    private void sendBroadcast(String action) {
+        Intent new_intent = new Intent();
+        switch (action) {
+            case ACTION_BEACHES: {
+                Gson gson = new Gson();
+                String arr = gson.toJson(beaches);
+                new_intent.putExtra("beaches", arr);
+                new_intent.setAction(ACTION_BEACHES);
+                break;
+            }
+            case ACTION_USER: {
+                new_intent.putExtra("User", mUser);
+                new_intent.setAction(ACTION_USER);
+                Log.e(TAG, "onvcvxCreate");
+                break;
+            }
+            case ACTION_STRING_ACTIVITY: {
+                new_intent.putExtra("lat", mLocation.latitude);
+                new_intent.putExtra("lng", mLocation.longitude);
+                new_intent.setAction(ACTION_STRING_ACTIVITY);
+                break;
+            }
+        }
+        sendBroadcast(new_intent);
+
+
+    }
+
+
     @Override
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
         super.onDestroy();
-
+        unregisterReceiver(serviceReceiver);
         if (mLocationManager != null) {
             for (int i = 0; i < mLocationListeners.length; i++) {
                 try {
+                    if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
                     mLocationManager.removeUpdates(mLocationListeners[i]);
                 } catch (Exception ex) {
-                    Log.i(TAG, "fail to remove location listners, ignore", ex);
+                    Log.i(TAG, "fail to remove location listener, ignore", ex);
                 }
             }
         }
     }
+
+
 }
