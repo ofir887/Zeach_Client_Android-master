@@ -1,6 +1,8 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
+import com.google.firebase.database.DatabaseReference;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
@@ -98,7 +101,19 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
         if (v == this.SaveButton){
             AppSavedObjects.getInstance().setUser(this.ZeachUser);
             if (AppSavedObjects.getInstance().getUser().isImportFacebookFriends()) {
-               AppSavedObjects.getInstance().getFacebookFriends();
+                Handler handler = new Handler();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppSavedObjects.getInstance().getFacebookFriends();
+                        // AppSavedObjects.getInstance().addFacebookFriends(AppSavedObjects.getInstance().arr);
+                    }
+                });
+
+
+                // AppSavedObjects.getInstance().getFacebookFriends();
+                //  AppSavedObjects.getInstance().addFacebookFriends(AppSavedObjects.getInstance().arr);
+
             }
             AppSavedObjects.getInstance().UpdateUserInfo();
             if (checkOnWhatActivityUserIs()==1){

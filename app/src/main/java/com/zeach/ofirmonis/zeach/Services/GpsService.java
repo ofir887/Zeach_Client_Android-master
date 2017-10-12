@@ -1,16 +1,22 @@
 package com.zeach.ofirmonis.zeach.Services;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.zeach.ofirmonis.zeach.Constants.GpsConstants;
 
 import java.util.Timer;
 
@@ -40,10 +46,10 @@ public class GpsService extends Service {
         {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(),location.getLongitude());
-            Intent i = new Intent("location_update");
-            i.putExtra("coordinates",userCurrentLocation);
-            sendBroadcast(i);
-            mLastLocation.set(location);
+            //   Intent i = new Intent("location_update");
+            //   i.putExtra("coordinates",userCurrentLocation);
+            //   sendBroadcast(i);
+            //   mLastLocation.set(location);
             stopService(new Intent(getApplicationContext(),GpsService.class));
         }
 
@@ -118,6 +124,8 @@ public class GpsService extends Service {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
     }
+
+
     @Override
     public void onCreate()
     {

@@ -19,6 +19,7 @@ import com.zeach.ofirmonis.zeach.Adapters.FriendListAdapter;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
 import java.util.ArrayList;
 
@@ -45,6 +46,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/friendsList/");;
         getFriendsFromServer();
+
         return this.rootView;
     }
     public void getFriendsFromServer(){

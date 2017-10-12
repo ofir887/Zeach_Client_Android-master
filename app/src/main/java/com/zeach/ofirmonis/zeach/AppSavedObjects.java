@@ -6,11 +6,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
+import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.google.firebase.database.ChildEventListener;
@@ -35,11 +37,14 @@ import java.util.Map;
  */
 
 public class AppSavedObjects {
-    private static AppSavedObjects mInstance= null;
+    private static AppSavedObjects mInstance = null;
+
+    public static JSONArray arr;
 
     public ZeachUser User;
 
-    protected AppSavedObjects(){}
+    protected AppSavedObjects() {
+    }
 
     public ZeachUser getUser() {
         return User;
@@ -49,18 +54,19 @@ public class AppSavedObjects {
         User = user;
     }
 
-    public static synchronized AppSavedObjects getInstance(){
-        if(null == mInstance){
+    public static synchronized AppSavedObjects getInstance() {
+        if (null == mInstance) {
             mInstance = new AppSavedObjects();
         }
         return mInstance;
     }
-    public void UpdateUserInfo(){
+
+    public void UpdateUserInfo() {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
-      //  AppSavedObjects.getInstance().setUser(this.ZeachUser);
-       // Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
-        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
-        user.put(this.User.getUID(),this.User);
+        //  AppSavedObjects.getInstance().setUser(this.ZeachUser);
+        // Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
+        Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
+        user.put(this.User.getUID(), this.User);
         data.child("Users").child(this.User.getUID()).setValue(this.User);
         //Add seperate parent ! need to check if this is good or can out this on Users in nested map
         //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
@@ -70,69 +76,32 @@ public class AppSavedObjects {
         getActivity().finish();
         startActivity(profileActivity);*/
     }
+
     //add friend to awaiting aproval.
-    public void AddFriendRequest(String userId,Friend friend){
+    public void AddFriendRequest(String userId, Friend friend) {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //create awaiting confirmation on current user
         data.child("Users").child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
         //create awaiting confirmation on current user
-        Friend destinationFriend = new Friend(this.User.getName(),this.User.getUID(),this.User.getProfilePictureUri());
+        Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
         data.child("Users").child(friend.getUID()).child("FriendsRequset").child(this.User.getUID()).setValue(destinationFriend);
     }
-    public void getFacebookFriends(){
+
+    public void getFacebookFriends() {
         //get friends list
         final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
-                "/"+ this.User.getFacebookUID()+"/friends",
+                "/" + this.User.getFacebookUID() + "/friends",
                 null,
                 HttpMethod.GET,
                 new GraphRequest.Callback() {
                     public void onCompleted(GraphResponse response) {
                         JSONObject json = response.getJSONObject();
                         try {
-                            final JSONArray data1 = json.getJSONArray("data");
-                            final String[] uid = new String[1];
-                            for (int i=0; i < data1.length(); i++){
-                                DatabaseReference searchUserId = data.getDatabase().getReference();
-                                Query UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
-                                final int finalI = i;
-                                UserId.addChildEventListener(new ChildEventListener() {
-                                    @Override
-                                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                        Log.d("found",dataSnapshot.toString());
-                                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
-                                     //   try {
-                                            User.AddFriendToList(desired.getUID(),desired.getName(),desired.getProfilePictureUri(),desired.getCurrentBeach());
-                                      //  } catch (JSONException e) {
-                                        //    e.printStackTrace();
-                                     //   }
-
-
-                                    }
-
-                                    @Override
-                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                                    }
-
-                                    @Override
-                                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                                    }
-
-                                    @Override
-                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-                            //    ZeachUser.AddFriendToList(String.valueOf(uid[0]),data1.getJSONObject(i).getString("name"));
-                            }
+                            JSONArray data1 = json.getJSONArray("data");
+                            arr = data1;
+                            addFacebookFriends(data1);
 
 
                         } catch (JSONException e) {
@@ -144,9 +113,62 @@ public class AppSavedObjects {
                     }
                 }
         ).executeAsync();
-        //
+
+
     }
-    public static class DownloadImageTask extends AsyncTask<String,Void,Bitmap> {
+
+    public void addFacebookFriends(JSONArray data1) {
+        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference searchUserId = data.getDatabase().getReference();
+        for (int i = 0; i < data1.length(); i++) {
+            //  DatabaseReference searchUserId = data.getDatabase().getReference();
+            Query UserId = null;
+            try {
+                UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
+                final int finalI = i;
+                UserId.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Log.d("found", dataSnapshot.toString());
+                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
+                        //   try {
+                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        //  } catch (JSONException e) {
+                        //    e.printStackTrace();
+                        //   }
+
+
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                //    ZeachUser.AddFriendToList(String.valueOf(uid[0]),data1.getJSONObject(i).getString("name"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    public static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
         ImageView imageView = null;
 
@@ -186,8 +208,8 @@ public class AppSavedObjects {
 
         final Path path = new Path();
         path.addCircle(
-                (float)(width / 2)
-                , (float)(height / 2)
+                (float) (width / 2)
+                , (float) (height / 2)
                 , (float) Math.min(width, (height / 2))
                 , Path.Direction.CCW);
 
@@ -196,12 +218,13 @@ public class AppSavedObjects {
         canvas.drawBitmap(bitmap, 0, 0, null);
         return outputBitmap;
     }
-    public static Bitmap addBorderToCircularBitmap(Bitmap srcBitmap, int borderWidth, int borderColor){
+
+    public static Bitmap addBorderToCircularBitmap(Bitmap srcBitmap, int borderWidth, int borderColor) {
         // Calculate the circular bitmap width with border
-        int dstBitmapWidth = srcBitmap.getWidth()+borderWidth*2;
+        int dstBitmapWidth = srcBitmap.getWidth() + borderWidth * 2;
 
         // Initialize a new Bitmap to make it bordered circular bitmap
-        Bitmap dstBitmap = Bitmap.createBitmap(dstBitmapWidth,dstBitmapWidth, Bitmap.Config.ARGB_8888);
+        Bitmap dstBitmap = Bitmap.createBitmap(dstBitmapWidth, dstBitmapWidth, Bitmap.Config.ARGB_8888);
 
         // Initialize a new Canvas instance
         Canvas canvas = new Canvas(dstBitmap);
@@ -230,7 +253,7 @@ public class AppSavedObjects {
         canvas.drawCircle(
                 canvas.getWidth() / 2, // cx
                 canvas.getWidth() / 2, // cy
-                canvas.getWidth()/2 - borderWidth / 2, // Radius
+                canvas.getWidth() / 2 - borderWidth / 2, // Radius
                 paint // Paint
         );
 
@@ -240,11 +263,12 @@ public class AppSavedObjects {
         // Return the bordered circular bitmap
         return dstBitmap;
     }
-    public static Bitmap addShadowToCircularBitmap(Bitmap srcBitmap, int shadowWidth, int shadowColor){
+
+    public static Bitmap addShadowToCircularBitmap(Bitmap srcBitmap, int shadowWidth, int shadowColor) {
 
         // Calculate the circular bitmap width with shadow
-        int dstBitmapWidth = srcBitmap.getWidth()+shadowWidth*2;
-        Bitmap dstBitmap = Bitmap.createBitmap(dstBitmapWidth,dstBitmapWidth, Bitmap.Config.ARGB_8888);
+        int dstBitmapWidth = srcBitmap.getWidth() + shadowWidth * 2;
+        Bitmap dstBitmap = Bitmap.createBitmap(dstBitmapWidth, dstBitmapWidth, Bitmap.Config.ARGB_8888);
 
         // Initialize a new Canvas instance
         Canvas canvas = new Canvas(dstBitmap);
