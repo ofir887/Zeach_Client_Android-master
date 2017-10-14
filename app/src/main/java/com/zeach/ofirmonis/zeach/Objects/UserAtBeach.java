@@ -10,6 +10,7 @@ public class UserAtBeach {
     private String mBeachName;
     private String mBeachID;
     private long mTimeStamp;
+    //
 
     public UserAtBeach(String mBeachName, String mBeachID, long timestamp) {
         this.mBeachName = mBeachName;
