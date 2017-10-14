@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -40,6 +41,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.ion.Ion;
@@ -74,6 +77,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private LatLng userLocation;
     private BroadcastReceiver broadcastReceiver;
     private LatLng CurrentUserLocation;
+    private ArrayList<Beach> mBeaches;
 
     ///
     private LatLng currentLocation;
@@ -96,7 +100,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     Bundle b = intent.getExtras();
                     LatLng latLng = new LatLng(b.getDouble("lat"), b.getDouble("lng"));
                     Log.d(MapFragment.class.getSimpleName(), latLng.toString());
-                    setMapLocation(latLng);
+                    userLocation = latLng;
+                    setUserLocationOnMap();
+                    //  setMapLocation(latLng);
                     break;
                 }
                 case ACTION_BEACHES: {
@@ -105,19 +111,37 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     Type type = new TypeToken<ArrayList<Beach>>() {
                     }.getType();
                     ArrayList<Beach> beaches = gson.fromJson(str, type);
+                    mBeaches = beaches;
                     Log.d(MapFragment.class.getSimpleName(), beaches.toString());
+                    addBeachesAsPolygons();
                     break;
                 }
             }
         }
     };
 
+    public void showFriendsOnMap() {
+
+    }
+
+    public void addBeachesAsPolygons() {
+        for (int i = 0; i < mBeaches.size(); i++) {
+            Polygon polygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).addAll(mBeaches.get(i).getBeachCoordinates()));
+            mGoogleMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
+                @Override
+                public void onPolygonClick(Polygon polygon) {
+                    Log.d("Click", polygon.getId());
+                }
+            });
+        }
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
-
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
         //  this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
         //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
@@ -178,6 +202,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onDestroy() {
         getActivity().unregisterReceiver(broadcastReceiver);
+        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", false);
+        getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
         super.onDestroy();
 
     }
@@ -235,6 +261,20 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public void setMapLocation(LatLng location) {
         this.userLocation = location;
         mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(this.userLocation).zoom(16).bearing(0).tilt(45).build()));
+    }
+
+    public void setUserLocationOnMap() {
+        try {
+            Bitmap bmp = Ion.with(getApplicationContext()).load(AppSavedObjects.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
+            bmp = AppSavedObjects.SetCircleMarkerIcon(bmp);
+            bmp = AppSavedObjects.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
+            bmp = AppSavedObjects.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
+            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
 
