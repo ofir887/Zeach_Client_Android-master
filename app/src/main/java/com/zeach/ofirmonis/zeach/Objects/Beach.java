@@ -16,7 +16,7 @@ public class Beach implements Serializable {
     private String BeachListenerID;
     private ArrayList<LatLng> BeachCoords;
     private long CurrentPeopleEstimation;
-    private HashMap<String, Friend> Friends;
+    private ArrayList<Friend> mFriends;
     private long CurrentPeople;
     private int MaxCapacity;
 
@@ -25,20 +25,21 @@ public class Beach implements Serializable {
         this.BeachName = beachName;
         this.BeachListenerID = beachListenerID;
         this.BeachCoords = beachCoords;
-        this.Friends = new HashMap<>();
+        this.mFriends = new ArrayList<>();
         this.CurrentPeople = Integer.parseInt(null);
         this.MaxCapacity = Integer.parseInt(null);
 
 
     }
 
-    public Beach(String key, String beachListenerID, long currentPeopleEstimation, ArrayList<LatLng> beachCoords, String beachName, long currentPeople) {
+    public Beach(String key, String beachListenerID, long currentPeopleEstimation, ArrayList<LatLng> beachCoords, String beachName, long currentPeople, ArrayList<Friend> friends) {
         this.BeachKey = key;
         this.BeachListenerID = beachListenerID;
         this.CurrentPeopleEstimation = currentPeopleEstimation;
         this.BeachCoords = beachCoords;
         this.BeachName = beachName;
         this.CurrentPeople = currentPeople;
+        this.mFriends = friends;
     }
 
     //Constructor for using in app
@@ -48,7 +49,7 @@ public class Beach implements Serializable {
         this.BeachCoords = beachCoords;
         this.CurrentPeople = currentPeople;
         this.MaxCapacity = maxCapacity;
-        this.Friends = new HashMap<>();
+        this.mFriends = new ArrayList<>();
     }
 
     public ArrayList<LatLng> getBeachCoordinates() {
@@ -79,6 +80,9 @@ public class Beach implements Serializable {
                 ", BeachListenerID='" + BeachListenerID + '\'' +
                 ", BeachCoords=" + BeachCoords +
                 ", CurrentPeopleEstimation=" + CurrentPeopleEstimation +
+                ", mFriends=" + mFriends +
+                ", CurrentPeople=" + CurrentPeople +
+                ", MaxCapacity=" + MaxCapacity +
                 '}';
     }
 }

@@ -2,46 +2,59 @@ package com.zeach.ofirmonis.zeach.Services;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
-import com.zeach.ofirmonis.zeach.Constants.GpsConstants;
+import com.google.gson.Gson;
+import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.UserAtBeach;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
-import com.zeach.ofirmonis.zeach.Singletons.Beaches;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
+
 
 /**
  * Created by ofirmonis on 27/05/2017.
@@ -50,6 +63,7 @@ import java.util.Timer;
 public class BackgroundService extends Service {
 
     private static final String TAG = BackgroundService.class.getSimpleName();
+    public static final int ID = 0;
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 0;
@@ -59,6 +73,29 @@ public class BackgroundService extends Service {
     private FirebaseAuth mAuth;
     private FirebaseUser mFirebaseUser;
     private ZeachUser mUser;
+    private LatLng mLocation;
+
+    //
+    private static final String ACTION_STRING_SERVICE = "ToService";
+    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
+    private static final String ACTION_BEACHES = "Beaches";
+    private static final String ACTION_USER = "User";
+    private static final String GPS = "GPS";
+
+    private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case GPS:
+                    Log.d(TAG, "received gps request from receiver");
+                    getSingleLocationUpdate();
+                    break;
+            }
+
+            //sendBroadcast();
+        }
+    };
+    //
 
 
     private class LocationListener implements android.location.LocationListener {
@@ -74,18 +111,26 @@ public class BackgroundService extends Service {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
             mLastLocation.set(location);
-            updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
+            mLocation = userCurrentLocation;
+            //
+            if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", true)) {
+                Log.d(TAG, "Activity is active. sending broadcast...");
+                sendBroadcast(ACTION_STRING_ACTIVITY);
+            }
+            //  updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
             for (int i = 0; i < beaches.size(); i++) {
                 boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
+                Log.d(TAG, "checking against:" + beaches.get(i).getBeachName());
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
+                    Log.d(TAG, "ofir is here fucking worikng !!!");
+                    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
+                    //  onDestroy();
 
                 }
             }
-            //   Intent i = new Intent("location_update");
-            //   i.putExtra("coordinates",userCurrentLocation);
-            //   sendBroadcast(i);
-            //   mLastLocation.set(location);
+            onDestroy();
+
         }
 
         @Override
@@ -113,13 +158,13 @@ public class BackgroundService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "Service binded");
         return null;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
-
         return START_STICKY;
     }
 
@@ -134,15 +179,15 @@ public class BackgroundService extends Service {
         DatabaseReference ref = data.getDatabase().getReference();
         Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
         //TODO add support for reading beach json at user current beach
-        UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey());
+        long timeStamp = System.currentTimeMillis() / 1000;
+        UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), timeStamp);
         ref.child("BeachesListener/Country/Israel").child(beach.getBeachListenerID()).child("CurrentPeople").setValue(beach.getCurrentPeople() + 1);
         ref.child("Beaches/Country/Israel").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
-        ref.child("Users").child(userId).child("currentBeach").setValue(beach.getBeachKey());
+        ref.child("Users").child(userId).child("CurrentBeach").setValue(beach.getBeachKey());
 
     }
 
     public void getSingleLocationUpdate() {
-        // initializeLocationManager();
         Looper looper = null;
         try {
             mLocationManager.requestSingleUpdate(
@@ -163,7 +208,6 @@ public class BackgroundService extends Service {
     }
 
     public void getMultipleLocationUpdates() {
-        // initializeLocationManager();
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
@@ -189,6 +233,23 @@ public class BackgroundService extends Service {
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private ArrayList<Friend> getFriendsOnBeach(HashMap<String, HashMap<String, Friend>> friendsInBeach) {
+        final ArrayList<Friend> friends = new ArrayList<Friend>();
+        for (Map.Entry<String, HashMap<String, Friend>> entry : friendsInBeach.entrySet()) {
+            HashMap<String, Friend> friendHashMap = entry.getValue();
+            String name = String.valueOf(friendHashMap.get("name"));
+            String uid = String.valueOf(friendHashMap.get("uid"));
+            String photoUrl = String.valueOf(friendHashMap.get("photoUrl"));
+            Friend friend = new Friend(name, uid, photoUrl);
+            //  for (Map.Entry<String, Friend> userEntry : mUser.getFriendsList().entrySet()){
+            //       if (friend.getUID().equals(userEntry.getValue().getUID()))
+            friends.add(friend);
+            //  }
+            Log.d(TAG, "Friend" + friend.toString());
+        }
+        return friends;
+    }
+
     public void getBeachesFromFirebase() {
         DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
         ref.addValueEventListener(new ValueEventListener() {
@@ -198,11 +259,29 @@ public class BackgroundService extends Service {
                     String mBeachKey = (String) beach.child("BeachID").getValue();
                     String mBeachName = (String) beach.child("BeachName").getValue();
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
-                    long currentPeople = (long) beach.child("Current People").getValue();
+                    long currentPeople = (long) beach.child("CurrentPeople").getValue();
                     long currentOccupationEstimation = (long) beach.child("Result").getValue();
                     long res = (long) currentOccupationEstimation;
                     // int beachMaxCapacity = (int)beach.child("Capacity").getValue();
+                    //get Friends
+                    HashMap<String, HashMap<String, Friend>> friendsInBeach = (HashMap<String, HashMap<String, Friend>>) beach.child("Peoplelist").getValue();
+                    //
+                    /*//Todo change operation to firebase cloud query
+                    final ArrayList<Friend> friends = new ArrayList<Friend>();
+                    for (Map.Entry<String, HashMap<String, Friend>>entry : friendsInBeach.entrySet()){
+                        HashMap<String,Friend> friendHashMap = entry.getValue();
+                        String name = String.valueOf(friendHashMap.get("name"));
+                        String uid = String.valueOf(friendHashMap.get("uid"));
+                        String photoUrl = String.valueOf(friendHashMap.get("photoUrl"));
+                        Friend friend = new Friend(name,uid,photoUrl);
+                      //  for (Map.Entry<String, Friend> userEntry : mUser.getFriendsList().entrySet()){
+                     //       if (friend.getUID().equals(userEntry.getValue().getUID()))
+                                friends.add(friend);
+                      //  }
+                        Log.d(TAG,"Friend"+friend.toString());
+                    }*/
 
+                    //
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
                             beach.child("Coords").getValue();
                     ArrayList<LatLng> beachCoords = new ArrayList<LatLng>();
@@ -212,7 +291,7 @@ public class BackgroundService extends Service {
                         beachCoords.add(latlng);
                         Log.d("Beach1", latlng.toString());
                     }
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, res, beachCoords, mBeachName, currentPeople);
+                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, res, beachCoords, mBeachName, 500, getFriendsOnBeach(friendsInBeach));
                     beaches.add(beach1);
                     Handler handler = new Handler();
                     Runnable runnable = new Runnable() {
@@ -222,6 +301,7 @@ public class BackgroundService extends Service {
                         }
                     };
                     handler.postDelayed(runnable, 1000);
+                    sendBroadcast(ACTION_BEACHES);
                 }
             }
 
@@ -238,6 +318,7 @@ public class BackgroundService extends Service {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(ZeachUser.class);
+                sendBroadcast(ACTION_USER);
 
             }
 
@@ -246,6 +327,7 @@ public class BackgroundService extends Service {
 
             }
         });
+
     }
 
 
@@ -253,13 +335,30 @@ public class BackgroundService extends Service {
     public void onCreate() {
 
         Log.e(TAG, "onCreate");
+        //
+        if (serviceReceiver != null) {
+            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_SERVICE);
+            intentFilter.addAction(ACTION_BEACHES);
+            intentFilter.addAction(ACTION_USER);
+            intentFilter.addAction(GPS);
+            registerReceiver(serviceReceiver, intentFilter);
+        }
+        //
         FirebaseApp.initializeApp(this);
         this.data = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser();
+
         getUserDetailsFromServer();
-        beaches = new ArrayList<Beach>();
-        getBeachesFromFirebase();
+        Handler beachHandler = new Handler();
+        Runnable beachRunnable = new Runnable() {
+            @Override
+            public void run() {
+                beaches = new ArrayList<Beach>();
+                getBeachesFromFirebase();
+            }
+        };
+        beachHandler.postDelayed(beachRunnable, 1000 * 5);
 
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -276,19 +375,55 @@ public class BackgroundService extends Service {
 
     }
 
+    private void sendBroadcast(String action) {
+        Intent new_intent = new Intent();
+        switch (action) {
+            case ACTION_BEACHES: {
+                Gson gson = new Gson();
+                String arr = gson.toJson(beaches);
+                new_intent.putExtra("beaches", arr);
+                new_intent.setAction(ACTION_BEACHES);
+                break;
+            }
+            case ACTION_USER: {
+                new_intent.putExtra("User", mUser);
+                new_intent.setAction(ACTION_USER);
+                Log.e(TAG, "onvcvxCreate");
+                break;
+            }
+            case ACTION_STRING_ACTIVITY: {
+                new_intent.putExtra("lat", mLocation.latitude);
+                new_intent.putExtra("lng", mLocation.longitude);
+                new_intent.setAction(ACTION_STRING_ACTIVITY);
+                break;
+            }
+        }
+        sendBroadcast(new_intent);
+
+
+    }
+
+
     @Override
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
-        super.onDestroy();
-
+        //super.onDestroy();
+        if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", true))
+            unregisterReceiver(serviceReceiver);
         if (mLocationManager != null) {
             for (int i = 0; i < mLocationListeners.length; i++) {
                 try {
+                    if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
                     mLocationManager.removeUpdates(mLocationListeners[i]);
                 } catch (Exception ex) {
-                    Log.i(TAG, "fail to remove location listners, ignore", ex);
+                    Log.i(TAG, "fail to remove location listener, ignore", ex);
                 }
             }
         }
+        Process.killProcess(Process.myPid());
     }
+
+
 }

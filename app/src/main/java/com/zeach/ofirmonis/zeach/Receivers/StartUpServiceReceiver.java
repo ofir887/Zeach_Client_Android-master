@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.CalendarContract;
@@ -29,25 +30,55 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 public class StartUpServiceReceiver extends BroadcastReceiver {
 
     private static String TAG = StartUpServiceReceiver.class.getSimpleName();
+    private static final String GPS = "GPS";
+    private static final String ACTION_STRING_SERVICE = "ToService";
+    private Context mContext;
+
+    private BroadcastReceiver mStartUpBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
 
     @Override
     public void onReceive(final Context context, Intent intent) {
+        mContext = context;
+        //
+        if (mStartUpBroadcastReceiver != null) {
+            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_SERVICE);
+            intentFilter.addAction(GPS);
+            context.registerReceiver(mStartUpBroadcastReceiver, intentFilter);
+        }
+        //
         // if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
         Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");
-        Intent service = new Intent(context, GpsService.class);
+        Intent service = new Intent(context, BackgroundService.class);
         // context.startService(service);
 
 
-        /*Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60*3;
+        long interval = 1000 * 60 * 3;
         PendingIntent pendingIntent = PendingIntent.getService(context, BackgroundService.ID,
                 service, PendingIntent.FLAG_CANCEL_CURRENT);
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), interval, pendingIntent);*/
+                calendar.getTimeInMillis(), interval, pendingIntent);
+        //   sendBroadcast(GPS);
 
 
+    }
+
+    private void sendBroadcast(String action) {
+        Intent intent = new Intent();
+        switch (action) {
+            case GPS: {
+                intent.setAction(GPS);
+                mContext.sendBroadcast(intent);
+                break;
+            }
+        }
     }
 
 
