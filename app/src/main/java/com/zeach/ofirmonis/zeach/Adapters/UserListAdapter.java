@@ -43,7 +43,7 @@ public class UserListAdapter extends ArrayAdapter <ZeachUser>{
             holder = new ViewHolder();
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_row, parent, false);
             holder.userName = (TextView)convertView.findViewById(R.id.user_name);
-            holder.userPhoto = (ImageView) convertView.findViewById(R.id.user_circle_photo);
+            holder.userPhoto = (ImageView) convertView.findViewById(R.id.User_circle_photo);
             holder.AddAsFriend = (Button)convertView.findViewById(R.id.add_user_as_friend);
             convertView.setTag(holder);
         }
@@ -53,7 +53,8 @@ public class UserListAdapter extends ArrayAdapter <ZeachUser>{
         if (users.get(position).getName() !=null)
             holder.userName.setText(users.get(position).getName());
         if (users.get(position).getProfilePictureUri() !=null)
-            holder.userPhoto.setImageURI(Uri.parse(users.get(position).getProfilePictureUri()));
+            new AppSavedObjects.DownloadImageTask(holder.userPhoto).execute(users.get(position).getProfilePictureUri());
+        // holder.userPhoto.setImageURI(Uri.parse(users.get(position).getProfilePictureUri()));
         if ((users.get(position).getFriendsList().containsKey(this.UserId))) {
             holder.AddAsFriend.setText("Already Friend");
             holder.AddAsFriend.setClickable(false);

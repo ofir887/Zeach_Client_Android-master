@@ -86,9 +86,10 @@ public class BackgroundService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case GPS:
+                case ACTION_USER:
                     Log.d(TAG, "received gps request from receiver");
-                    getSingleLocationUpdate();
+                    //getSingleLocationUpdate();
+                    //   sendBroadcast(ACTION_USER);
                     break;
             }
 
@@ -183,7 +184,7 @@ public class BackgroundService extends Service {
         UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), timeStamp);
         ref.child("BeachesListener/Country/Israel").child(beach.getBeachListenerID()).child("CurrentPeople").setValue(beach.getCurrentPeople() + 1);
         ref.child("Beaches/Country/Israel").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
-        ref.child("Users").child(userId).child("CurrentBeach").setValue(beach.getBeachKey());
+        ref.child("Users").child(userId).child("CurrentBeach").setValue(userAtBeach);
 
     }
 
@@ -358,7 +359,7 @@ public class BackgroundService extends Service {
                 getBeachesFromFirebase();
             }
         };
-        beachHandler.postDelayed(beachRunnable, 1000 * 5);
+        beachHandler.postDelayed(beachRunnable, 1000 * 10);
 
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -370,7 +371,7 @@ public class BackgroundService extends Service {
                 }
             }
         };
-        handler.postDelayed(runnable, 1000 * 5);
+        handler.postDelayed(runnable, 1000 * 15);
 
 
     }

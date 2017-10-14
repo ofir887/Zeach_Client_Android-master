@@ -53,7 +53,8 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
         holder.friendName.setText(friends.get(position).getName());
         new AppSavedObjects.DownloadImageTask(holder.friendPhoto).execute(friends.get(position).getPhotoUrl().toString());
         holder.AddFriendUnfriend.setText("Unfriend");
-        holder.CurrentBeach.setText(friends.get(position).getCurrentBeach());
+        if (friends.get(position).getCurrentBeach() != null)
+            holder.CurrentBeach.setText(friends.get(position).getCurrentBeach().getmBeachName());
         holder.AddFriendUnfriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

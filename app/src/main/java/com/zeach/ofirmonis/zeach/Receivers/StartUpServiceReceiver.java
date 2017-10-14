@@ -45,11 +45,11 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         mContext = context;
         //
-        if (mStartUpBroadcastReceiver != null) {
+        /*if (mStartUpBroadcastReceiver != null) {
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_SERVICE);
             intentFilter.addAction(GPS);
             context.registerReceiver(mStartUpBroadcastReceiver, intentFilter);
-        }
+        }*/
         //
         // if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
         Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");

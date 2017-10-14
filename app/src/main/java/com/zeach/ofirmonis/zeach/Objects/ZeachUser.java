@@ -8,7 +8,7 @@ import java.util.Map;
  * Created by ofirmonis on 24/06/2017.
  */
 
-public class ZeachUser  implements Serializable {
+public class ZeachUser implements Serializable {
     private String Name;
     private String Email;
     private String UID;
@@ -16,18 +16,19 @@ public class ZeachUser  implements Serializable {
     private boolean importFacebookFriends = true;
     private String Provider;
     private String ProfilePictureUri;
-    private Map<String,Friend> FriendsList = new HashMap<>();
-    private Map<String,String> FavoriteBeachesList;
-    private String CurrentBeach;
+    private Map<String, Friend> FriendsList = new HashMap<>();
+    private Map<String, String> FavoriteBeachesList;
+    private UserAtBeach CurrentBeach;
     private boolean isProfilePrivate;
     //private CurrentBeach CurrentBeach1;
 
 
-    public ZeachUser(){
+    public ZeachUser() {
         //
     }
+
     //For facebook signup
-    public ZeachUser(String name, String email, String UID, String provider, String profilePictureUri,String facebookUID) {
+    public ZeachUser(String name, String email, String UID, String provider, String profilePictureUri, String facebookUID) {
         this.Name = name;
         this.Email = email;
         this.UID = UID;
@@ -35,11 +36,13 @@ public class ZeachUser  implements Serializable {
         this.ProfilePictureUri = profilePictureUri;
         this.FriendsList = new HashMap<>();
         this.FavoriteBeachesList = new HashMap<>();
-        this.CurrentBeach = "Not In any Beach"; // need to change
+        //  this.CurrentBeach = "Not In any Beach"; // need to change
+        this.CurrentBeach = new UserAtBeach();
         this.FacebookUID = facebookUID;
-       // this.CurrentBeach1 = new CurrentBeach();
+        // this.CurrentBeach1 = new CurrentBeach();
         this.importFacebookFriends = true;
     }
+
     //For Firebase SignUp
     public ZeachUser(String email, String UID, String provider) {
         this.Email = email;
@@ -49,8 +52,9 @@ public class ZeachUser  implements Serializable {
         this.Name = "";
         this.FriendsList = new HashMap<>();
         this.FavoriteBeachesList = new HashMap<>();
-        this.CurrentBeach = "Not In any Beach"; // need to change
-       // this.CurrentBeach1 = new CurrentBeach();
+        this.CurrentBeach = new UserAtBeach();
+        //  this.CurrentBeach = "Not In any Beach"; // need to change
+        // this.CurrentBeach1 = new CurrentBeach();
         this.FacebookUID = null;
         this.importFacebookFriends = false;
     }
@@ -94,12 +98,14 @@ public class ZeachUser  implements Serializable {
     public void setProfilePictureUri(String profilePictureUri) {
         ProfilePictureUri = profilePictureUri;
     }
+
     //not good need to think about child in has map it is in the same key!!
-    public void AddFriendToList(String uid,String name,String photoUrl,String currentBeach){
-        Friend friend = new Friend(name,uid,photoUrl,currentBeach);
-        this.FriendsList.put(uid,friend);
+    public void AddFriendToList(String uid, String name, String photoUrl, UserAtBeach currentBeach) {
+        Friend friend = new Friend(name, uid, photoUrl, currentBeach);
+        this.FriendsList.put(uid, friend);
         //this.FriendsList.put("FriendName",name);
     }
+
     public Map<String, Friend> getFriendsList() {
         return FriendsList;
     }
@@ -107,10 +113,12 @@ public class ZeachUser  implements Serializable {
     public void setFriendsList(Map<String, Friend> friendsList) {
         FriendsList = friendsList;
     }
-    public void AddBeachToList(String beachUid){
-        this.FavoriteBeachesList.put("BeachUid",beachUid);
+
+    public void AddBeachToList(String beachUid) {
+        this.FavoriteBeachesList.put("BeachUid", beachUid);
 
     }
+
     public Map<String, String> getFavoriteBeachesList() {
         return FavoriteBeachesList;
     }
@@ -119,11 +127,11 @@ public class ZeachUser  implements Serializable {
         FavoriteBeachesList = favoriteBeachesList;
     }
 
-    public String getCurrentBeach() {
+    public UserAtBeach getCurrentBeach() {
         return CurrentBeach;
     }
 
-    public void setCurrentBeach(String currentBeach) {
+    public void setCurrentBeach(UserAtBeach currentBeach) {
         CurrentBeach = currentBeach;
     }
 
@@ -155,6 +163,7 @@ public class ZeachUser  implements Serializable {
     public void setImportFacebookFriends(boolean importFacebookFriends) {
         this.importFacebookFriends = importFacebookFriends;
     }
+
 
     @Override
     public String toString() {

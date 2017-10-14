@@ -39,7 +39,7 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend>{
             holder = new ViewHolder();
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_row, parent, false);
             holder.userName = (TextView)convertView.findViewById(R.id.user_name);
-            holder.userPhoto = (ImageView) convertView.findViewById(R.id.user_circle_photo);
+            holder.userPhoto = (ImageView) convertView.findViewById(R.id.User_circle_photo);
             holder.Confirm = (Button)convertView.findViewById(R.id.add_user_as_friend);
             convertView.setTag(holder);
         }
