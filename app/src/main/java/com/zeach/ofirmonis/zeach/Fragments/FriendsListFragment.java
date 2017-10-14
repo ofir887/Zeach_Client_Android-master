@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -77,6 +78,8 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
         this.friendsListView = (ListView) rootView.findViewById(R.id.friends_list);
         this.ZeachUser = AppSavedObjects.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/friendsList/");
+        String s = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("user", "defaultStringIfNothingFound");
+        Log.d("listfragment", s);
         //
         /*if (mFriendsReciever!= null) {
             //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"

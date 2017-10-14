@@ -319,6 +319,15 @@ public class BackgroundService extends Service {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(ZeachUser.class);
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("User", mUser.toString());
+                    //TODO fix asyncTask
+                    PreferenceManager.getDefaultSharedPreferences(getApplication()).edit().putString("user", jsonObject.toString()).apply();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                //  PreferenceManager.getDefaultSharedPreferences(getApplication()).edit().putString("user", mUser.toString());
                 sendBroadcast(ACTION_USER);
 
             }
