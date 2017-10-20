@@ -54,7 +54,7 @@ public class AppSavedObjects {
         User = user;
     }
 
-    public static synchronized AppSavedObjects getInstance() {
+    public static AppSavedObjects getInstance() {
         if (null == mInstance) {
             mInstance = new AppSavedObjects();
         }
@@ -89,7 +89,6 @@ public class AppSavedObjects {
 
     public void getFacebookFriends() {
         //get friends list
-        final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
                 "/" + this.User.getFacebookUID() + "/friends",
@@ -107,9 +106,6 @@ public class AppSavedObjects {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        //  Log.d("friends app",response.toString());
-
-            /* handle the result */
                     }
                 }
         ).executeAsync();
@@ -118,24 +114,20 @@ public class AppSavedObjects {
     }
 
     public void addFacebookFriends(JSONArray data1) {
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         DatabaseReference searchUserId = data.getDatabase().getReference();
         for (int i = 0; i < data1.length(); i++) {
-            //  DatabaseReference searchUserId = data.getDatabase().getReference();
             Query UserId = null;
             try {
                 UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
-                final int finalI = i;
                 UserId.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("found", dataSnapshot.toString());
                         ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
-                        //   try {
+                        Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        data.child("Users/").child(getUser().getUID()).child("/friendsList").child(desired.getUID()).setValue(f);
                         User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
-                        //  } catch (JSONException e) {
-                        //    e.printStackTrace();
-                        //   }
 
 
                     }

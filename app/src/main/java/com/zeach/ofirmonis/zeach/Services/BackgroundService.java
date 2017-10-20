@@ -184,7 +184,7 @@ public class BackgroundService extends Service {
         UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), timeStamp);
         ref.child("BeachesListener/Country/Israel").child(beach.getBeachListenerID()).child("CurrentPeople").setValue(beach.getCurrentPeople() + 1);
         ref.child("Beaches/Country/Israel").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
-        ref.child("Users").child(userId).child("CurrentBeach").setValue(userAtBeach);
+        ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);
 
     }
 

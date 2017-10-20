@@ -207,6 +207,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             //   getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
         }
         //getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
+
         super.onDestroy();
 
     }

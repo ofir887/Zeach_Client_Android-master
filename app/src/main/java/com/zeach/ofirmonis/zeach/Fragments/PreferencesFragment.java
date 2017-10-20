@@ -101,14 +101,14 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
         if (v == this.SaveButton){
             AppSavedObjects.getInstance().setUser(this.ZeachUser);
             if (AppSavedObjects.getInstance().getUser().isImportFacebookFriends()) {
-                Handler handler = new Handler();
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
+                //    Handler handler = new Handler();
+                //    handler.post(new Runnable() {
+                //       @Override
+                //      public void run() {
                         AppSavedObjects.getInstance().getFacebookFriends();
                         // AppSavedObjects.getInstance().addFacebookFriends(AppSavedObjects.getInstance().arr);
-                    }
-                });
+                //   }
+                //  });
 
 
                 // AppSavedObjects.getInstance().getFacebookFriends();
