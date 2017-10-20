@@ -1,5 +1,9 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,13 +17,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.login.LoginManager;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.koushikdutta.ion.Ion;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
@@ -27,6 +35,15 @@ import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.concurrent.ExecutionException;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -39,7 +56,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
@@ -57,10 +73,22 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
-        TextView navigationName = (TextView) header.findViewById(R.id.userName);
+        TextView navigationName = (TextView) header.findViewById(R.id.profileName);
         //  String name = AppSavedObjects.getInstance().getUser().getName();
         //   navigationName.setText(this.ZeachUser.getName());
         navigationView.setNavigationItemSelectedListener(this);
+        String user = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("user", "");
+        try {
+            JSONObject jsn = new JSONObject(user);
+            navigationName.setText(jsn.getString("name"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
+        new AppSavedObjects.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
+
     }
 
     public void setNameAtDrawer(View view) {
