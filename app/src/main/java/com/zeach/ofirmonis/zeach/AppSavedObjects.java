@@ -84,7 +84,7 @@ public class AppSavedObjects {
         data.child("Users").child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
         //create awaiting confirmation on current user
         Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
-        data.child("Users").child(friend.getUID()).child("FriendsRequset").child(this.User.getUID()).setValue(destinationFriend);
+        data.child("Users").child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);
     }
 
     public void getFacebookFriends() {
