@@ -273,7 +273,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             bmp = AppSavedObjects.SetCircleMarkerIcon(bmp);
             bmp = AppSavedObjects.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
             bmp = AppSavedObjects.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
-            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
+            Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
+            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));
+            setMapLocation(this.userLocation);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

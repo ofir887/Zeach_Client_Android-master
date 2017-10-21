@@ -50,10 +50,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
+import java.util.TreeMap;
 
 
 /**
@@ -286,13 +288,21 @@ public class BackgroundService extends Service {
                     //
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
                             beach.child("Coords").getValue();
+                    Map<String, HashMap<String, Double>> map = new TreeMap<String, HashMap<String, Double>>(mBeachCoords);
+
                     ArrayList<LatLng> beachCoords = new ArrayList<LatLng>();
-                    for (Map.Entry<String, HashMap<String, Double>> entry : mBeachCoords.entrySet()) {
+                    for (Map.Entry<String, HashMap<String, Double>> entry : map.entrySet()) {
                         HashMap<String, Double> coords = entry.getValue();
                         LatLng latlng = new LatLng(coords.get("lat"), coords.get("lng"));
                         beachCoords.add(latlng);
                         Log.d("Beach1", latlng.toString());
                     }
+                    /*for (Map.Entry<String, HashMap<String, Double>> entry : mBeachCoords.entrySet()) {
+                        HashMap<String, Double> coords = entry.getValue();
+                        LatLng latlng = new LatLng(coords.get("lat"), coords.get("lng"));
+                        beachCoords.add(latlng);
+                        Log.d("Beach1", latlng.toString());
+                    }*/
                     final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, res, beachCoords, mBeachName, 500, getFriendsOnBeach(friendsInBeach));
                     beaches.add(beach1);
                     Handler handler = new Handler();
@@ -300,10 +310,11 @@ public class BackgroundService extends Service {
                         @Override
                         public void run() {
                             Log.d("Beach1", beach1.toString());
+                            sendBroadcast(ACTION_BEACHES);
                         }
                     };
                     handler.postDelayed(runnable, 1000);
-                    sendBroadcast(ACTION_BEACHES);
+                    //sendBroadcast(ACTION_BEACHES);
                 }
             }
 
