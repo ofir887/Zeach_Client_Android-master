@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
@@ -119,14 +120,14 @@ public class AppSavedObjects {
         for (int i = 0; i < data1.length(); i++) {
             Query UserId = null;
             try {
-                UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
+                UserId = searchUserId.child(FirebaseConstants.USERS).orderByChild(FirebaseConstants.FACEBOOK_UID).equalTo(data1.getJSONObject(i).getString(FirebaseConstants.ID));
                 UserId.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("found", dataSnapshot.toString());
                         ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
                         Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri(), desired.getCurrentBeach());
-                        data.child("Users/").child(getUser().getUID()).child("/friendsList").child(desired.getUID()).setValue(f);
+                        data.child(String.format("%s/", FirebaseConstants.USERS)).child(getUser().getUID()).child(String.format("/%s", FirebaseConstants.FRIENDS_LIST)).child(desired.getUID()).setValue(f);
                         User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
 
 
