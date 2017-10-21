@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -49,10 +51,13 @@ import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TreeMap;
@@ -109,10 +114,30 @@ public class BackgroundService extends Service {
             mLastLocation = new Location(provider);
         }
 
+        public String getCountryByCoords(LatLng mUserCoords) {
+            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+            List<Address> addresses = null;
+            try {
+                addresses = geocoder.getFromLocation(mUserCoords.latitude, mUserCoords.longitude, 1);
+                Address result;
+
+                if (addresses != null && !addresses.isEmpty()) {
+                    Log.e(TAG, "country: " + addresses.get(0).getCountryName());
+                    return addresses.get(0).getCountryName();
+                }
+                return null;
+            } catch (IOException ignored) {
+                //do something
+            }
+            return null;
+
+        }
+
         @Override
         public void onLocationChanged(Location location) {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            String country = getCountryByCoords(userCurrentLocation);
             mLastLocation.set(location);
             mLocation = userCurrentLocation;
             //
@@ -127,7 +152,7 @@ public class BackgroundService extends Service {
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
                     Log.d(TAG, "ofir is here fucking worikng !!!");
-                    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
+                    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid(), country);
                     //  onDestroy();
 
                 }
@@ -178,14 +203,14 @@ public class BackgroundService extends Service {
         }
     }
 
-    public void updateUserInBeach(Beach beach, String userId) {
+    public void updateUserInBeach(Beach beach, String userId, String country) {
         DatabaseReference ref = data.getDatabase().getReference();
         Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
         //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
         UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), timeStamp);
-        ref.child("BeachesListener/Country/Israel").child(beach.getBeachListenerID()).child("CurrentPeople").setValue(beach.getCurrentPeople() + 1);
-        ref.child("Beaches/Country/Israel").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+        ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentPeople").setValue(beach.getCurrentPeople() + 1);
+        ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
         ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);
 
     }
