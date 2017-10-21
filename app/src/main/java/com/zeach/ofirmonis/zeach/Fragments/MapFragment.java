@@ -56,6 +56,7 @@ import com.zeach.ofirmonis.zeach.Singletons.Beaches;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -68,6 +69,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class MapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, LocationListener, View.OnClickListener {
 
+    private static final String TAG = MapFragment.class.getSimpleName();
     private View rootView;
     private GoogleMap mGoogleMap;
     private MapView mMapView;
@@ -126,11 +128,15 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     public void addBeachesAsPolygons() {
         for (int i = 0; i < mBeaches.size(); i++) {
-            Polygon polygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).addAll(mBeaches.get(i).getBeachCoordinates()));
+            final Polygon mPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).addAll(mBeaches.get(i).getBeachCoordinates()).fillColor(0x2200FFFF));
+            mPolygon.getId();
+            final int finalI = i;
             mGoogleMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
                 @Override
                 public void onPolygonClick(Polygon polygon) {
-                    Log.d("Click", polygon.getId());
+                    if (mPolygon.getId().equals(polygon.getId())) {
+                        Log.d(TAG, mBeaches.get(finalI).getBeachName() + " beach pressed");
+                    }
                 }
             });
         }

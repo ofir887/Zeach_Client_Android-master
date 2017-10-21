@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.koushikdutta.ion.Ion;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
 import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
         } else if (id == R.id.favorite_beaches) {
             Log.d("fragment", "favorite fragment pressed");
-            fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new FavoriteBeachesFragment()).commit();
 
         } else if (id == R.id.friends) {
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FriendsFragment()).commit();
