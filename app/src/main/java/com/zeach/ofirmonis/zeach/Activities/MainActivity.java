@@ -1,5 +1,9 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,18 +17,33 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.facebook.login.LoginManager;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.koushikdutta.ion.Ion;
 import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
 import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Services.BackgroundService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.concurrent.ExecutionException;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -32,16 +51,18 @@ public class MainActivity extends AppCompatActivity
     private ZeachUser zeachUser;
 
     private ProgressBar spinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        this.spinner = (ProgressBar)findViewById(R.id.progress_bar);
-       // this.spinner.setVisibility(View.VISIBLE);
-      //  getUser();
+        this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
+        Intent backgroundService = new Intent(this, BackgroundService.class);
+        startService(backgroundService);
+        // this.spinner.setVisibility(View.VISIBLE);
+        //  getUser();
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame,new MapFragment()).commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
         //mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -52,24 +73,45 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
-        TextView navigationName = (TextView)header.findViewById(R.id.userName);
-      //  String name = AppSavedObjects.getInstance().getUser().getName();
-     //   navigationName.setText(this.ZeachUser.getName());
+        TextView navigationName = (TextView) header.findViewById(R.id.profileName);
+        //  String name = AppSavedObjects.getInstance().getUser().getName();
+        //   navigationName.setText(this.ZeachUser.getName());
         navigationView.setNavigationItemSelectedListener(this);
+        String user = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("user", "");
+        try {
+            JSONObject jsn = new JSONObject(user);
+            navigationName.setText(jsn.getString("name"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
+        new AppSavedObjects.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
+
     }
-    public void setNameAtDrawer(View view){
-      //  TextView navigationName = (TextView).findViewById(R.id.userName);
-      //  navigationName.setText(AppSavedObjects.getInstance().getUser().getName());
+
+    public void setNameAtDrawer(View view) {
+        //  TextView navigationName = (TextView).findViewById(R.id.userName);
+        //  navigationName.setText(AppSavedObjects.getInstance().getUser().getName());
     }
-    public void getUser(){
+
+    public void getUser() {
         //this.zeachUser = AppSavedObjects.getInstance().getUser();
-        while (this.zeachUser == null){
+        while (this.zeachUser == null) {
             this.zeachUser = AppSavedObjects.getInstance().getUser();
             this.spinner.setVisibility(View.VISIBLE);
         }
         this.spinner.setVisibility(View.GONE);
 
     }
+
+    @Override
+    protected void onDestroy() {
+        stopService(new Intent(this, BackgroundService.class));
+        super.onDestroy();
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -96,7 +138,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Log.d("logout","logout");
+            Log.d("logout", "logout");
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
             for (UserInfo profile : user.getProviderData()) {
@@ -109,7 +151,7 @@ public class MainActivity extends AppCompatActivity
             finish();
             LoginManager.getInstance().logOut();
 
-            Intent SignInLogInActivity = new Intent(getApplicationContext(),SignInLogInActivity.class);
+            Intent SignInLogInActivity = new Intent(getApplicationContext(), SignInLogInActivity.class);
             startActivity(SignInLogInActivity);
             return true;
         }
@@ -126,20 +168,19 @@ public class MainActivity extends AppCompatActivity
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
         if (id == R.id.map) {
             Log.d("fragment", "fragment pressed");
-            fragmentManager.beginTransaction().replace(R.id.content_frame,new MapFragment()).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
 
             // Handle the camera action
-       } else
-            if (id == R.id.favorite_beaches) {
+        } else if (id == R.id.favorite_beaches) {
             Log.d("fragment", "favorite fragment pressed");
-            fragmentManager.beginTransaction().replace(R.id.content_frame,new ProfileFragment()).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
 
         } else if (id == R.id.friends) {
-                fragmentManager.beginTransaction().replace(R.id.content_frame,new FriendsFragment()).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new FriendsFragment()).commit();
 
         } else if (id == R.id.profile) {
-                Log.d("fragment", "favorite fragment pressed");
-                fragmentManager.beginTransaction().replace(R.id.content_frame,new ProfileFragment()).commit();
+            Log.d("fragment", "favorite fragment pressed");
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
 
         } else if (id == R.id.feedback) {
 

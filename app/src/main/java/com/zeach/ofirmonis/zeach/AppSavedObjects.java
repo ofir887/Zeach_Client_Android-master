@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
@@ -54,7 +55,7 @@ public class AppSavedObjects {
         User = user;
     }
 
-    public static synchronized AppSavedObjects getInstance() {
+    public static AppSavedObjects getInstance() {
         if (null == mInstance) {
             mInstance = new AppSavedObjects();
         }
@@ -84,12 +85,11 @@ public class AppSavedObjects {
         data.child("Users").child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
         //create awaiting confirmation on current user
         Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
-        data.child("Users").child(friend.getUID()).child("FriendsRequset").child(this.User.getUID()).setValue(destinationFriend);
+        data.child("Users").child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);
     }
 
     public void getFacebookFriends() {
         //get friends list
-        final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
                 "/" + this.User.getFacebookUID() + "/friends",
@@ -107,9 +107,6 @@ public class AppSavedObjects {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        //  Log.d("friends app",response.toString());
-
-            /* handle the result */
                     }
                 }
         ).executeAsync();
@@ -118,24 +115,20 @@ public class AppSavedObjects {
     }
 
     public void addFacebookFriends(JSONArray data1) {
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         DatabaseReference searchUserId = data.getDatabase().getReference();
         for (int i = 0; i < data1.length(); i++) {
-            //  DatabaseReference searchUserId = data.getDatabase().getReference();
             Query UserId = null;
             try {
-                UserId = searchUserId.child("Users").orderByChild("facebookUID").equalTo(data1.getJSONObject(i).getString("id"));
-                final int finalI = i;
+                UserId = searchUserId.child(FirebaseConstants.USERS).orderByChild(FirebaseConstants.FACEBOOK_UID).equalTo(data1.getJSONObject(i).getString(FirebaseConstants.ID));
                 UserId.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("found", dataSnapshot.toString());
                         ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
-                        //   try {
+                        Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        data.child(String.format("%s/", FirebaseConstants.USERS)).child(getUser().getUID()).child(String.format("/%s", FirebaseConstants.FRIENDS_LIST)).child(desired.getUID()).setValue(f);
                         User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
-                        //  } catch (JSONException e) {
-                        //    e.printStackTrace();
-                        //   }
 
 
                     }

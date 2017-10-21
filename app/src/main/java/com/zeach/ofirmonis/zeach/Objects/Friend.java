@@ -10,7 +10,7 @@ public class Friend implements Serializable{
     private String Name;
     private String UID;
     private String PhotoUrl;
-    private String CurrentBeach;
+    private UserAtBeach CurrentBeach;
 
     public Friend(){
 
@@ -22,18 +22,18 @@ public class Friend implements Serializable{
         this.CurrentBeach = null;
     }
 
-    public Friend(String name, String UID,String photoUrl,String currentBeach) {
+    public Friend(String name, String UID, String photoUrl, UserAtBeach currentBeach) {
         this.Name = name;
         this.UID = UID;
         this.PhotoUrl = photoUrl;
         this.CurrentBeach = currentBeach;
     }
 
-    public String getCurrentBeach() {
+    public UserAtBeach getCurrentBeach() {
         return CurrentBeach;
     }
 
-    public void setCurrentBeach(String currentBeach) {
+    public void setCurrentBeach(UserAtBeach currentBeach) {
         CurrentBeach = currentBeach;
     }
 

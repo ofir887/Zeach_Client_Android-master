@@ -1,15 +1,20 @@
 package com.zeach.ofirmonis.zeach.Objects;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
  * Created by ofirmonis on 12/10/2017.
  */
 
-public class UserAtBeach {
+public class UserAtBeach implements Serializable {
     private String mBeachName;
     private String mBeachID;
     private long mTimeStamp;
+
+    public UserAtBeach() {
+
+    }
 
     public UserAtBeach(String mBeachName, String mBeachID, long timestamp) {
         this.mBeachName = mBeachName;
@@ -35,5 +40,14 @@ public class UserAtBeach {
 
     public long getmTimeStamp() {
         return mTimeStamp;
+    }
+
+    @Override
+    public String toString() {
+        return "UserAtBeach{" +
+                "mBeachName='" + mBeachName + '\'' +
+                ", mBeachID='" + mBeachID + '\'' +
+                ", mTimeStamp=" + mTimeStamp +
+                '}';
     }
 }

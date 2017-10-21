@@ -170,7 +170,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         // getActivity().startService(intent);
 
         Intent intent1 = new Intent(getActivity(), BackgroundService.class);
-        getActivity().startService(intent1);
+        //  getActivity().startService(intent1);
 
 
         return this.rootView;
@@ -201,9 +201,13 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onDestroy() {
-        getActivity().unregisterReceiver(broadcastReceiver);
-        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", false);
-        getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
+        if (broadcastReceiver != null) {
+            getActivity().unregisterReceiver(broadcastReceiver);
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", false);
+            //   getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
+        }
+        //getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
+
         super.onDestroy();
 
     }
