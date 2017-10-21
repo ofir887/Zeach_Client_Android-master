@@ -249,6 +249,7 @@ public class BackgroundService extends Service {
             Log.d(TAG, "Friend" + friend.toString());
         }
         return friends;
+        //
     }
 
     public void getBeachesFromFirebase() {
