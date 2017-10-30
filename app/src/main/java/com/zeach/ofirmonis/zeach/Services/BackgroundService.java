@@ -82,7 +82,7 @@ public class BackgroundService extends Service {
     private ZeachUser mUser;
     private LatLng mLocation;
 
-    //
+    ////
     private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private static final String ACTION_BEACHES = "Beaches";
