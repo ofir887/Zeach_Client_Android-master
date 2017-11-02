@@ -52,6 +52,14 @@ public class Beach implements Serializable {
         this.mFriends = new ArrayList<>();
     }
 
+    //for favorite beaches
+    public Beach(String beachName, String beachKey, long occupation) {
+        BeachName = beachName;
+        BeachKey = beachKey;
+        CurrentPeople = occupation;
+
+    }
+
     public ArrayList<LatLng> getBeachCoordinates() {
         return this.BeachCoords;
     }
