@@ -3,7 +3,6 @@ package com.zeach.ofirmonis.zeach.Fragments;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -14,23 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.Adapters.FriendListAdapter;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
-import com.zeach.ofirmonis.zeach.Objects.Beach;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
@@ -76,7 +69,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.friends_list_fragment, container, false);
         this.friendsListView = (ListView) rootView.findViewById(R.id.friends_list);
-        this.ZeachUser = AppSavedObjects.getInstance().getUser();
+        this.ZeachUser = AppController.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/friendsList/");
         String s = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("user", "defaultStringIfNothingFound");
         Log.d("listfragment", s);

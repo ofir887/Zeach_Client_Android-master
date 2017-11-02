@@ -1,11 +1,9 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -13,11 +11,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -46,17 +39,14 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.ion.Ion;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
-import com.zeach.ofirmonis.zeach.Singletons.Beaches;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -275,12 +265,12 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     public void setUserLocationOnMap() {
         try {
-            Bitmap bmp = Ion.with(getApplicationContext()).load(AppSavedObjects.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
-            bmp = AppSavedObjects.SetCircleMarkerIcon(bmp);
-            bmp = AppSavedObjects.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-            bmp = AppSavedObjects.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
+            Bitmap bmp = Ion.with(getApplicationContext()).load(AppController.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
+            bmp = AppController.SetCircleMarkerIcon(bmp);
+            bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
+            bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
             Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
-            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));
+            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));
             setMapLocation(this.userLocation);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -298,11 +288,11 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
 
         try {
-            Bitmap bmp = Ion.with(getApplicationContext()).load(AppSavedObjects.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
-            bmp = AppSavedObjects.SetCircleMarkerIcon(bmp);
-            bmp = AppSavedObjects.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-            bmp = AppSavedObjects.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
-            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppSavedObjects.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
+            Bitmap bmp = Ion.with(getApplicationContext()).load(AppController.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
+            bmp = AppController.SetCircleMarkerIcon(bmp);
+            bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
+            bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
+            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

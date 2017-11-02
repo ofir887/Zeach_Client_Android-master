@@ -16,7 +16,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.FriendsRequestsListAdapter;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -43,7 +43,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
         this.UsersListView = (ListView)rootView.findViewById(R.id.freinds_requests_list);
 
 
-        this.ZeachUser = AppSavedObjects.getInstance().getUser();
+        this.ZeachUser = AppController.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/FriendsRequset/");
         getFriendsRequestsFromServer();
         return this.rootView;

@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -58,7 +58,7 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend>{
                 public void onClick(View v) {
                     Log.d("clicked",friends.get(position).getName());
                     Friend friend = new Friend(friends.get(position).getName(),friends.get(position).getUID(),friends.get(position).getPhotoUrl());
-                    AppSavedObjects.getInstance().AddFriendRequest(UserId,friend);
+                    AppController.getInstance().AddFriendRequest(UserId,friend);
 
                 }
             });

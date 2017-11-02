@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -51,7 +51,7 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
             holder = (ViewHolder) convertView.getTag();
         }
         holder.friendName.setText(friends.get(position).getName());
-        new AppSavedObjects.DownloadImageTask(holder.friendPhoto).execute(friends.get(position).getPhotoUrl().toString());
+        new AppController.DownloadImageTask(holder.friendPhoto).execute(friends.get(position).getPhotoUrl().toString());
         holder.AddFriendUnfriend.setText("Unfriend");
         if (friends.get(position).getCurrentBeach() != null)
             holder.CurrentBeach.setText(friends.get(position).getCurrentBeach().getmBeachName());

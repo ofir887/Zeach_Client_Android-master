@@ -1,8 +1,6 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,8 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
-import com.google.firebase.database.DatabaseReference;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
 import com.zeach.ofirmonis.zeach.R;
@@ -33,7 +30,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView  =inflater.inflate(R.layout.fragment_preferences,container,false);
-        this.ZeachUser = AppSavedObjects.getInstance().getUser();
+        this.ZeachUser = AppController.getInstance().getUser();
         this.btn = (Button)rootView.findViewById(R.id.button3s);
         this.SaveButton = (Button)rootView.findViewById(R.id.save_button);
         this.btn.setOnClickListener(this);
@@ -99,40 +96,40 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
                 ((ProfileActivity)getActivity()).setCurrentItem(0);
         }
         if (v == this.SaveButton){
-            AppSavedObjects.getInstance().setUser(this.ZeachUser);
-            if (AppSavedObjects.getInstance().getUser().isImportFacebookFriends()) {
+            AppController.getInstance().setUser(this.ZeachUser);
+            if (AppController.getInstance().getUser().isImportFacebookFriends()) {
                 //    Handler handler = new Handler();
                 //    handler.post(new Runnable() {
                 //       @Override
                 //      public void run() {
-                        AppSavedObjects.getInstance().getFacebookFriends();
-                        // AppSavedObjects.getInstance().addFacebookFriends(AppSavedObjects.getInstance().arr);
+                        AppController.getInstance().getFacebookFriends();
+                        // AppController.getInstance().addFacebookFriends(AppController.getInstance().arr);
                 //   }
                 //  });
 
 
-                // AppSavedObjects.getInstance().getFacebookFriends();
-                //  AppSavedObjects.getInstance().addFacebookFriends(AppSavedObjects.getInstance().arr);
+                // AppController.getInstance().getFacebookFriends();
+                //  AppController.getInstance().addFacebookFriends(AppController.getInstance().arr);
 
             }
-            AppSavedObjects.getInstance().UpdateUserInfo();
+            AppController.getInstance().UpdateUserInfo();
             if (checkOnWhatActivityUserIs()==1){
                 /*
-                AppSavedObjects.getInstance().setUser(this.ZeachUser);
-                if (AppSavedObjects.getInstance().getUser().isImportFacebookFriends()) {
-                    AppSavedObjects.getInstance().getFacebookFriends();
+                AppController.getInstance().setUser(this.ZeachUser);
+                if (AppController.getInstance().getUser().isImportFacebookFriends()) {
+                    AppController.getInstance().getFacebookFriends();
                 }
-                AppSavedObjects.getInstance().UpdateUserInfo();*/
+                AppController.getInstance().UpdateUserInfo();*/
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame,new MapFragment()).commit();
 
             }
             else{
                 /*
-                AppSavedObjects.getInstance().setUser(this.ZeachUser);
-                if (AppSavedObjects.getInstance().getUser().isImportFacebookFriends()) {
-                    AppSavedObjects.getInstance().getFacebookFriends();
+                AppController.getInstance().setUser(this.ZeachUser);
+                if (AppController.getInstance().getUser().isImportFacebookFriends()) {
+                    AppController.getInstance().getFacebookFriends();
                 }
-                AppSavedObjects.getInstance().UpdateUserInfo();
+                AppController.getInstance().UpdateUserInfo();
                 */
                 Intent mainActivity = new Intent(getActivity(), MainActivity.class);
                 startActivity(mainActivity);

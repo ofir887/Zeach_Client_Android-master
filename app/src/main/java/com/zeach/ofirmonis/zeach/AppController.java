@@ -6,13 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
-import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.google.firebase.database.ChildEventListener;
@@ -37,14 +35,14 @@ import java.util.Map;
  * Created by ofirmonis on 18/07/2017.
  */
 
-public class AppSavedObjects {
-    private static AppSavedObjects mInstance = null;
+public class AppController {
+    private static AppController mInstance = null;
 
     public static JSONArray arr;
 
     public ZeachUser User;
 
-    protected AppSavedObjects() {
+    protected AppController() {
     }
 
     public ZeachUser getUser() {
@@ -55,17 +53,17 @@ public class AppSavedObjects {
         User = user;
     }
 
-    public static AppSavedObjects getInstance() {
+    public static AppController getInstance() {
         if (null == mInstance) {
-            mInstance = new AppSavedObjects();
+            mInstance = new AppController();
         }
         return mInstance;
     }
 
     public void UpdateUserInfo() {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
-        //  AppSavedObjects.getInstance().setUser(this.ZeachUser);
-        // Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
+        //  AppController.getInstance().setUser(this.ZeachUser);
+        // Log.d("singleton",AppController.getInstance().getUser().toString());
         Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
         user.put(this.User.getUID(), this.User);
         data.child("Users").child(this.User.getUID()).setValue(this.User);
