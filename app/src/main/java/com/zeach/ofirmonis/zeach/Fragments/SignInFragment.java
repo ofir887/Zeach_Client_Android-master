@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
+import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
@@ -160,7 +161,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
        // User.AddFriendToList("hggfdf","ofihr");
         Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
        // user.put(this.User.getUID(),this.User);
-        data.child("Users").child(this.User.getUID()).setValue(this.User);
+        data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
         AppController.getInstance().setUser(this.User); // save user in singleton
         //Add seperate parent ! need to check if this is good or can out this on Users in nested map
         //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");

@@ -120,13 +120,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            //data.child("Users").child(user.getUid()).
-                            //  updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             // Log.w(TAG, "signInWithCredential:failure", task.getException());
-
-                            // updateUI(null);
                         }
 
                         // ...
@@ -195,6 +191,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     ZeachUser = dataSnapshot.getValue(ZeachUser.class);
+                    //new AppController.DownloadImageTask2().execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
                     AppController.getInstance().setUser(ZeachUser);
 
                 }

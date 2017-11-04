@@ -13,6 +13,7 @@ import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.facebook.appevents.internal.Constants;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,13 +37,15 @@ import java.util.Map;
  */
 
 public class AppController {
-    private static AppController mInstance = null;
+    private static AppController mInstance;
 
     public static JSONArray arr;
+    public static Bitmap mProfileBitmap;
 
     public ZeachUser User;
 
     protected AppController() {
+
     }
 
     public ZeachUser getUser() {
@@ -60,13 +63,17 @@ public class AppController {
         return mInstance;
     }
 
+    public Bitmap getmProfileBitmap() {
+        return mProfileBitmap;
+    }
+
     public void UpdateUserInfo() {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //  AppController.getInstance().setUser(this.ZeachUser);
         // Log.d("singleton",AppController.getInstance().getUser().toString());
         Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
         user.put(this.User.getUID(), this.User);
-        data.child("Users").child(this.User.getUID()).setValue(this.User);
+        data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
         //Add seperate parent ! need to check if this is good or can out this on Users in nested map
         //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
         /*
@@ -80,10 +87,10 @@ public class AppController {
     public void AddFriendRequest(String userId, Friend friend) {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //create awaiting confirmation on current user
-        data.child("Users").child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
+        data.child(FirebaseConstants.USERS).child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
         //create awaiting confirmation on current user
         Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
-        data.child("Users").child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);
+        data.child(FirebaseConstants.USERS).child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);
     }
 
     public void getFacebookFriends() {
@@ -151,7 +158,6 @@ public class AppController {
 
                     }
                 });
-                //    ZeachUser.AddFriendToList(String.valueOf(uid[0]),data1.getJSONObject(i).getString("name"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -186,6 +192,36 @@ public class AppController {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             imageView.setImageBitmap(bitmap);
+        }
+
+
+    }
+
+    public static class DownloadImageTask2 extends AsyncTask<String, Void, Bitmap> {
+
+        public DownloadImageTask2() {
+
+        }
+
+
+        @SuppressWarnings("WrongThread")
+        @Override
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            mProfileBitmap = bitmap;
         }
 
 

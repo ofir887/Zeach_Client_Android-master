@@ -10,16 +10,18 @@ import java.sql.Timestamp;
 public class UserAtBeach implements Serializable {
     private String mBeachName;
     private String mBeachID;
+    private String mBeachListenerId;
     private long mTimeStamp;
 
     public UserAtBeach() {
 
     }
 
-    public UserAtBeach(String mBeachName, String mBeachID, long timestamp) {
-        this.mBeachName = mBeachName;
-        this.mBeachID = mBeachID;
-        this.mTimeStamp = timestamp;
+    public UserAtBeach(String aBeachName, String aBeachID, String aBeachListenerId, long atimestamp) {
+        this.mBeachName = aBeachName;
+        this.mBeachID = aBeachID;
+        this.mBeachListenerId = aBeachListenerId;
+        this.mTimeStamp = atimestamp;
     }
 
     public String getmBeachName() {
@@ -42,11 +44,20 @@ public class UserAtBeach implements Serializable {
         return mTimeStamp;
     }
 
+    public String getmBeachListenerId() {
+        return mBeachListenerId;
+    }
+
+    public void setmBeachListenerId(String mBeachListenerId) {
+        this.mBeachListenerId = mBeachListenerId;
+    }
+
     @Override
     public String toString() {
         return "UserAtBeach{" +
                 "mBeachName='" + mBeachName + '\'' +
                 ", mBeachID='" + mBeachID + '\'' +
+                ", mBeachListenerId='" + mBeachListenerId + '\'' +
                 ", mTimeStamp=" + mTimeStamp +
                 '}';
     }

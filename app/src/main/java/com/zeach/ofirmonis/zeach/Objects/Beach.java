@@ -17,7 +17,7 @@ public class Beach implements Serializable {
     private ArrayList<LatLng> BeachCoords;
     private long CurrentPeopleEstimation;
     private ArrayList<Friend> mFriends;
-    private long CurrentPeople;
+    private long CurrentDevices;
     private int MaxCapacity;
 
     //Constructor for using service
@@ -26,28 +26,28 @@ public class Beach implements Serializable {
         this.BeachListenerID = beachListenerID;
         this.BeachCoords = beachCoords;
         this.mFriends = new ArrayList<>();
-        this.CurrentPeople = Integer.parseInt(null);
+        this.CurrentDevices = Integer.parseInt(null);
         this.MaxCapacity = Integer.parseInt(null);
 
 
     }
 
-    public Beach(String key, String beachListenerID, long currentPeopleEstimation, ArrayList<LatLng> beachCoords, String beachName, long currentPeople, ArrayList<Friend> friends) {
+    public Beach(String key, String beachListenerID, long currentPeopleEstimation, ArrayList<LatLng> beachCoords, String beachName, long currentDevices, ArrayList<Friend> friends) {
         this.BeachKey = key;
         this.BeachListenerID = beachListenerID;
         this.CurrentPeopleEstimation = currentPeopleEstimation;
         this.BeachCoords = beachCoords;
         this.BeachName = beachName;
-        this.CurrentPeople = currentPeople;
+        this.CurrentDevices = currentDevices;
         this.mFriends = friends;
     }
 
     //Constructor for using in app
-    public Beach(String beachName, String beachListenerID, ArrayList<LatLng> beachCoords, int currentPeople, int maxCapacity, ArrayList<Friend> friends) {
+    public Beach(String beachName, String beachListenerID, ArrayList<LatLng> beachCoords, int currentDevices, int maxCapacity, ArrayList<Friend> friends) {
         this.BeachName = beachName;
         this.BeachListenerID = beachListenerID;
         this.BeachCoords = beachCoords;
-        this.CurrentPeople = currentPeople;
+        this.CurrentDevices = currentDevices;
         this.MaxCapacity = maxCapacity;
         this.mFriends = new ArrayList<>();
     }
@@ -56,7 +56,7 @@ public class Beach implements Serializable {
     public Beach(String beachName, String beachKey, long occupation) {
         BeachName = beachName;
         BeachKey = beachKey;
-        CurrentPeople = occupation;
+        CurrentDevices = occupation;
 
     }
 
@@ -76,8 +76,8 @@ public class Beach implements Serializable {
         return BeachListenerID;
     }
 
-    public long getCurrentPeople() {
-        return CurrentPeople;
+    public long getCurrentDevices() {
+        return CurrentDevices;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class Beach implements Serializable {
                 ", BeachCoords=" + BeachCoords +
                 ", CurrentPeopleEstimation=" + CurrentPeopleEstimation +
                 ", mFriends=" + mFriends +
-                ", CurrentPeople=" + CurrentPeople +
+                ", CurrentPeople=" + CurrentDevices +
                 ", MaxCapacity=" + MaxCapacity +
                 '}';
     }

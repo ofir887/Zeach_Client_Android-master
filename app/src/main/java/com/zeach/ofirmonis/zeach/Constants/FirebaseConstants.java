@@ -12,11 +12,13 @@ public class FirebaseConstants {
     public static final String BEACHES = "Beaches";
     public static final String ID = "id";
     public static final String FACEBOOK_UID = "facebookUID";
+    public static final String FRIENDS = "friends";
 
     //Beach
 
 
     //Beach Listener
 
-
+    //TimeStamp Constants
+    public static final String TIMESTAMPS = "Timestamps";
 }

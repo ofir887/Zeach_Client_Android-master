@@ -42,6 +42,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
+import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
@@ -203,16 +204,16 @@ public class BackgroundService extends Service {
         }
     }
 
-    public void updateUserInBeach(Beach beach, String userId, String country) {
-        DatabaseReference ref = data.getDatabase().getReference();
-        Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
+    public void updateUserInBeach(final Beach beach, final String userId, final String country) {
+        final DatabaseReference ref = data.getDatabase().getReference();
+        final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
         //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
-        UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), timeStamp);
-        ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentPeople").setValue(beach.getCurrentPeople() + 1);
+        final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), beach.getBeachListenerID(), timeStamp);
+        ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
         ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
         ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);
-
+        ref.child(FirebaseConstants.TIMESTAMPS).child(userId).setValue(userAtBeach);
     }
 
     public void getSingleLocationUpdate() {
@@ -288,12 +289,15 @@ public class BackgroundService extends Service {
                     String mBeachKey = (String) beach.child("BeachID").getValue();
                     String mBeachName = (String) beach.child("BeachName").getValue();
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
-                    long currentPeople = (long) beach.child("CurrentPeople").getValue();
+                    long currentPeople = (long) beach.child("CurrentDevices").getValue();
                     long currentOccupationEstimation = (long) beach.child("Result").getValue();
                     long res = (long) currentOccupationEstimation;
                     // int beachMaxCapacity = (int)beach.child("Capacity").getValue();
                     //get Friends
-                    HashMap<String, HashMap<String, Friend>> friendsInBeach = (HashMap<String, HashMap<String, Friend>>) beach.child("Peoplelist").getValue();
+                    HashMap<String, HashMap<String, Friend>> friendsInBeach = new HashMap<String, HashMap<String, Friend>>();
+                    if (beach.child("Peoplelist").exists())
+                        friendsInBeach = (HashMap<String, HashMap<String, Friend>>) beach.child("Peoplelist").getValue();
+
                     //
                     /*//Todo change operation to firebase cloud query
                     final ArrayList<Friend> friends = new ArrayList<Friend>();

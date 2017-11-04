@@ -68,16 +68,17 @@ public class MainActivity extends AppCompatActivity
         //   navigationName.setText(this.ZeachUser.getName());
         navigationView.setNavigationItemSelectedListener(this);
         String user = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("user", "");
-        try {
+        /*try {
             JSONObject jsn = new JSONObject(user);
             navigationName.setText(jsn.getString("name"));
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
 
 
         CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
         new AppController.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
+        //image.setImageBitmap(AppController.getInstance().getmProfileBitmap());
 
     }
 
