@@ -158,7 +158,7 @@ public class BackgroundService extends Service {
 
                 }
             }
-            onDestroy();
+            // onDestroy();
 
         }
 
@@ -209,7 +209,7 @@ public class BackgroundService extends Service {
         final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
         //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
-        final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), beach.getBeachListenerID(), timeStamp);
+        final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), beach.getBeachListenerID(), timeStamp, country);
         ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
         ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
         ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);

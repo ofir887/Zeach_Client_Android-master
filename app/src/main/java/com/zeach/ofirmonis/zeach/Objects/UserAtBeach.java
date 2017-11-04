@@ -11,17 +11,19 @@ public class UserAtBeach implements Serializable {
     private String mBeachName;
     private String mBeachID;
     private String mBeachListenerId;
+    private String mCountry;
     private long mTimeStamp;
 
     public UserAtBeach() {
 
     }
 
-    public UserAtBeach(String aBeachName, String aBeachID, String aBeachListenerId, long atimestamp) {
+    public UserAtBeach(String aBeachName, String aBeachID, String aBeachListenerId, long atimestamp, String aCountry) {
         this.mBeachName = aBeachName;
         this.mBeachID = aBeachID;
         this.mBeachListenerId = aBeachListenerId;
         this.mTimeStamp = atimestamp;
+        this.mCountry = aCountry;
     }
 
     public String getmBeachName() {
@@ -52,12 +54,25 @@ public class UserAtBeach implements Serializable {
         this.mBeachListenerId = mBeachListenerId;
     }
 
+    public String getCountry() {
+        return mCountry;
+    }
+
+    public void setCountry(String aCountry) {
+        mCountry = aCountry;
+    }
+
+    public void setmTimeStamp(long mTimeStamp) {
+        this.mTimeStamp = mTimeStamp;
+    }
+
     @Override
     public String toString() {
         return "UserAtBeach{" +
                 "mBeachName='" + mBeachName + '\'' +
                 ", mBeachID='" + mBeachID + '\'' +
                 ", mBeachListenerId='" + mBeachListenerId + '\'' +
+                ", mCountry='" + mCountry + '\'' +
                 ", mTimeStamp=" + mTimeStamp +
                 '}';
     }
