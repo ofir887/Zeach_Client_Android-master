@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.UserListAdapter;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
@@ -45,7 +45,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         this.UsersListView = (ListView)rootView.findViewById(R.id.users_list);
         this.searchView = (SearchView)rootView.findViewById(R.id.users_search_widget);
 
-        this.ZeachUser = AppSavedObjects.getInstance().getUser();
+        this.ZeachUser = AppController.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/");
         getUsersFromServer("");
         this.searchView.setOnQueryTextListener(this);

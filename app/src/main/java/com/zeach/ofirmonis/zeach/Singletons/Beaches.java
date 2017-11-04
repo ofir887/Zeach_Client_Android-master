@@ -1,8 +1,6 @@
 package com.zeach.ofirmonis.zeach.Singletons;
 
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
 import java.util.ArrayList;
 

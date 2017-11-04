@@ -1,7 +1,6 @@
 package com.zeach.ofirmonis.zeach.Adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,7 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
@@ -53,7 +52,7 @@ public class UserListAdapter extends ArrayAdapter <ZeachUser>{
         if (users.get(position).getName() !=null)
             holder.userName.setText(users.get(position).getName());
         if (users.get(position).getProfilePictureUri() !=null)
-            new AppSavedObjects.DownloadImageTask(holder.userPhoto).execute(users.get(position).getProfilePictureUri());
+            new AppController.DownloadImageTask(holder.userPhoto).execute(users.get(position).getProfilePictureUri());
         // holder.userPhoto.setImageURI(Uri.parse(users.get(position).getProfilePictureUri()));
         if ((users.get(position).getFriendsList().containsKey(this.UserId))) {
             holder.AddAsFriend.setText("Already Friend");
@@ -67,7 +66,7 @@ public class UserListAdapter extends ArrayAdapter <ZeachUser>{
                 public void onClick(View v) {
                     Log.d("clicked",users.get(position).getName());
                     Friend friend = new Friend(users.get(position).getName(),users.get(position).getUID(),users.get(position).getProfilePictureUri());
-                    AppSavedObjects.getInstance().AddFriendRequest(UserId,friend);
+                    AppController.getInstance().AddFriendRequest(UserId,friend);
 
                 }
             });

@@ -1,7 +1,6 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
 import android.content.Intent;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -22,7 +21,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -34,17 +32,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
-import com.zeach.ofirmonis.zeach.Objects.Beach;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 import com.zeach.ofirmonis.zeach.R;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.facebook.GraphRequest.TAG;
@@ -62,7 +54,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private Button FirebaseLoginButton;
     private TextView EmailTextView;
     private TextView PasswordTextView;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private ZeachUser ZeachUser;
 
     @Nullable
     @Override
@@ -190,45 +182,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    /*public void getBeachesFromFirebase() {
-        DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot beach : dataSnapshot.getChildren()) {
-                    String mBeachKey = (String) beach.child("BeachID").getValue();
-                    String mBeachName = (String) beach.child("BeachName").getValue();
-                    String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
-                    long currentOccupationEstimation = (long) beach.child("Result").getValue();
-                    // int beachMaxCapacity = (int)beach.child("Capacity").getValue();
-
-                    HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
-                            beach.child("Coords").getValue();
-                    ArrayList<LatLng> beachCoords = new ArrayList<LatLng>();
-                    for (Map.Entry<String, HashMap<String, Double>> entry : mBeachCoords.entrySet()) {
-                        HashMap<String, Double> coords = entry.getValue();
-                        LatLng latlng = new LatLng(coords.get("lat"), coords.get("lng"));
-                        beachCoords.add(latlng);
-                        Log.d("Beach1", latlng.toString());
-                    }
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, currentOccupationEstimation, beachCoords, mBeachName);
-                    Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d("Beach1", beach1.toString());
-                        }
-                    };
-                    handler.postDelayed(runnable, 1000);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }*/
 
     @Override
     public void onStart() {
@@ -242,8 +195,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     ZeachUser = dataSnapshot.getValue(ZeachUser.class);
-                    AppSavedObjects.getInstance().setUser(ZeachUser);
-//                                              Log.d("ofofo",ZeachUser.toString());
+                    AppController.getInstance().setUser(ZeachUser);
 
                 }
 

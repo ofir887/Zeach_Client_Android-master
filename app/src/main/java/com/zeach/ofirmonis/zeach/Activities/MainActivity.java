@@ -1,8 +1,5 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -17,18 +14,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.login.LoginManager;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
-import com.koushikdutta.ion.Ion;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
@@ -40,11 +33,7 @@ import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.concurrent.ExecutionException;
-
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -75,7 +64,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
         TextView navigationName = (TextView) header.findViewById(R.id.profileName);
-        //  String name = AppSavedObjects.getInstance().getUser().getName();
+        //  String name = AppController.getInstance().getUser().getName();
         //   navigationName.setText(this.ZeachUser.getName());
         navigationView.setNavigationItemSelectedListener(this);
         String user = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("user", "");
@@ -88,19 +77,19 @@ public class MainActivity extends AppCompatActivity
 
 
         CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
-        new AppSavedObjects.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
+        new AppController.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
 
     }
 
     public void setNameAtDrawer(View view) {
         //  TextView navigationName = (TextView).findViewById(R.id.userName);
-        //  navigationName.setText(AppSavedObjects.getInstance().getUser().getName());
+        //  navigationName.setText(AppController.getInstance().getUser().getName());
     }
 
     public void getUser() {
-        //this.zeachUser = AppSavedObjects.getInstance().getUser();
+        //this.zeachUser = AppController.getInstance().getUser();
         while (this.zeachUser == null) {
-            this.zeachUser = AppSavedObjects.getInstance().getUser();
+            this.zeachUser = AppController.getInstance().getUser();
             this.spinner.setVisibility(View.VISIBLE);
         }
         this.spinner.setVisibility(View.GONE);
@@ -196,8 +185,8 @@ public class MainActivity extends AppCompatActivity
     /*
     public void UpdateUserInfo(){
        // this.data = FirebaseDatabase.getInstance().getReference();
-        AppSavedObjects.getInstance().setUser(this.ZeachUser);
-        Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
+        AppController.getInstance().setUser(this.ZeachUser);
+        Log.d("singleton",AppController.getInstance().getUser().toString());
         Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
         user.put(this.ZeachUser.getUID(),this.ZeachUser);
         this.data.child("Users").child(this.ZeachUser.getUID()).setValue(this.ZeachUser);
