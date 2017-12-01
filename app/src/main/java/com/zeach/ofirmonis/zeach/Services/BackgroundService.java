@@ -3,45 +3,35 @@ package com.zeach.ofirmonis.zeach.Services;
 import android.Manifest;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.Parcelable;
 import android.os.Process;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
@@ -54,8 +44,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -283,26 +271,8 @@ public class BackgroundService extends Service {
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private ArrayList<Friend> getFriendsOnBeach(HashMap<String, HashMap<String, Friend>> friendsInBeach) {
-        final ArrayList<Friend> friends = new ArrayList<Friend>();
-        for (Map.Entry<String, HashMap<String, Friend>> entry : friendsInBeach.entrySet()) {
-            HashMap<String, Friend> friendHashMap = entry.getValue();
-            String name = String.valueOf(friendHashMap.get("name"));
-            String uid = String.valueOf(friendHashMap.get("uid"));
-            String photoUrl = String.valueOf(friendHashMap.get("photoUrl"));
-            Friend friend = new Friend(name, uid, photoUrl);
-            //  for (Map.Entry<String, Friend> userEntry : mUser.getFriendsList().entrySet()){
-            //       if (friend.getUID().equals(userEntry.getValue().getUID()))
-            friends.add(friend);
-            //  }
-            Log.d(TAG, "Friend" + friend.toString());
-        }
-        return friends;
-        //
-    }
-
     public void getBeachesFromFirebase() {
-        DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
+        final DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -313,27 +283,32 @@ public class BackgroundService extends Service {
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     //get Friends
-                    HashMap<String, HashMap<String, Friend>> friendsInBeach = new HashMap<String, HashMap<String, Friend>>();
-                    if (beach.child("Peoplelist").exists())
-                        friendsInBeach = (HashMap<String, HashMap<String, Friend>>) beach.child("Peoplelist").getValue();
-
-                    //
-                    /*//Todo change operation to firebase cloud query
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
-                    for (Map.Entry<String, HashMap<String, Friend>>entry : friendsInBeach.entrySet()){
-                        HashMap<String,Friend> friendHashMap = entry.getValue();
-                        String name = String.valueOf(friendHashMap.get("name"));
-                        String uid = String.valueOf(friendHashMap.get("uid"));
-                        String photoUrl = String.valueOf(friendHashMap.get("photoUrl"));
-                        Friend friend = new Friend(name,uid,photoUrl);
-                      //  for (Map.Entry<String, Friend> userEntry : mUser.getFriendsList().entrySet()){
-                     //       if (friend.getUID().equals(userEntry.getValue().getUID()))
-                                friends.add(friend);
-                      //  }
-                        Log.d(TAG,"Friend"+friend.toString());
-                    }*/
+                    if (beach.child("Peoplelist").exists()) {
+                        final DatabaseReference peopleRef = ref.child(mBeachKey).child("Peoplelist");
+                        peopleRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
+                                    if (dataSnapshot.hasChild(entry.getKey())) {
+                                        Log.d(TAG, "Found Friend: " + dataSnapshot.child(entry.getKey()).getValue());
+                                        String name = (String) dataSnapshot.child(entry.getKey()).child("name").getValue();
+                                        String uid = (String) dataSnapshot.child(entry.getKey()).child("uid").getValue();
+                                        String photoUrl = (String) dataSnapshot.child(entry.getKey()).child("photoUrl").getValue();
+                                        Friend friend = new Friend(name, uid, photoUrl);
+                                        friends.add(friend);
 
-                    //
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
+
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
                             beach.child("Coords").getValue();
                     Map<String, HashMap<String, Double>> map = new TreeMap<String, HashMap<String, Double>>(mBeachCoords);
@@ -345,13 +320,8 @@ public class BackgroundService extends Service {
                         beachCoords.add(latlng);
                         Log.d("Beach1", latlng.toString());
                     }
-                    /*for (Map.Entry<String, HashMap<String, Double>> entry : mBeachCoords.entrySet()) {
-                        HashMap<String, Double> coords = entry.getValue();
-                        LatLng latlng = new LatLng(coords.get("lat"), coords.get("lng"));
-                        beachCoords.add(latlng);
-                        Log.d("Beach1", latlng.toString());
-                    }*/
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, getFriendsOnBeach(friendsInBeach), mTraffic);
+
+                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic);
                     beaches.add(beach1);
                     Handler handler = new Handler();
                     Runnable runnable = new Runnable() {
