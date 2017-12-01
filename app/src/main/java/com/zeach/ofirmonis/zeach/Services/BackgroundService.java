@@ -154,6 +154,7 @@ public class BackgroundService extends Service {
                     //Asign user in this beach and break loop after it
                     Log.d(TAG, "ofir is here fucking worikng !!!");
                     updateUserInBeach(beaches.get(0), mFirebaseUser.getUid(), country);
+                    break;
                     //  onDestroy();
 
                 }
@@ -210,8 +211,28 @@ public class BackgroundService extends Service {
         //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
         final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), beach.getBeachListenerID(), timeStamp, country);
-        ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
-        ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+        //TODO - check if already there
+
+        DatabaseReference userRef = ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist");
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild(user.getUID())) {
+                    Log.d(TAG, "User not in the beach..Updating");
+                    ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
+                    ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        //if (ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()))
+        // ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
+        //  ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+        //update time stamp
         ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);
         ref.child(FirebaseConstants.TIMESTAMPS).child(userId).setValue(userAtBeach);
     }
@@ -285,14 +306,12 @@ public class BackgroundService extends Service {
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                //TODO - change string to constants (beachid and...)
                 for (DataSnapshot beach : dataSnapshot.getChildren()) {
                     String mBeachKey = (String) beach.child("BeachID").getValue();
                     String mBeachName = (String) beach.child("BeachName").getValue();
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
-                    long currentPeople = (long) beach.child("CurrentDevices").getValue();
-                    long currentOccupationEstimation = (long) beach.child("Result").getValue();
-                    long res = (long) currentOccupationEstimation;
-                    // int beachMaxCapacity = (int)beach.child("Capacity").getValue();
+                    String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     //get Friends
                     HashMap<String, HashMap<String, Friend>> friendsInBeach = new HashMap<String, HashMap<String, Friend>>();
                     if (beach.child("Peoplelist").exists())
@@ -332,7 +351,7 @@ public class BackgroundService extends Service {
                         beachCoords.add(latlng);
                         Log.d("Beach1", latlng.toString());
                     }*/
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, res, beachCoords, mBeachName, 500, getFriendsOnBeach(friendsInBeach));
+                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, getFriendsOnBeach(friendsInBeach), mTraffic);
                     beaches.add(beach1);
                     Handler handler = new Handler();
                     Runnable runnable = new Runnable() {

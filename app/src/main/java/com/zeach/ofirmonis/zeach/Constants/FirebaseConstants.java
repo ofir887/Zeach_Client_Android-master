@@ -13,6 +13,7 @@ public class FirebaseConstants {
     public static final String ID = "id";
     public static final String FACEBOOK_UID = "facebookUID";
     public static final String FRIENDS = "friends";
+    public static final String TRAFFIC = "Traffic";
 
     //Beach
 
