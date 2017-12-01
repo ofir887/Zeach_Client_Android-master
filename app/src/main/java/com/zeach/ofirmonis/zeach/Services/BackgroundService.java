@@ -141,7 +141,7 @@ public class BackgroundService extends Service {
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
                     Log.d(TAG, "ofir is here fucking worikng !!!");
-                    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid(), country);
+                    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid(), country, userCurrentLocation.longitude, userCurrentLocation.latitude);
                     break;
                     //  onDestroy();
 
@@ -193,12 +193,13 @@ public class BackgroundService extends Service {
         }
     }
 
-    public void updateUserInBeach(final Beach beach, final String userId, final String country) {
+    public void updateUserInBeach(final Beach beach, final String userId, final String country, double aLongitude, double aLatitude) {
         final DatabaseReference ref = data.getDatabase().getReference();
         final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
         //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
-        final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(), beach.getBeachListenerID(), timeStamp, country);
+        final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(),
+                beach.getBeachListenerID(), timeStamp, country, aLongitude, aLatitude);
         //TODO - check if already there
 
         DatabaseReference userRef = ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist");
@@ -289,6 +290,7 @@ public class BackgroundService extends Service {
                         peopleRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
+                                friends.clear();
                                 for (Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
                                     if (dataSnapshot.hasChild(entry.getKey())) {
                                         Log.d(TAG, "Found Friend: " + dataSnapshot.child(entry.getKey()).getValue());
@@ -308,7 +310,7 @@ public class BackgroundService extends Service {
                             }
                         });
                     }
-
+                    Log.d(TAG, "Friends = " + friends.toString());
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
                             beach.child("Coords").getValue();
                     Map<String, HashMap<String, Double>> map = new TreeMap<String, HashMap<String, Double>>(mBeachCoords);

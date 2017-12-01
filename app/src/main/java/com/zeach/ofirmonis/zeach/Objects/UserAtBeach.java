@@ -1,5 +1,7 @@
 package com.zeach.ofirmonis.zeach.Objects;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -13,17 +15,21 @@ public class UserAtBeach implements Serializable {
     private String mBeachListenerId;
     private String mCountry;
     private long mTimeStamp;
+    private double mLatitude;
+    private double mLongitude;
 
     public UserAtBeach() {
 
     }
 
-    public UserAtBeach(String aBeachName, String aBeachID, String aBeachListenerId, long atimestamp, String aCountry) {
+    public UserAtBeach(String aBeachName, String aBeachID, String aBeachListenerId, long atimestamp, String aCountry, double aLongitude, double aLatitude) {
         this.mBeachName = aBeachName;
         this.mBeachID = aBeachID;
         this.mBeachListenerId = aBeachListenerId;
         this.mTimeStamp = atimestamp;
         this.mCountry = aCountry;
+        mLongitude = aLongitude;
+        mLatitude = aLatitude;
     }
 
     public String getmBeachName() {
@@ -50,7 +56,23 @@ public class UserAtBeach implements Serializable {
         return mBeachListenerId;
     }
 
-    public void setmBeachListenerId(String mBeachListenerId) {
+    public double getLatitude() {
+        return mLatitude;
+    }
+
+    public void setLatitude(double mLatitude) {
+        this.mLatitude = mLatitude;
+    }
+
+    public double getLongitude() {
+        return mLongitude;
+    }
+
+    public void setLongitude(double mLongitude) {
+        this.mLongitude = mLongitude;
+    }
+
+    public void setBeachListenerId(String mBeachListenerId) {
         this.mBeachListenerId = mBeachListenerId;
     }
 
