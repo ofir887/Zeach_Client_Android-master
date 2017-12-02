@@ -19,7 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.UserListAdapter;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 
 import java.util.ArrayList;
 
@@ -30,8 +30,8 @@ import java.util.ArrayList;
 public class SearchUsersListFragment extends Fragment implements View.OnClickListener,SearchView.OnQueryTextListener{
 
     private View rootView;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
-    private ArrayList<ZeachUser> users = new ArrayList();
+    private User ZeachUser;
+    private ArrayList<User> users = new ArrayList();
     private UserListAdapter userListAdapter;
     private ListView UsersListView;
     private DatabaseReference data;
@@ -63,8 +63,8 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
                 userListAdapter.notifyDataSetChanged();
                 for(DataSnapshot user: dataSnapshot.getChildren()){
                     if (!user.getKey().equals(ZeachUser.getUID()))
-                        if (user.getValue(ZeachUser.class).getName().toLowerCase().contains(str))
-                            users.add(user.getValue(ZeachUser.class));
+                        if (user.getValue(User.class).getName().toLowerCase().contains(str))
+                            users.add(user.getValue(User.class));
                     //  Log.d("fgf",friend.toString());
                 }
 

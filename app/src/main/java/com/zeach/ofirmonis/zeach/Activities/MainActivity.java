@@ -27,18 +27,15 @@ import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
 import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private ZeachUser zeachUser;
+    private User zeachUser;
 
     private ProgressBar spinner;
 

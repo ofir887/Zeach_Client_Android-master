@@ -11,7 +11,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,7 +36,7 @@ import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.UserAtBeach;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,7 +67,7 @@ public class BackgroundService extends Service {
     private DatabaseReference data;
     private FirebaseAuth mAuth;
     private FirebaseUser mFirebaseUser;
-    private ZeachUser mUser;
+    private User mUser;
     private LatLng mLocation;
 
     ////
@@ -344,7 +343,7 @@ public class BackgroundService extends Service {
         mUserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mUser = dataSnapshot.getValue(ZeachUser.class);
+                mUser = dataSnapshot.getValue(User.class);
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("User", mUser.toString());

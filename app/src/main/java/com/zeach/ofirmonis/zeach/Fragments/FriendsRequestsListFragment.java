@@ -18,6 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.FriendsRequestsListAdapter;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener{
 
     private View rootView;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private User ZeachUser;
     private ArrayList<Friend> friendsRequests = new ArrayList();
     private FriendsRequestsListAdapter friendsRequestsListAdapter;
     private ListView UsersListView;

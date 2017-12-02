@@ -35,7 +35,7 @@ import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 
 import org.json.JSONObject;
 
@@ -58,7 +58,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
     private TextView EmailTextView;
     private TextView PasswordTextView;
 
-    private ZeachUser User;
+    private com.zeach.ofirmonis.zeach.Objects.User User;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -76,7 +76,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
             public void onSuccess(LoginResult loginResult) {
                 Log.d("ok","yesss" + loginResult.getAccessToken().getToken().toString());
                 Profile profile  = Profile.getCurrentProfile();
-                User = new ZeachUser(profile.getName(),null,null,null,profile.getProfilePictureUri(200,200).toString(),profile.getId());
+                User = new User(profile.getName(), null, null, null, profile.getProfilePictureUri(200, 200).toString(), profile.getId());
                 Log.d("Profile", profile.getName() + " " + profile.getId());
 
                 GraphRequest request = GraphRequest.newMeRequest(
@@ -159,7 +159,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
         this.data = FirebaseDatabase.getInstance().getReference();
       //  User.AddFriendToList("hgg","ofir");
        // User.AddFriendToList("hggfdf","ofihr");
-        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
+        Map<String, com.zeach.ofirmonis.zeach.Objects.User> user = new HashMap<String, com.zeach.ofirmonis.zeach.Objects.User>();
        // user.put(this.User.getUID(),this.User);
         data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
         AppController.getInstance().setUser(this.User); // save user in singleton
@@ -179,7 +179,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener{
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
-                            User = new ZeachUser(user.getEmail(),user.getUid(),user.getProviderId());
+                            User = new User(user.getEmail(), user.getUid(), user.getProviderId());
                             SendUserAndMoveToProfileActivity();
                         } else {
 

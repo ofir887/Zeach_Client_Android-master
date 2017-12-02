@@ -13,25 +13,20 @@ import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-import com.facebook.appevents.internal.Constants;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by ofirmonis on 18/07/2017.
@@ -43,17 +38,17 @@ public class AppController {
     public static JSONArray arr;
     public static Bitmap mProfileBitmap;
 
-    public ZeachUser User;
+    public com.zeach.ofirmonis.zeach.Objects.User User;
 
     protected AppController() {
 
     }
 
-    public ZeachUser getUser() {
+    public com.zeach.ofirmonis.zeach.Objects.User getUser() {
         return User;
     }
 
-    public void setUser(ZeachUser user) {
+    public void setUser(com.zeach.ofirmonis.zeach.Objects.User user) {
         User = user;
     }
 
@@ -137,7 +132,7 @@ public class AppController {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("found", dataSnapshot.toString());
-                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
+                        com.zeach.ofirmonis.zeach.Objects.User desired = dataSnapshot.getValue(com.zeach.ofirmonis.zeach.Objects.User.class);
                         Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri());
                         data.child(String.format("%s/", FirebaseConstants.USERS)).child(getUser().getUID()).child(String.format("/%s", FirebaseConstants.FRIENDS_LIST)).child(desired.getUID()).setValue(f);
                         User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri());

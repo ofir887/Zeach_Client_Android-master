@@ -47,7 +47,7 @@ import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Constants.BeachConstants;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
@@ -92,7 +92,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             switch (intent.getAction()) {
                 case ACTION_USER: {
                     Log.d(MapFragment.class.getSimpleName(), "lets see");
-                    ZeachUser user = (ZeachUser) intent.getSerializableExtra("User");
+                    User user = (User) intent.getSerializableExtra("User");
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
                     break;
                 }

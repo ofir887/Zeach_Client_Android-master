@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 
 import java.util.ArrayList;
 
@@ -22,12 +22,12 @@ import java.util.ArrayList;
  * Created by ofirmonis on 18/07/2017.
  */
 
-public class UserListAdapter extends ArrayAdapter <ZeachUser>{
+public class UserListAdapter extends ArrayAdapter<User> {
 
-    private ArrayList<ZeachUser> users = new ArrayList<>();
+    private ArrayList<User> users = new ArrayList<>();
     private String UserId;
 
-    public UserListAdapter(Context context, ArrayList<ZeachUser> users,String userId, FragmentActivity activity) {
+    public UserListAdapter(Context context, ArrayList<User> users, String userId, FragmentActivity activity) {
         super(context,0, users);
         this.users = users;
         this.UserId = userId;

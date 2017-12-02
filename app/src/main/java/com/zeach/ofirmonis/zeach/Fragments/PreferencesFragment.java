@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 /**
@@ -24,7 +25,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     Button btn;
     private CheckBox importFacebookFriendsCheckbox;
     private CheckBox isUserPrivate;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private User ZeachUser;
     private Button SaveButton;
     @Nullable
     @Override

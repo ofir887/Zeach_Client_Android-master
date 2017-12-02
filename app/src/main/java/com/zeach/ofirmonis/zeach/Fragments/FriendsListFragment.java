@@ -21,7 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.FriendListAdapter;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 public class FriendsListFragment extends Fragment implements View.OnClickListener {
 
     private View rootView;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private User ZeachUser;
     private ArrayList friends = new ArrayList();
     private FriendListAdapter friendListAdapter;
     private ListView friendsListView;
@@ -49,7 +49,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
             switch (intent.getAction()) {
                 case ACTION_USER: {
                     Log.d(MapFragment.class.getSimpleName(), "lets see new");
-                    ZeachUser user = (ZeachUser) intent.getSerializableExtra("User");
+                    User user = (User) intent.getSerializableExtra("User");
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
                     break;
                 }

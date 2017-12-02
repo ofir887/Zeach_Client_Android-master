@@ -17,6 +17,7 @@ import android.widget.ImageView;
 
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int RESULT_OK = -1;
     private ImageView image;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private User ZeachUser;
     private View rootView;
     private Bitmap bit=null;
 

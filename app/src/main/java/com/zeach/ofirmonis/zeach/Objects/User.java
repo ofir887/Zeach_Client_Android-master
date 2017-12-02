@@ -8,7 +8,7 @@ import java.util.Map;
  * Created by ofirmonis on 24/06/2017.
  */
 
-public class ZeachUser implements Serializable {
+public class User implements Serializable {
     private String Name;
     private String Email;
     private String UID;
@@ -20,15 +20,14 @@ public class ZeachUser implements Serializable {
     private Map<String, String> FavoriteBeachesList;
     private UserAtBeach CurrentBeach;
     private boolean isProfilePrivate;
-    //private CurrentBeach CurrentBeach1;
 
 
-    public ZeachUser() {
+    public User() {
         //
     }
 
     //For facebook signup
-    public ZeachUser(String name, String email, String UID, String provider, String profilePictureUri, String facebookUID) {
+    public User(String name, String email, String UID, String provider, String profilePictureUri, String facebookUID) {
         this.Name = name;
         this.Email = email;
         this.UID = UID;
@@ -44,7 +43,7 @@ public class ZeachUser implements Serializable {
     }
 
     //For Firebase SignUp
-    public ZeachUser(String email, String UID, String provider) {
+    public User(String email, String UID, String provider) {
         this.Email = email;
         this.UID = UID;
         this.Provider = provider;

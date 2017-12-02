@@ -35,7 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.AppController;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -54,7 +54,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private Button FirebaseLoginButton;
     private TextView EmailTextView;
     private TextView PasswordTextView;
-    private ZeachUser ZeachUser;
+    private User ZeachUser;
 
     @Nullable
     @Override
@@ -190,7 +190,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    ZeachUser = dataSnapshot.getValue(ZeachUser.class);
+                    ZeachUser = dataSnapshot.getValue(User.class);
                     //new AppController.DownloadImageTask2().execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
                     AppController.getInstance().setUser(ZeachUser);
 
