@@ -98,39 +98,15 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
         if (v == this.SaveButton){
             AppController.getInstance().setUser(this.ZeachUser);
             if (AppController.getInstance().getUser().isImportFacebookFriends()) {
-                //    Handler handler = new Handler();
-                //    handler.post(new Runnable() {
-                //       @Override
-                //      public void run() {
                         AppController.getInstance().getFacebookFriends();
-                        // AppController.getInstance().addFacebookFriends(AppController.getInstance().arr);
-                //   }
-                //  });
-
-
-                // AppController.getInstance().getFacebookFriends();
-                //  AppController.getInstance().addFacebookFriends(AppController.getInstance().arr);
 
             }
             AppController.getInstance().UpdateUserInfo();
             if (checkOnWhatActivityUserIs()==1){
-                /*
-                AppController.getInstance().setUser(this.ZeachUser);
-                if (AppController.getInstance().getUser().isImportFacebookFriends()) {
-                    AppController.getInstance().getFacebookFriends();
-                }
-                AppController.getInstance().UpdateUserInfo();*/
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame,new MapFragment()).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
 
             }
             else{
-                /*
-                AppController.getInstance().setUser(this.ZeachUser);
-                if (AppController.getInstance().getUser().isImportFacebookFriends()) {
-                    AppController.getInstance().getFacebookFriends();
-                }
-                AppController.getInstance().UpdateUserInfo();
-                */
                 Intent mainActivity = new Intent(getActivity(), MainActivity.class);
                 startActivity(mainActivity);
                 getActivity().finish();

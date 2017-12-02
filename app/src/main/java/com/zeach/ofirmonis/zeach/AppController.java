@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
@@ -68,12 +69,26 @@ public class AppController {
     }
 
     public void UpdateUserInfo() {
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //  AppController.getInstance().setUser(this.ZeachUser);
         // Log.d("singleton",AppController.getInstance().getUser().toString());
         Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
         user.put(this.User.getUID(), this.User);
         data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
+        data.child(FirebaseConstants.USERS).child(this.User.getUID()).child("profilePrivate").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (User.getCurrentBeach() != null) {
+                    data.child(FirebaseConstants.BEACHES).child(User.getCurrentBeach().getmBeachID()).child("Peoplelist")
+                            .child(User.getUID()).child("profilePrivate").setValue(User.isProfilePrivate());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         //Add seperate parent ! need to check if this is good or can out this on Users in nested map
         //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
         /*

@@ -11,6 +11,7 @@ public class Friend implements Serializable{
     private String UID;
     private String PhotoUrl;
     private UserAtBeach CurrentBeach;
+    private boolean mIsPrivate;
 
     public Friend(){
 
@@ -22,11 +23,12 @@ public class Friend implements Serializable{
         this.CurrentBeach = null;
     }
 
-    public Friend(String name, String UID, String photoUrl, UserAtBeach currentBeach) {
+    public Friend(String name, String UID, String photoUrl, UserAtBeach currentBeach, boolean aIsPrivate) {
         this.Name = name;
         this.UID = UID;
         this.PhotoUrl = photoUrl;
         this.CurrentBeach = currentBeach;
+        mIsPrivate = aIsPrivate;
     }
 
     public UserAtBeach getCurrentBeach() {
@@ -61,6 +63,13 @@ public class Friend implements Serializable{
         PhotoUrl = photoUrl;
     }
 
+    public boolean isIsPrivate() {
+        return mIsPrivate;
+    }
+
+    public void setIsPrivate(boolean mIsPrivate) {
+        this.mIsPrivate = mIsPrivate;
+    }
 
     @Override
     public String toString() {

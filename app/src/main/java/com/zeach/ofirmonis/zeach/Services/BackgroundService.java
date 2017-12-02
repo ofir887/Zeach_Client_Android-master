@@ -200,7 +200,7 @@ public class BackgroundService extends Service {
         long timeStamp = System.currentTimeMillis() / 1000;
         final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(),
                 beach.getBeachListenerID(), timeStamp, country, aLongitude, aLatitude);
-        final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri(), userAtBeach);
+        final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri(), userAtBeach, mUser.isProfilePrivate());
         Log.d(TAG, "User with beach coords = " + user.toString());
         DatabaseReference userRef = ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist");
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -279,24 +279,27 @@ public class BackgroundService extends Service {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 beaches.clear();
                 //TODO - change string to constants (beachid and...)
-                for (DataSnapshot beach : dataSnapshot.getChildren()) {
+                for (final DataSnapshot beach : dataSnapshot.getChildren()) {
                     String mBeachKey = (String) beach.child("BeachID").getValue();
                     String mBeachName = (String) beach.child("BeachName").getValue();
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     //get Friends
-                    ArrayList<Friend> friends = new ArrayList<Friend>();
+                    final ArrayList<Friend> friends = new ArrayList<Friend>();
                     if (beach.child("Peoplelist").exists()) {
-                        final DatabaseReference peopleRef = ref.child(mBeachKey).child("Peoplelist");
-                        for (Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
+                        final DatabaseReference userRef = data.getDatabase().getReference("Users");
+                        for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
                             if (beach.child("Peoplelist").hasChild(entry.getKey())) {
-                                Log.d(TAG, "Found Friend: " + beach.child("Peoplelist").child(entry.getKey()).getValue());
-                                String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
-                                String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
-                                String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
-                                UserAtBeach userAtBeach = beach.child("Peoplelist").child(entry.getKey()).child("currentBeach").getValue(UserAtBeach.class);
-                                Friend friend = new Friend(name, uid, photoUrl, userAtBeach);
-                                friends.add(friend);
+                                boolean privateProfile = beach.child("Peoplelist").child(entry.getKey()).child("profilePrivate").getValue(boolean.class);
+                                if (!privateProfile) {
+                                    Log.d(TAG, "Found Friend: " + beach.child("Peoplelist").child(entry.getKey()).getValue());
+                                    String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
+                                    String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
+                                    String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
+                                    UserAtBeach userAtBeach = beach.child("Peoplelist").child(entry.getKey()).child("currentBeach").getValue(UserAtBeach.class);
+                                    Friend friend = new Friend(name, uid, photoUrl, userAtBeach, privateProfile);
+                                    friends.add(friend);
+                                }
                             }
                         }
 
