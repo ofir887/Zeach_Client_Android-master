@@ -14,17 +14,17 @@ public class BeachConstants {
 
     public static final String LOW_TRAFFIC = "Low";
 
-    private static final int TRANSPARENT = 40;
+    private static final int TRANSPARENT = 45;
 
     public static int getTrafficColorByString(String aTrafficState) {
         switch (aTrafficState) {
             case HIGH_TRAFFIC:
                 //return Color.RED;
-                return Color.argb(TRANSPARENT, 255, 0, 0);
+                return Color.argb(40, 255, 0, 0);
             case MEDIUM_TRAFFIC:
-                return Color.argb(TRANSPARENT, 255, 140, 0);
+                return Color.argb(40, 255, 140, 0);
             case LOW_TRAFFIC:
-                return Color.argb(TRANSPARENT, 0, 255, 0);
+                return Color.argb(40, 0, 255, 0);
             default:
                 return Color.TRANSPARENT;
         }

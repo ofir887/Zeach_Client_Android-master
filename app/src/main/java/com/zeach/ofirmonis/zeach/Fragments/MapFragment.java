@@ -65,7 +65,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     private static final String TAG = MapFragment.class.getSimpleName();
     private View rootView;
-    private GoogleMap mGoogleMap;
+    private static GoogleMap mGoogleMap;
     private MapView mMapView;
     private Button SearchButton;
     private AutoCompleteTextView autoCompleteSearch;
@@ -75,6 +75,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private LatLng CurrentUserLocation;
     private ArrayList<Beach> mBeaches = new ArrayList<>();
     private ArrayList<Marker> mFriendsMarkers = new ArrayList<>();
+    private ArrayList<Polygon> mPolygons = new ArrayList<>();
     ///
     private LatLng currentLocation;
     private static final String ACTION_STRING_SERVICE = "ToService";
@@ -165,12 +166,21 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         }
     }
 
+    public void removePolygon() {
+        for (int i = 0; i < mPolygons.size(); i++) {
+            mPolygons.get(i).remove();
+        }
+    }
+
     public void addBeachesAsPolygons() {
+        removePolygon();
         for (int i = 0; i < mBeaches.size(); i++) {
             int color = BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic());
             final Polygon mPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).
                     addAll(mBeaches.get(i).getBeachCoordinates()).
-                    fillColor(color).strokeColor(color).strokeWidth(0));
+                    fillColor(BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic())).
+                    strokeColor(BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic())).strokeWidth(0));
+            mPolygons.add(mPolygon);
             mPolygon.getId();
             final int finalI = i;
             mGoogleMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {

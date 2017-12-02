@@ -277,6 +277,7 @@ public class BackgroundService extends Service {
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                beaches.clear();
                 //TODO - change string to constants (beachid and...)
                 for (DataSnapshot beach : dataSnapshot.getChildren()) {
                     String mBeachKey = (String) beach.child("BeachID").getValue();
@@ -284,10 +285,20 @@ public class BackgroundService extends Service {
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     //get Friends
-                    final ArrayList<Friend> friends = new ArrayList<Friend>();
+                    ArrayList<Friend> friends = new ArrayList<Friend>();
                     if (beach.child("Peoplelist").exists()) {
                         final DatabaseReference peopleRef = ref.child(mBeachKey).child("Peoplelist");
-                        peopleRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        for (Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
+                            if (beach.child("Peoplelist").hasChild(entry.getKey())) {
+                                Log.d(TAG, "Found Friend: " + beach.child("Peoplelist").child(entry.getKey()).getValue());
+                                String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
+                                String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
+                                String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
+                                Friend friend = new Friend(name, uid, photoUrl);
+                                friends.add(friend);
+                            }
+                        }
+                        /*peopleRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 friends.clear();
@@ -308,7 +319,7 @@ public class BackgroundService extends Service {
                             public void onCancelled(DatabaseError databaseError) {
 
                             }
-                        });
+                        });*/
                     }
                     Log.d(TAG, "Friends = " + friends.toString());
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
