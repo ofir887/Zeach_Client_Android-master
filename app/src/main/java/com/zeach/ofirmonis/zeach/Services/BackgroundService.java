@@ -83,7 +83,7 @@ public class BackgroundService extends Service {
             switch (intent.getAction()) {
                 case ACTION_USER:
                     Log.d(TAG, "received gps request from receiver");
-                    //getSingleLocationUpdate();
+                    //  getSingleLocationUpdate();
                     //   sendBroadcast(ACTION_USER);
                     break;
             }
@@ -447,7 +447,7 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
-        super.onDestroy();
+        // super.onDestroy();
         if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", true))
             unregisterReceiver(serviceReceiver);
         if (mLocationManager != null) {

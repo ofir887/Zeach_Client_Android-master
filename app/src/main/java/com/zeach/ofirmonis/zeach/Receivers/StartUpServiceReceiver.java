@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.CalendarContract;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -20,6 +21,8 @@ import com.zeach.ofirmonis.zeach.Services.StartService;
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import Util.Util;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
@@ -46,7 +49,8 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         //
         // if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
         Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");
-        Intent service = new Intent(context, BackgroundService.class);
+        // TODO
+        /*Intent service = new Intent(context, BackgroundService.class);
         // context.startService(service);
 
         Calendar calendar = Calendar.getInstance();
@@ -55,8 +59,19 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getService(context, BackgroundService.ID,
                 service, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), interval, pendingIntent);
+                calendar.getTimeInMillis(), interval, pendingIntent);*/
+        //TODO
         //   sendBroadcast(GPS);
+
+        //
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Util.scheduleJob(context);
+            }
+        }, 30 * 1000);
+        //Util.scheduleJob(context);
+        //
 
 
     }
