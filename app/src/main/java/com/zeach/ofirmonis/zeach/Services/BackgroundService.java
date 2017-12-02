@@ -137,14 +137,14 @@ public class BackgroundService extends Service {
             for (int i = 0; i < beaches.size(); i++) {
                 boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
                 Log.d(TAG, "checking against:" + beaches.get(i).getBeachName());
-                if (isUserInBeach) {
+                // if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
                     Log.d(TAG, "ofir is here fucking worikng !!!");
-                    updateUserInBeach(beaches.get(0), mFirebaseUser.getUid(), country, userCurrentLocation.longitude, userCurrentLocation.latitude);
+                updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), country, userCurrentLocation.longitude, userCurrentLocation.latitude);
                     break;
                     //  onDestroy();
 
-                }
+                //   }
             }
             // onDestroy();
 
@@ -182,7 +182,13 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
-        return START_STICKY;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onDestroy();
+            }
+        }, 1000 * 60);
+        return START_NOT_STICKY;
     }
 
     private void initializeLocationManager() {
@@ -407,7 +413,6 @@ public class BackgroundService extends Service {
         };
         handler.postDelayed(runnable, 1000 * 15);
 
-
     }
 
     private void sendBroadcast(String action) {
@@ -442,7 +447,7 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
-        //super.onDestroy();
+        super.onDestroy();
         if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", true))
             unregisterReceiver(serviceReceiver);
         if (mLocationManager != null) {

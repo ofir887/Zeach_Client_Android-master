@@ -34,13 +34,6 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
     private static final String ACTION_STRING_SERVICE = "ToService";
     private Context mContext;
 
-    private BroadcastReceiver mStartUpBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    };
-
     @Override
     public void onReceive(final Context context, Intent intent) {
         mContext = context;
@@ -56,13 +49,11 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         Intent service = new Intent(context, BackgroundService.class);
         // context.startService(service);
 
-
         Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60 * 3;
+        long interval = 1000 * 60 * 2;
         PendingIntent pendingIntent = PendingIntent.getService(context, BackgroundService.ID,
                 service, PendingIntent.FLAG_CANCEL_CURRENT);
-
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                 calendar.getTimeInMillis(), interval, pendingIntent);
         //   sendBroadcast(GPS);
