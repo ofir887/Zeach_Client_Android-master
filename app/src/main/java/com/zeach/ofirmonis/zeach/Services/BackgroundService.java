@@ -286,7 +286,7 @@ public class BackgroundService extends Service {
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     //get Friends
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
-                    if (beach.child("Peoplelist").exists()) {
+                    if (!mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
                         final DatabaseReference userRef = data.getDatabase().getReference("Users");
                         for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
                             if (beach.child("Peoplelist").hasChild(entry.getKey())) {

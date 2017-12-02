@@ -11,7 +11,7 @@ public class Friend implements Serializable{
     private String UID;
     private String PhotoUrl;
     private UserAtBeach CurrentBeach;
-    private boolean mIsPrivate;
+    private boolean profilePrivate;
 
     public Friend(){
 
@@ -23,12 +23,31 @@ public class Friend implements Serializable{
         this.CurrentBeach = null;
     }
 
-    public Friend(String name, String UID, String photoUrl, UserAtBeach currentBeach, boolean aIsPrivate) {
+    @Override
+    public String toString() {
+        return "Friend{" +
+                "Name='" + Name + '\'' +
+                ", UID='" + UID + '\'' +
+                ", PhotoUrl='" + PhotoUrl + '\'' +
+                ", CurrentBeach=" + CurrentBeach +
+                ", profilePrivate=" + profilePrivate +
+                '}';
+    }
+
+    public boolean isProfilePrivate() {
+        return profilePrivate;
+    }
+
+    public void setProfilePrivate(boolean profilePrivate) {
+        this.profilePrivate = profilePrivate;
+    }
+
+    public Friend(String name, String UID, String photoUrl, UserAtBeach currentBeach, boolean aProfilePrivate) {
         this.Name = name;
         this.UID = UID;
         this.PhotoUrl = photoUrl;
         this.CurrentBeach = currentBeach;
-        mIsPrivate = aIsPrivate;
+        profilePrivate = aProfilePrivate;
     }
 
     public UserAtBeach getCurrentBeach() {
@@ -63,23 +82,7 @@ public class Friend implements Serializable{
         PhotoUrl = photoUrl;
     }
 
-    public boolean isIsPrivate() {
-        return mIsPrivate;
-    }
 
-    public void setIsPrivate(boolean mIsPrivate) {
-        this.mIsPrivate = mIsPrivate;
-    }
-
-    @Override
-    public String toString() {
-        return "Friend{" +
-                "Name='" + Name + '\'' +
-                ", UID='" + UID + '\'' +
-                ", PhotoUrl='" + PhotoUrl + '\'' +
-                ", CurrentBeach=" + CurrentBeach +
-                '}';
-    }
 }
 
 

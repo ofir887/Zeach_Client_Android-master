@@ -72,30 +72,22 @@ public class AppController {
         final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //  AppController.getInstance().setUser(this.ZeachUser);
         // Log.d("singleton",AppController.getInstance().getUser().toString());
-        Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
-        user.put(this.User.getUID(), this.User);
+        //Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
+        //  user.put(this.User.getUID(), this.User);
         data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
-        data.child(FirebaseConstants.USERS).child(this.User.getUID()).child("profilePrivate").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (User.getCurrentBeach() != null) {
-                    data.child(FirebaseConstants.BEACHES).child(User.getCurrentBeach().getmBeachID()).child("Peoplelist")
-                            .child(User.getUID()).child("profilePrivate").setValue(User.isProfilePrivate());
-                }
-            }
+        if (User.getCurrentBeach() != null) {
+            data.child(FirebaseConstants.BEACHES).child("Country").child(User.getCurrentBeach().
+                    getCountry()).child(User.getCurrentBeach().getmBeachID()).child("Peoplelist")
+                    .child(User.getUID()).child("profilePrivate").setValue(User.isProfilePrivate());
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        //Add seperate parent ! need to check if this is good or can out this on Users in nested map
-        //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
+            //Add seperate parent ! need to check if this is good or can out this on Users in nested map
+            //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
         /*
         Intent profileActivity = new Intent(getActivity(),ProfileActivity.class);
         profileActivity.putExtra("User",User);
         getActivity().finish();
         startActivity(profileActivity);*/
+        }
     }
 
     //add friend to awaiting aproval.
