@@ -96,6 +96,8 @@ public class UserAtBeach implements Serializable {
                 ", mBeachListenerId='" + mBeachListenerId + '\'' +
                 ", mCountry='" + mCountry + '\'' +
                 ", mTimeStamp=" + mTimeStamp +
+                ", mLatitude=" + mLatitude +
+                ", mLongitude=" + mLongitude +
                 '}';
     }
 }

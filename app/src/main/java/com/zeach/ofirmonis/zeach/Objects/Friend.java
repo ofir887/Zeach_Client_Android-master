@@ -68,6 +68,7 @@ public class Friend implements Serializable{
                 "Name='" + Name + '\'' +
                 ", UID='" + UID + '\'' +
                 ", PhotoUrl='" + PhotoUrl + '\'' +
+                ", CurrentBeach=" + CurrentBeach +
                 '}';
     }
 }

@@ -195,13 +195,13 @@ public class BackgroundService extends Service {
 
     public void updateUserInBeach(final Beach beach, final String userId, final String country, double aLongitude, double aLatitude) {
         final DatabaseReference ref = data.getDatabase().getReference();
-        final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri());
+
         //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
         final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(),
                 beach.getBeachListenerID(), timeStamp, country, aLongitude, aLatitude);
-        //TODO - check if already there
-
+        final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri(), userAtBeach);
+        Log.d(TAG, "User with beach coords = " + user.toString());
         DatabaseReference userRef = ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist");
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -294,32 +294,12 @@ public class BackgroundService extends Service {
                                 String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
                                 String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
                                 String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
-                                Friend friend = new Friend(name, uid, photoUrl);
+                                UserAtBeach userAtBeach = beach.child("Peoplelist").child(entry.getKey()).child("currentBeach").getValue(UserAtBeach.class);
+                                Friend friend = new Friend(name, uid, photoUrl, userAtBeach);
                                 friends.add(friend);
                             }
                         }
-                        /*peopleRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                friends.clear();
-                                for (Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
-                                    if (dataSnapshot.hasChild(entry.getKey())) {
-                                        Log.d(TAG, "Found Friend: " + dataSnapshot.child(entry.getKey()).getValue());
-                                        String name = (String) dataSnapshot.child(entry.getKey()).child("name").getValue();
-                                        String uid = (String) dataSnapshot.child(entry.getKey()).child("uid").getValue();
-                                        String photoUrl = (String) dataSnapshot.child(entry.getKey()).child("photoUrl").getValue();
-                                        Friend friend = new Friend(name, uid, photoUrl);
-                                        friends.add(friend);
 
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });*/
                     }
                     Log.d(TAG, "Friends = " + friends.toString());
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)

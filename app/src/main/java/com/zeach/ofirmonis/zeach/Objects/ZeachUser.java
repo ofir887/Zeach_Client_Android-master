@@ -100,8 +100,8 @@ public class ZeachUser implements Serializable {
     }
 
     //not good need to think about child in has map it is in the same key!!
-    public void AddFriendToList(String uid, String name, String photoUrl, UserAtBeach currentBeach) {
-        Friend friend = new Friend(name, uid, photoUrl, currentBeach);
+    public void AddFriendToList(String uid, String name, String photoUrl) {
+        Friend friend = new Friend(name, uid, photoUrl);
         this.FriendsList.put(uid, friend);
         //this.FriendsList.put("FriendName",name);
     }

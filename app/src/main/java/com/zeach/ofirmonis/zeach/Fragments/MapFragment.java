@@ -38,6 +38,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.ion.Ion;
@@ -76,6 +78,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private ArrayList<Beach> mBeaches = new ArrayList<>();
     private ArrayList<Marker> mFriendsMarkers = new ArrayList<>();
     private ArrayList<Polygon> mPolygons = new ArrayList<>();
+    private DatabaseReference mData;
     ///
     private LatLng currentLocation;
     private static final String ACTION_STRING_SERVICE = "ToService";
@@ -129,8 +132,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             for (int j = 0; j < mBeaches.get(i).getFriends().size(); j++) {
 
                 final Friend friend = mBeaches.get(i).getFriends().get(j);
-                final LatLng friendLocation = new LatLng(AppController.getInstance().getUser().getFriendsList().get(friend.getUID()).getCurrentBeach().getLatitude(),
-                        AppController.getInstance().getUser().getFriendsList().get(friend.getUID()).getCurrentBeach().getLongitude());
+                final LatLng friendLocation = new LatLng(mBeaches.get(i).getFriends().get(j).
+                        getCurrentBeach().getLatitude(), mBeaches.get(i).getFriends().get(j).
+                        getCurrentBeach().getLongitude());
                 new Handler().post(new Runnable() {
                     @Override
                     public void run() {
@@ -204,7 +208,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
         //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
 //        this.autoCompleteSearch.setOnClickListener(this);
-
+        FirebaseDatabase.getInstance().getReference("Users/");
         locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
         //

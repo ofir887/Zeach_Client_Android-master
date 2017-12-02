@@ -131,9 +131,9 @@ public class AppController {
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("found", dataSnapshot.toString());
                         ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
-                        Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri());
                         data.child(String.format("%s/", FirebaseConstants.USERS)).child(getUser().getUID()).child(String.format("/%s", FirebaseConstants.FRIENDS_LIST)).child(desired.getUID()).setValue(f);
-                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri());
 
 
                     }
