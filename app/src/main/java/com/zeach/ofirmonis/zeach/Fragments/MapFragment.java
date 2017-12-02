@@ -167,9 +167,10 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     public void addBeachesAsPolygons() {
         for (int i = 0; i < mBeaches.size(); i++) {
+            int color = BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic());
             final Polygon mPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).
                     addAll(mBeaches.get(i).getBeachCoordinates()).
-                    fillColor(BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic())));
+                    fillColor(color).strokeColor(color).strokeWidth(0));
             mPolygon.getId();
             final int finalI = i;
             mGoogleMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
