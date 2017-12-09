@@ -64,7 +64,7 @@ public class BackgroundService extends Service {
     private static final String TAG = BackgroundService.class.getSimpleName();
     public static final int ID = 0;
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000 * 60;
+    private static final int LOCATION_INTERVAL = 1000 * 30;
     private static final float LOCATION_DISTANCE = 0;
     private Timer timer;
     private ArrayList<Beach> beaches;

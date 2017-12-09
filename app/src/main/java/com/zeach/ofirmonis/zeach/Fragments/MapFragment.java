@@ -71,16 +71,14 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private MapView mMapView;
     private Button SearchButton;
     private AutoCompleteTextView autoCompleteSearch;
-    private LocationManager locationManager;
     private LatLng userLocation;
-    private BroadcastReceiver broadcastReceiver;
     private LatLng CurrentUserLocation;
     private ArrayList<Beach> mBeaches = new ArrayList<>();
     private ArrayList<Marker> mFriendsMarkers = new ArrayList<>();
     private ArrayList<Polygon> mPolygons = new ArrayList<>();
-    private DatabaseReference mData;
+    private Marker mUserMarker;
+    private User mUser;
     ///
-    private LatLng currentLocation;
     private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private static final String ACTION_BEACHES = "Beaches";
@@ -93,6 +91,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                 case ACTION_USER: {
                     Log.d(MapFragment.class.getSimpleName(), "lets see");
                     User user = (User) intent.getSerializableExtra("User");
+                    mUser = user;
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
                     break;
                 }
@@ -102,11 +101,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     Log.d(MapFragment.class.getSimpleName(), latLng.toString());
                     userLocation = latLng;
                     setUserLocationOnMap();
-                    //  setMapLocation(latLng);
                     break;
                 }
                 case ACTION_BEACHES: {
-                    mGoogleMap.clear();
                     Gson gson = new Gson();
                     String str = intent.getStringExtra("beaches");
                     Type type = new TypeToken<ArrayList<Beach>>() {
@@ -119,8 +116,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                         mFriendsMarkers.get(i).remove();
                     }
                     showFriendsOnMap();
-                    if (userLocation != null)
-                        setUserLocationOnMap();
+/*                    if (userLocation != null)
+                        setUserLocationOnMap();*/
                     break;
                 }
             }
@@ -156,16 +153,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                         mFriendsMarkers.add(mGoogleMap.addMarker(marker));
                     }
                 });
-                    /*Bitmap bmp = Ion.with(getApplicationContext()).load(friend.getPhotoUrl()).asBitmap().get();
-                    bmp = AppController.SetCircleMarkerIcon(bmp);
-                    bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-                    bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);*/
-                    /*Bitmap smallMarker = Bitmap.createScaledBitmap(bmp[0], 150, 150, true);
-                    MarkerOptions marker = new MarkerOptions().position(friendLocation).
-                            title(friend.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
-                    mFriendsMarkers.add(mGoogleMap.addMarker(marker));*/
-                //   mGoogleMap.addMarker((new MarkerOptions().position(friendLocation).title(friend.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));
-
             }
         }
     }
@@ -182,8 +169,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             int color = BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic());
             final Polygon mPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).
                     addAll(mBeaches.get(i).getBeachCoordinates()).
-                    fillColor(BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic())).
-                    strokeColor(BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic())).strokeWidth(0));
+                    fillColor(color).
+                    strokeColor(color).strokeWidth(0));
             mPolygons.add(mPolygon);
             mPolygon.getId();
             final int finalI = i;
@@ -209,7 +196,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
 //        this.autoCompleteSearch.setOnClickListener(this);
         FirebaseDatabase.getInstance().getReference("Users/");
-        locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
+        // locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
         //
 
@@ -226,8 +213,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         //
 
         checkPermissions();
-
-        Intent intent1 = new Intent(getActivity(), BackgroundService.class);
 
 
         return this.rootView;
@@ -258,12 +243,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onDestroy() {
-        if (broadcastReceiver != null) {
-            getActivity().unregisterReceiver(broadcastReceiver);
-            PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", false);
-            //   getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
-        }
-        //getActivity().stopService(new Intent(getActivity(), BackgroundService.class));
 
         super.onDestroy();
 
@@ -305,18 +284,29 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     }
 
     public void setUserLocationOnMap() {
-        try {
-            Bitmap bmp = Ion.with(getApplicationContext()).load(AppController.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
-            bmp = AppController.SetCircleMarkerIcon(bmp);
-            bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-            bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
-            Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
-            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));
-            setMapLocation(this.userLocation);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        if (mUser != null) {
+            try {
+                Bitmap bmp = Ion.with(getApplicationContext()).load(mUser.getProfilePictureUri().toString()).asBitmap().get();
+                bmp = AppController.SetCircleMarkerIcon(bmp);
+                bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
+                bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
+                if (mUserMarker != null) {
+                    mUserMarker.remove();
+                } else {
+                    setMapLocation(userLocation);
+                }
+                MarkerOptions marker = new MarkerOptions().position(userLocation).
+                        title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+                mUserMarker = mGoogleMap.addMarker(marker);
+            /*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
+                    title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*/
+                setMapLocation(this.userLocation);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
     }
 
