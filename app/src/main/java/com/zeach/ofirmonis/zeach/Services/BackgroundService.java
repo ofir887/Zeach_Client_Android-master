@@ -60,7 +60,7 @@ public class BackgroundService extends Service {
     private static final String TAG = BackgroundService.class.getSimpleName();
     public static final int ID = 0;
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000;
+    private static final int LOCATION_INTERVAL = 1000 * 60;
     private static final float LOCATION_DISTANCE = 0;
     private Timer timer;
     private ArrayList<Beach> beaches;
@@ -182,12 +182,7 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                onDestroy();
-            }
-        }, 1000 * 60);
+
         return START_NOT_STICKY;
     }
 
@@ -407,7 +402,8 @@ public class BackgroundService extends Service {
             public void run() {
                 if (checkPermission(getApplicationContext())) {
                     initializeLocationManager();
-                    getSingleLocationUpdate();
+                    //     getSingleLocationUpdate();
+                    getMultipleLocationUpdates();
                 }
             }
         };

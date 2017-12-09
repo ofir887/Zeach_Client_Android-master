@@ -1,13 +1,14 @@
-package com.zeach.ofirmonis.zeach.Receivers;
+package com.crackme_native.ofirmonis.locationservice.Receivers;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 
-import com.zeach.ofirmonis.zeach.Services.BackgroundService;
+import com.crackme_native.ofirmonis.locationservice.Services.GpsService;
 
 import java.util.Calendar;
 
@@ -23,8 +24,17 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
     private Context mContext;
 
     @Override
-    public void onReceive(final Context context, Intent intent) {
+    public void onReceive(Context context, Intent intent) {
         mContext = context;
+        if(intent.getAction() != null)
+        {
+            if(intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) ||
+                    intent.getAction().equals(Intent.ACTION_USER_PRESENT) || intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) || intent.getAction().equals(Intent.ACTION_LOCKED_BOOT_COMPLETED) || intent.getAction().equals(Intent.ACTION_POWER_CONNECTED))
+            {
+                Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");
+                context.startService(new Intent(context, GpsService.class));
+            }
+        }
         //
         /*if (mStartUpBroadcastReceiver != null) {
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_SERVICE);
@@ -34,17 +44,21 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         //
         // if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
         Log.d(TAG, "StartUp service receiver has catch. starting gps background service..");
-        Intent service = new Intent(context, BackgroundService.class);
+        // TODO
+        Intent service = new Intent(context, GpsService.class);
         // context.startService(service);
 
         Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60 * 2;
-        PendingIntent pendingIntent = PendingIntent.getService(context, BackgroundService.ID,
+        long interval = 1000 * 60;
+        PendingIntent pendingIntent = PendingIntent.getService(context, GpsService.ID,
                 service, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                 calendar.getTimeInMillis(), interval, pendingIntent);
+        //TODO
         //   sendBroadcast(GPS);
+
+
 
 
     }
