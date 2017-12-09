@@ -1,5 +1,8 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -18,26 +21,54 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.login.LoginManager;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
 import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
+import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = MainActivity.class.getSimpleName();
     private User zeachUser;
-
+    private static final String ACTION_USER = "User";
+    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private ProgressBar spinner;
+    private View header;
+
+    private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_USER: {
+                    Log.d(TAG, "lets see");
+                    User user = (User) intent.getSerializableExtra("User");
+                    zeachUser = user;
+                    Log.d(TAG, user.toString());
+                    setDrawerProfileInforamtion();
+                    break;
+                }
+
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +77,15 @@ public class MainActivity extends AppCompatActivity
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
+        //
+        if (activityReceiver != null) {
+            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
+            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
+            intentFilter.addAction(ACTION_USER);
+            //Map the intent filter to the receiver
+            registerReceiver(activityReceiver, intentFilter);
+        }
+        //
         // this.spinner.setVisibility(View.VISIBLE);
         //  getUser();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -59,39 +99,16 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View header = navigationView.getHeaderView(0);
-        TextView navigationName = (TextView) header.findViewById(R.id.profileName);
-        //  String name = AppController.getInstance().getUser().getName();
-        //   navigationName.setText(this.ZeachUser.getName());
+        header = navigationView.getHeaderView(0);
         navigationView.setNavigationItemSelectedListener(this);
-        String user = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("user", "");
-        /*try {
-            JSONObject jsn = new JSONObject(user);
-            navigationName.setText(jsn.getString("name"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
 
+    }
 
+    public void setDrawerProfileInforamtion() {
+        TextView navigationName = (TextView) header.findViewById(R.id.profileName);
+        navigationName.setText(zeachUser.getName());
         CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
-        new AppController.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
-        //image.setImageBitmap(AppController.getInstance().getmProfileBitmap());
-
-    }
-
-    public void setNameAtDrawer(View view) {
-        //  TextView navigationName = (TextView).findViewById(R.id.userName);
-        //  navigationName.setText(AppController.getInstance().getUser().getName());
-    }
-
-    public void getUser() {
-        //this.zeachUser = AppController.getInstance().getUser();
-        while (this.zeachUser == null) {
-            this.zeachUser = AppController.getInstance().getUser();
-            this.spinner.setVisibility(View.VISIBLE);
-        }
-        this.spinner.setVisibility(View.GONE);
-
+        new AppController.DownloadImageTask(image).execute(zeachUser.getProfilePictureUri());
     }
 
     @Override
