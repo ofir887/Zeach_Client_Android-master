@@ -14,6 +14,8 @@ public class FirebaseConstants {
     public static final String FACEBOOK_UID = "facebookUID";
     public static final String FRIENDS = "friends";
     public static final String TRAFFIC = "Traffic";
+    public static final String FRIENDS_REQUESTS = "FriendsRequest";
+    public static final String AWAITING_CONFIRMATION = "AwaitingConfirmation";
 
     //Beach
 

@@ -45,7 +45,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
 
         this.ZeachUser = AppController.getInstance().getUser();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/FriendsRequset/");
+        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/FriendsRequest/");
         getFriendsRequestsFromServer();
         return this.rootView;
     }

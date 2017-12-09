@@ -89,7 +89,7 @@ public class AppController {
     public void AddFriendRequest(String userId, Friend friend) {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //create awaiting confirmation on current user
-        data.child(FirebaseConstants.USERS).child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
+        data.child(FirebaseConstants.USERS).child(this.User.getUID()).child("AwaitingConfirmation").child(friend.getUID()).setValue(friend);
         //create awaiting confirmation on current user
         Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
         data.child(FirebaseConstants.USERS).child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);

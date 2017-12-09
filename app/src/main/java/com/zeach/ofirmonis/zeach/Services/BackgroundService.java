@@ -31,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
@@ -42,6 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TreeMap;
+
+import com.google.gson.Gson;
 
 
 /**
@@ -77,24 +81,33 @@ public class BackgroundService extends Service {
     private static final String ACTION_USER = "User";
     private static final String GPS = "GPS";
     private static final String ACTION_DELETE_FRIEND = "deleteFriend";
-    private static final String ACTION_STRING_FRIENDS_LIST_ADAPTER = "ToFriendsListAdapter";
+    private static final String ACTION_CONFIRM_FRIEND = "confirmFriend";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
-                case ACTION_USER:
+                /*case ACTION_USER:
                     Log.d(TAG, "received gps request from receiver");
                     //getSingleLocationUpdate();
                     //   sendBroadcast(ACTION_USER);
-                    break;
+                    break;*/
                 case ACTION_DELETE_FRIEND:
                     String friendUid = intent.getStringExtra("UID");
                     Log.d(TAG, String.format("Received: [%s]", friendUid));
                     deleteFriendFromList(friendUid);
                     break;
-            }
 
+                case ACTION_CONFIRM_FRIEND:
+                    String friendjson = intent.getStringExtra("Friend");
+                    Type type = new TypeToken<Friend>() {
+                    }.getType();
+                    Gson gson = new Gson();
+                    Friend friend = gson.fromJson(friendjson, type);
+                    Log.d(TAG, String.format("Received: [%s]", friend));
+                    addUserAsFriend(friend);
+                    break;
+            }
             //sendBroadcast();
         }
     };
@@ -231,6 +244,7 @@ public class BackgroundService extends Service {
     public void deleteFriendFromList(String aFriendUid) {
         DatabaseReference ref = data.getDatabase().getReference();
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriendUid).removeValue();
+        ref.child(FirebaseConstants.USERS).child(aFriendUid).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).removeValue();
         Log.d(TAG, String.format("Friend: [%s] removed from friends list. refreshing beaches..", aFriendUid));
         getBeachesFromFirebase();
     }
@@ -362,8 +376,8 @@ public class BackgroundService extends Service {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                //  PreferenceManager.getDefaultSharedPreferences(getApplication()).edit().putString("user", mUser.toString());
                 sendBroadcast(ACTION_USER);
+                getBeachesFromFirebase();
 
             }
 
@@ -373,6 +387,18 @@ public class BackgroundService extends Service {
             }
         });
 
+    }
+
+    private void addUserAsFriend(Friend aFriend) {
+        DatabaseReference ref = data.getDatabase().getReference();
+        Friend user = new Friend(mUser.getName(), mUser.getUID(), mUser.getProfilePictureUri());
+        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriend.getUID()).setValue(aFriend);
+        ref.child(FirebaseConstants.USERS).child(aFriend.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).setValue(user);
+        Log.d(TAG, String.format("Friend: [%s] added to friends list. refreshing beaches..", aFriend));
+        Log.d(TAG, String.format("Removing request after adding"));
+        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_REQUESTS).child(aFriend.getUID()).removeValue();
+        ref.child(FirebaseConstants.USERS).child(aFriend.getUID()).child(FirebaseConstants.AWAITING_CONFIRMATION).child(mUser.getUID()).removeValue();
+        getBeachesFromFirebase();
     }
 
 
@@ -387,6 +413,7 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_USER);
             intentFilter.addAction(GPS);
             intentFilter.addAction(ACTION_DELETE_FRIEND);
+            intentFilter.addAction(ACTION_CONFIRM_FRIEND);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //
@@ -394,17 +421,8 @@ public class BackgroundService extends Service {
         this.data = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser();
-
+        beaches = new ArrayList<Beach>();
         getUserDetailsFromServer();
-        Handler beachHandler = new Handler();
-        Runnable beachRunnable = new Runnable() {
-            @Override
-            public void run() {
-                beaches = new ArrayList<Beach>();
-                getBeachesFromFirebase();
-            }
-        };
-        beachHandler.postDelayed(beachRunnable, 1000 * 10);
 
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {

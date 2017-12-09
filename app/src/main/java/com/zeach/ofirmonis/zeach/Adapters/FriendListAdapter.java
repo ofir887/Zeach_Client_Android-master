@@ -32,22 +32,11 @@ public class FriendListAdapter extends ArrayAdapter <Friend>{
     private ArrayList<Friend> friends = new ArrayList<>();
 
     private static final String ACTION_DELETE_FRIEND = "deleteFriend";
-    private static final String ACTION_STRING_FRIENDS_LIST_ADAPTER = "ToFriendsListAdapter";
     private BroadcastReceiver adapterReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            /*switch (intent.getAction()) {
-                case DELETE_FRIEND: {
-                    Log.d(TAG, "lets see");
-                    User user = (User) intent.getSerializableExtra("User");
-                    zeachUser = user;
-                    Log.d(TAG, user.toString());
-                    setDrawerProfileInforamtion();
-                    break;
-                }
 
-            }*/
         }
     };
 
