@@ -76,6 +76,8 @@ public class BackgroundService extends Service {
     private static final String ACTION_BEACHES = "Beaches";
     private static final String ACTION_USER = "User";
     private static final String GPS = "GPS";
+    private static final String ACTION_DELETE_FRIEND = "deleteFriend";
+    private static final String ACTION_STRING_FRIENDS_LIST_ADAPTER = "ToFriendsListAdapter";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
@@ -85,6 +87,11 @@ public class BackgroundService extends Service {
                     Log.d(TAG, "received gps request from receiver");
                     //getSingleLocationUpdate();
                     //   sendBroadcast(ACTION_USER);
+                    break;
+                case ACTION_DELETE_FRIEND:
+                    String friendUid = intent.getStringExtra("UID");
+                    Log.d(TAG, String.format("Received: [%s]", friendUid));
+                    deleteFriendFromList(friendUid);
                     break;
             }
 
@@ -138,11 +145,11 @@ public class BackgroundService extends Service {
                 boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
                 Log.d(TAG, "checking against:" + beaches.get(i).getBeachName());
                 // if (isUserInBeach) {
-                    //Asign user in this beach and break loop after it
-                    Log.d(TAG, "ofir is here fucking worikng !!!");
+                //Asign user in this beach and break loop after it
+                Log.d(TAG, "ofir is here fucking worikng !!!");
                 updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), country, userCurrentLocation.longitude, userCurrentLocation.latitude);
-                    break;
-                    //  onDestroy();
+                break;
+                //  onDestroy();
 
                 //   }
             }
@@ -195,8 +202,6 @@ public class BackgroundService extends Service {
 
     public void updateUserInBeach(final Beach beach, final String userId, final String country, double aLongitude, double aLatitude) {
         final DatabaseReference ref = data.getDatabase().getReference();
-
-        //TODO add support for reading beach json at user current beach
         long timeStamp = System.currentTimeMillis() / 1000;
         final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(),
                 beach.getBeachListenerID(), timeStamp, country, aLongitude, aLatitude);
@@ -218,12 +223,16 @@ public class BackgroundService extends Service {
 
             }
         });
-        //if (ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()))
-        // ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
-        //  ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
         //update time stamp
         ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);
         ref.child(FirebaseConstants.TIMESTAMPS).child(userId).setValue(userAtBeach);
+    }
+
+    public void deleteFriendFromList(String aFriendUid) {
+        DatabaseReference ref = data.getDatabase().getReference();
+        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriendUid).removeValue();
+        Log.d(TAG, String.format("Friend: [%s] removed from friends list. refreshing beaches..", aFriendUid));
+        getBeachesFromFirebase();
     }
 
     public void getSingleLocationUpdate() {
@@ -377,6 +386,7 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_BEACHES);
             intentFilter.addAction(ACTION_USER);
             intentFilter.addAction(GPS);
+            intentFilter.addAction(ACTION_DELETE_FRIEND);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //

@@ -103,8 +103,6 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
                     friends.add(friend1);
                     //  Log.d("fgf",friend.toString());
                 }
-
-
                 friendsListView.setAdapter(friendListAdapter);
                 friendListAdapter.notifyDataSetChanged();
             }
