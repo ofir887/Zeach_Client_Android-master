@@ -63,7 +63,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class MapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, LocationListener, View.OnClickListener {
+public class MapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, View.OnClickListener {
 
     private static final String TAG = MapFragment.class.getSimpleName();
     private View rootView;
@@ -165,6 +165,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     public void addBeachesAsPolygons() {
         removePolygon();
+        mPolygons.clear();
         for (int i = 0; i < mBeaches.size(); i++) {
             int color = BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic());
             final Polygon mPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).
@@ -185,20 +186,37 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         }
     }
 
+    private void readDataFromPref() {
+        String markers = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("markers", "");
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<Marker>>() {
+        }.getType();
+        if (!markers.isEmpty()) {
+            mFriendsMarkers = new ArrayList<>();
+            mFriendsMarkers = gson.fromJson(markers, type);
+        } else
+            mFriendsMarkers = new ArrayList<>();
+
+    }
+
+    private void saveDataInPref() {
+        Gson gson = new Gson();
+        String markers = gson.toJson(mFriendsMarkers);
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString("markers", markers);
+        String userMarker = gson.toJson(mUserMarker);
+        String polygons = gson.toJson(mPolygons);
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
+        readDataFromPref();
         //  this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
-        //this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
-//        this.autoCompleteSearch.setOnClickListener(this);
-        FirebaseDatabase.getInstance().getReference("Users/");
-        // locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
 
-        //
 
 
         if (activityReceiver != null) {
@@ -252,13 +270,12 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
     }
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mMapView = (MapView) rootView.findViewById(R.id.map);
         if (mMapView != null) {
             mMapView.onCreate(null);
@@ -266,6 +283,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             mMapView.getMapAsync(this);
         }
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -310,46 +328,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         }
     }
 
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d("location", location.toString());
-        this.userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(this.userLocation).zoom(16).bearing(0).tilt(45).build()));
-
-
-        try {
-            Bitmap bmp = Ion.with(getApplicationContext()).load(AppController.getInstance().getUser().getProfilePictureUri().toString()).asBitmap().get();
-            bmp = AppController.SetCircleMarkerIcon(bmp);
-            bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-            bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
-            mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(bmp))));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        //mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).title("my location")));
-    }
-
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        startActivity(i);
-    }
-
     @Override
     public void onClick(View v) {
         if (v == autoCompleteSearch) {
@@ -379,4 +357,14 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
 }

@@ -296,6 +296,7 @@ public class BackgroundService extends Service {
     }
 
     public void getBeachesFromFirebase() {
+        beaches.clear();
         final DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
