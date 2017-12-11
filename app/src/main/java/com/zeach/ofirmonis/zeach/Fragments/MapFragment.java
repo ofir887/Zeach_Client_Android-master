@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -76,6 +77,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private ArrayList<Beach> mBeaches = new ArrayList<>();
     private ArrayList<Marker> mFriendsMarkers = new ArrayList<>();
     private ArrayList<Polygon> mPolygons = new ArrayList<>();
+    private CameraPosition mCameraPosition;
     private Marker mUserMarker;
     private User mUser;
     ///
@@ -187,36 +189,79 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     }
 
     private void readDataFromPref() {
-        String markers = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("markers", "");
+        Log.d(TAG, "loading beaches from pref");
         Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<Marker>>() {
-        }.getType();
-        if (!markers.isEmpty()) {
-            mFriendsMarkers = new ArrayList<>();
-            mFriendsMarkers = gson.fromJson(markers, type);
-        } else
-            mFriendsMarkers = new ArrayList<>();
+        Type type;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String beaches = prefs.getString("beaches", "");
+        if (!beaches.isEmpty()) {
+            type = new TypeToken<ArrayList<Beach>>() {
+            }.getType();
+            mBeaches = gson.fromJson(beaches, type);
+        }
+        Log.d(TAG, "loading user from pref");
+        String user = prefs.getString("user", "");
+        if (!user.isEmpty()) {
+            type = new TypeToken<User>() {
+            }.getType();
+            mUser = gson.fromJson(user, type);
+        }
+        float bearing = prefs.getFloat("bearing", 0);
+        float tilt = prefs.getFloat("tilt", 0);
+        float zoom = prefs.getFloat("zoom", 0);
+        double mapLatitude = prefs.getFloat("mapLatitude", 0);
+        double mapLongitude = prefs.getFloat("mapLongitude", 0);
+        LatLng mapLocation = new LatLng(mapLatitude, mapLongitude);
+        mCameraPosition = new CameraPosition(mapLocation, zoom, bearing, tilt);
+        float userLatitude = prefs.getFloat("userLatitude", 0);
+        float userLongitude = prefs.getFloat("userLongitude", 0);
+        userLocation = new LatLng(userLatitude, userLongitude);
+        //   Log.d(TAG, "loading from pref2");
+        //   Log.d(TAG, markers);
 
     }
 
     private void saveDataInPref() {
+        Log.d(TAG, "Saving Beaches To Pref..");
         Gson gson = new Gson();
-        String markers = gson.toJson(mFriendsMarkers);
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString("markers", markers);
-        String userMarker = gson.toJson(mUserMarker);
-        String polygons = gson.toJson(mPolygons);
+        String beaches = gson.toJson(mBeaches);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("beaches", beaches);
+        Log.d(TAG, "Saving User To Pref..");
+        String user = gson.toJson(mUser);
+        editor.putString("user", user);
+        Log.d(TAG, "Saving MapView To Pref..");
+        float bearing = mGoogleMap.getCameraPosition().bearing;
+        float tilt = mGoogleMap.getCameraPosition().tilt;
+        float zoom = mGoogleMap.getCameraPosition().zoom;
+        double mapLatitude = mGoogleMap.getCameraPosition().target.latitude;
+        double mapLongitude = mGoogleMap.getCameraPosition().target.longitude;
+        editor.putFloat("bearing", bearing);
+        editor.putFloat("tilt", tilt);
+        editor.putFloat("mapLatitude", (float) mapLatitude);
+        editor.putFloat("mapLongitude", (float) mapLongitude);
+        float userLatitude = (float) userLocation.latitude;
+        float userLongitude = (float) userLocation.longitude;
+        editor.putFloat("userLatitude", userLatitude);
+        editor.putFloat("userLongitude", userLongitude);
+        editor.commit();
+
+
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        //   saveDataInPref();
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
-        readDataFromPref();
-        //  this.SearchButton = (Button) rootView.findViewById(R.id.beach_search_button);
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
-
 
 
         if (activityReceiver != null) {
@@ -245,18 +290,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onResume() {
+        readDataFromPref();
         super.onResume();
-        /*
-        if (broadcastReceiver == null){
-            broadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    CurrentUserLocation = (LatLng) intent.getExtras().get("coordinates");
-                    Log.d("gps ofir",CurrentUserLocation.toString());
-                }
-            };
-        }
-        getActivity().registerReceiver(broadcastReceiver,new IntentFilter("location_update"));*/
     }
 
     @Override
@@ -288,9 +323,18 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onMapReady(GoogleMap googleMap) {
         MapsInitializer.initialize(getApplicationContext());
-
         mGoogleMap = googleMap;
-
+        if (mBeaches != null) {
+            showFriendsOnMap();
+            addBeachesAsPolygons();
+        }
+        if (mUser.getProfilePictureUri() != null) {
+            Log.d(TAG, "kkk" + mUser.toString());
+            setUserLocationOnMap();
+        }
+        setMapLocation(mCameraPosition.target);
+        /*mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(mCameraPosition.target).
+                zoom(mCameraPosition.zoom).bearing(mCameraPosition.bearing).tilt(mCameraPosition.tilt).build()));*/
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         checkPermissions();
 
@@ -365,6 +409,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onDetach() {
+        saveDataInPref();
         super.onDetach();
     }
 }

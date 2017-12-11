@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().clear();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().commit();
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
@@ -113,7 +115,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        unregisterReceiver(activityReceiver);
         stopService(new Intent(this, BackgroundService.class));
+        Log.d(TAG, "on destroy");
         super.onDestroy();
     }
 
@@ -170,6 +174,7 @@ public class MainActivity extends AppCompatActivity
 
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        MapFragment map = new MapFragment();
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
         if (id == R.id.map) {
             Log.d("fragment", "fragment pressed");
@@ -178,6 +183,7 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
         } else if (id == R.id.favorite_beaches) {
             Log.d("fragment", "favorite fragment pressed");
+
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FavoriteBeachesFragment()).commit();
 
         } else if (id == R.id.friends) {
@@ -214,4 +220,5 @@ public class MainActivity extends AppCompatActivity
         startActivity(profileActivity);
 
     }*/
+
 }
