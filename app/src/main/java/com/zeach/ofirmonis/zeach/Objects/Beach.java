@@ -30,7 +30,7 @@ public class Beach implements Serializable {
 
     }
 
-    public Beach(String key, String beachListenerID, ArrayList<LatLng> beachCoords, String beachName, ArrayList<Friend> friends, String aTraffic, String aCountry) {
+    public Beach(String key, String beachListenerID, ArrayList<LatLng> beachCoords, String beachName, ArrayList<Friend> friends, String aTraffic, String aCountry, int aCurrentDevices) {
         this.BeachKey = key;
         this.BeachListenerID = beachListenerID;
         this.BeachCoords = beachCoords;
@@ -38,6 +38,7 @@ public class Beach implements Serializable {
         this.mFriends = friends;
         mTraffic = aTraffic;
         Country = aCountry;
+        CurrentDevices = aCurrentDevices;
     }
 
     //Constructor for using in app

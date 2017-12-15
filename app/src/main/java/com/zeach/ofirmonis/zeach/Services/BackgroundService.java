@@ -308,6 +308,7 @@ public class BackgroundService extends Service {
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     String mCountry = (String) beach.child("Country").getValue();
+                    int currentDevices = (int) (long) beach.child("CurrentDevices").getValue();
                     //get Friends
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
                     if (!mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
@@ -341,7 +342,7 @@ public class BackgroundService extends Service {
                         Log.d("Beach1", latlng.toString());
                     }
 
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry);
+                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry, currentDevices);
                     beaches.add(beach1);
                     Handler handler = new Handler();
                     Runnable runnable = new Runnable() {
