@@ -113,6 +113,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     ArrayList<Beach> beaches = gson.fromJson(str, type);
                     mBeaches = beaches;
                     Log.d(MapFragment.class.getSimpleName(), beaches.toString());
+                    removePolygon();
                     addBeachesAsPolygons();
                     for (int i = 0; i < mFriendsMarkers.size(); i++) {
                         mFriendsMarkers.get(i).remove();
@@ -263,17 +264,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
         mUser = new User();
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
-
-
-        if (activityReceiver != null) {
-            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
-            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
-            intentFilter.addAction(ACTION_BEACHES);
-            intentFilter.addAction(ACTION_USER);
-            //Map the intent filter to the receiver
-            getActivity().registerReceiver(activityReceiver, intentFilter);
-        }
-
         //
 
         checkPermissions();
@@ -292,6 +282,15 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onResume() {
         readDataFromPref();
+        addBeachesAsPolygons();
+        if (activityReceiver != null) {
+            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
+            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
+            intentFilter.addAction(ACTION_BEACHES);
+            intentFilter.addAction(ACTION_USER);
+            //Map the intent filter to the receiver
+            getActivity().registerReceiver(activityReceiver, intentFilter);
+        }
         super.onResume();
     }
 
@@ -409,8 +408,16 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     }
 
     @Override
-    public void onDetach() {
+    public void onPause() {
         saveDataInPref();
+        removePolygon();
+        mBeaches.clear();
+        getActivity().unregisterReceiver(activityReceiver);
+        super.onPause();
+    }
+
+    @Override
+    public void onDetach() {
         super.onDetach();
     }
 }

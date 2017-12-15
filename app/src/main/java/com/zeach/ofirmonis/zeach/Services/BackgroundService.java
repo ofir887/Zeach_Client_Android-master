@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -245,7 +246,7 @@ public class BackgroundService extends Service {
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriendUid).removeValue();
         ref.child(FirebaseConstants.USERS).child(aFriendUid).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).removeValue();
         Log.d(TAG, String.format("Friend: [%s] removed from friends list. refreshing beaches..", aFriendUid));
-        getBeachesFromFirebase();
+        //  getBeachesFromFirebase();
     }
 
     public void getSingleLocationUpdate() {
@@ -297,6 +298,7 @@ public class BackgroundService extends Service {
     public void getBeachesFromFirebase() {
         beaches.clear();
         final DatabaseReference ref = data.getDatabase().getReference("Beaches");
+
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -342,17 +344,21 @@ public class BackgroundService extends Service {
                         Log.d("Beach1", latlng.toString());
                     }
 
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry, currentDevices);
-                    beaches.add(beach1);
-                    Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
+                    Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry, currentDevices);
+                    if (beaches.contains(beach1)) {
+                        beaches.set(beaches.indexOf(beach1), beach1);
+                    } else {
+                        beaches.add(beach1);
+                    }
+                    //    Handler handler = new Handler();
+                    //    Runnable runnable = new Runnable() {
+                    //       @Override
+                    //      public void run() {
                             Log.d("Beach1", beach1.toString());
                             sendBroadcast(ACTION_BEACHES);
-                        }
-                    };
-                    handler.postDelayed(runnable, 1000);
+                    //        }
+                    //      };
+                    //     handler.postDelayed(runnable, 1000);
                     //sendBroadcast(ACTION_BEACHES);
                 }
             }
@@ -379,7 +385,7 @@ public class BackgroundService extends Service {
                     e.printStackTrace();
                 }
                 sendBroadcast(ACTION_USER);
-                getBeachesFromFirebase();
+
 
             }
 
@@ -400,7 +406,7 @@ public class BackgroundService extends Service {
         Log.d(TAG, String.format("Removing request after adding"));
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_REQUESTS).child(aFriend.getUID()).removeValue();
         ref.child(FirebaseConstants.USERS).child(aFriend.getUID()).child(FirebaseConstants.AWAITING_CONFIRMATION).child(mUser.getUID()).removeValue();
-        getBeachesFromFirebase();
+        //   getBeachesFromFirebase();
     }
 
 
@@ -431,6 +437,7 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 if (checkPermission(getApplicationContext())) {
+                    getBeachesFromFirebase();
                     initializeLocationManager();
                     //     getSingleLocationUpdate();
                     getMultipleLocationUpdates();
@@ -449,6 +456,7 @@ public class BackgroundService extends Service {
                 String arr = gson.toJson(beaches);
                 new_intent.putExtra("beaches", arr);
                 new_intent.setAction(ACTION_BEACHES);
+                Log.d(TAG, "Sending beach to map fragment" + arr.toString());
                 break;
             }
             case ACTION_USER: {
