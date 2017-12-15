@@ -281,6 +281,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onResume() {
+        //TODO - request beach update from service..
         readDataFromPref();
         addBeachesAsPolygons();
         if (activityReceiver != null) {
