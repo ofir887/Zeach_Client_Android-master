@@ -18,6 +18,7 @@ public class Beach implements Serializable {
     private ArrayList<Friend> mFriends;
     private long CurrentDevices;
     private String mTraffic;
+    private String Country;
 
     //Constructor for using service
     public Beach(String beachName, String beachListenerID, ArrayList beachCoords) {
@@ -29,13 +30,14 @@ public class Beach implements Serializable {
 
     }
 
-    public Beach(String key, String beachListenerID, ArrayList<LatLng> beachCoords, String beachName, ArrayList<Friend> friends, String aTraffic) {
+    public Beach(String key, String beachListenerID, ArrayList<LatLng> beachCoords, String beachName, ArrayList<Friend> friends, String aTraffic, String aCountry) {
         this.BeachKey = key;
         this.BeachListenerID = beachListenerID;
         this.BeachCoords = beachCoords;
         this.BeachName = beachName;
         this.mFriends = friends;
         mTraffic = aTraffic;
+        Country = aCountry;
     }
 
     //Constructor for using in app
@@ -80,6 +82,10 @@ public class Beach implements Serializable {
 
     public String getTraffic() {
         return mTraffic;
+    }
+
+    public String getCountry() {
+        return Country;
     }
 
     @Override

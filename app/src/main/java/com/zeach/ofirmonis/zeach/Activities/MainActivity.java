@@ -74,8 +74,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().clear();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().clear().commit();
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);

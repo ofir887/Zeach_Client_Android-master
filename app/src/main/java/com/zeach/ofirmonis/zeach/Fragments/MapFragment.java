@@ -261,6 +261,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
+        mUser = new User();
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
 
 
@@ -332,7 +333,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             Log.d(TAG, "kkk" + mUser.toString());
             setUserLocationOnMap();
         }
-        setMapLocation(mCameraPosition.target);
+        //    setMapLocation(mCameraPosition.target);
         /*mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(mCameraPosition.target).
                 zoom(mCameraPosition.zoom).bearing(mCameraPosition.bearing).tilt(mCameraPosition.tilt).build()));*/
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);

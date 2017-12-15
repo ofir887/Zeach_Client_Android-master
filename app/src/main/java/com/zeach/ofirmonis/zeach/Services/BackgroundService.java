@@ -145,7 +145,6 @@ public class BackgroundService extends Service {
         public void onLocationChanged(Location location) {
             Log.e(TAG, "onLocationChanged: " + location);
             LatLng userCurrentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-            String country = getCountryByCoords(userCurrentLocation);
             mLastLocation.set(location);
             mLocation = userCurrentLocation;
             //
@@ -160,7 +159,7 @@ public class BackgroundService extends Service {
                 // if (isUserInBeach) {
                 //Asign user in this beach and break loop after it
                 Log.d(TAG, "ofir is here fucking worikng !!!");
-                updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), country, userCurrentLocation.longitude, userCurrentLocation.latitude);
+                updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), userCurrentLocation.longitude, userCurrentLocation.latitude);
                 break;
                 //  onDestroy();
 
@@ -213,21 +212,21 @@ public class BackgroundService extends Service {
         }
     }
 
-    public void updateUserInBeach(final Beach beach, final String userId, final String country, double aLongitude, double aLatitude) {
+    public void updateUserInBeach(final Beach beach, final String userId, double aLongitude, double aLatitude) {
         final DatabaseReference ref = data.getDatabase().getReference();
         long timeStamp = System.currentTimeMillis() / 1000;
         final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(),
-                beach.getBeachListenerID(), timeStamp, country, aLongitude, aLatitude);
+                beach.getBeachListenerID(), timeStamp, beach.getCountry(), aLongitude, aLatitude);
         final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri(), userAtBeach, mUser.isProfilePrivate());
         Log.d(TAG, "User with beach coords = " + user.toString());
-        DatabaseReference userRef = ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist");
+        DatabaseReference userRef = ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist");
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild(user.getUID())) {
                     Log.d(TAG, "User not in the beach..Updating");
-                    ref.child("BeachesListener/Country/" + country).child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
-                    ref.child("Beaches/Country/" + country).child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+                    ref.child("BeachesListener").child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
+                    ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
                 }
             }
 
@@ -297,7 +296,7 @@ public class BackgroundService extends Service {
 
     public void getBeachesFromFirebase() {
         beaches.clear();
-        final DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
+        final DatabaseReference ref = data.getDatabase().getReference("Beaches");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -308,6 +307,7 @@ public class BackgroundService extends Service {
                     String mBeachName = (String) beach.child("BeachName").getValue();
                     String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
+                    String mCountry = (String) beach.child("Country").getValue();
                     //get Friends
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
                     if (!mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
@@ -341,7 +341,7 @@ public class BackgroundService extends Service {
                         Log.d("Beach1", latlng.toString());
                     }
 
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic);
+                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry);
                     beaches.add(beach1);
                     Handler handler = new Handler();
                     Runnable runnable = new Runnable() {
