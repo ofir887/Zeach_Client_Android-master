@@ -16,6 +16,7 @@ public class FirebaseConstants {
     public static final String TRAFFIC = "Traffic";
     public static final String FRIENDS_REQUESTS = "FriendsRequest";
     public static final String AWAITING_CONFIRMATION = "AwaitingConfirmation";
+    public static final String FAVORITE_BEACHES = "favoriteBeaches";
 
     //Beach
 

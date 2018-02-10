@@ -17,7 +17,7 @@ public class User implements Serializable {
     private String Provider;
     private String ProfilePictureUri;
     private Map<String, Friend> FriendsList = new HashMap<>();
-    private Map<String, String> FavoriteBeachesList;
+    private Map<String, FavoriteBeach> FavoriteBeaches = new HashMap<>();
     private UserAtBeach CurrentBeach;
     private boolean isProfilePrivate;
 
@@ -34,7 +34,7 @@ public class User implements Serializable {
         this.Provider = provider;
         this.ProfilePictureUri = profilePictureUri;
         this.FriendsList = new HashMap<>();
-        this.FavoriteBeachesList = new HashMap<>();
+        this.FavoriteBeaches = new HashMap<>();
         //  this.CurrentBeach = "Not In any Beach"; // need to change
         this.CurrentBeach = new UserAtBeach();
         this.FacebookUID = facebookUID;
@@ -50,7 +50,7 @@ public class User implements Serializable {
         this.ProfilePictureUri = null;
         this.Name = "";
         this.FriendsList = new HashMap<>();
-        this.FavoriteBeachesList = new HashMap<>();
+        this.FavoriteBeaches = new HashMap<>();
         this.CurrentBeach = new UserAtBeach();
         //  this.CurrentBeach = "Not In any Beach"; // need to change
         // this.CurrentBeach1 = new CurrentBeach();
@@ -113,17 +113,17 @@ public class User implements Serializable {
         FriendsList = friendsList;
     }
 
-    public void AddBeachToList(String beachUid) {
-        this.FavoriteBeachesList.put("BeachUid", beachUid);
+    public void AddBeachToList(FavoriteBeach aFavoriteBeach) {
+        this.FavoriteBeaches.put(aFavoriteBeach.getmBeachKey(), aFavoriteBeach);
 
     }
 
-    public Map<String, String> getFavoriteBeachesList() {
-        return FavoriteBeachesList;
+    public Map<String, FavoriteBeach> getFavoriteBeaches() {
+        return FavoriteBeaches;
     }
 
-    public void setFavoriteBeachesList(Map<String, String> favoriteBeachesList) {
-        FavoriteBeachesList = favoriteBeachesList;
+    public void setFavoriteBeaches(Map<String, FavoriteBeach> favoriteBeachesList) {
+        FavoriteBeaches = favoriteBeachesList;
     }
 
     public UserAtBeach getCurrentBeach() {
@@ -175,7 +175,7 @@ public class User implements Serializable {
                 ", Provider='" + Provider + '\'' +
                 ", ProfilePictureUri='" + ProfilePictureUri + '\'' +
                 ", FriendsList=" + FriendsList +
-                ", FavoriteBeachesList=" + FavoriteBeachesList +
+                ", FavoriteBeaches=" + FavoriteBeaches +
                 ", CurrentBeach='" + CurrentBeach + '\'' +
                 ", isProfilePrivate=" + isProfilePrivate +
 

@@ -1,14 +1,19 @@
 package com.zeach.ofirmonis.zeach.Objects;
 
+import java.io.Serializable;
+
 /**
  * Created by ofirmonis on 21/10/2017.
  */
 
-public class FavoriteBeach {
+public class FavoriteBeach implements Serializable {
     private String mBeachKey;
     private String mBeachName;
     private String mBeachCountry;
 
+    public FavoriteBeach() {
+
+    }
     public FavoriteBeach(String mBeachKey, String mBeachName, String mBeachCountry) {
         this.mBeachKey = mBeachKey;
         this.mBeachName = mBeachName;

@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zeach.ofirmonis.zeach.Objects.Beach;
+import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
@@ -20,11 +21,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by ofirmonis on 21/10/2017.
  */
 
-public class FavoriteBeachesAdapter extends ArrayAdapter<Beach> {
+public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
 
-    private ArrayList<Beach> mBeach;
+    private ArrayList<FavoriteBeach> mBeach;
 
-    public FavoriteBeachesAdapter(Context context, ArrayList<Beach> beaches) {
+    public FavoriteBeachesAdapter(Context context, ArrayList<FavoriteBeach> beaches) {
         super(context, 0, beaches);
         mBeach = beaches;
     }
@@ -45,7 +46,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<Beach> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        holder.beachName.setText(mBeach.get(position).getBeachName());
+        holder.beachName.setText(mBeach.get(position).getmBeachName());
         holder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,6 +54,8 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<Beach> {
             }
         });
         return convertView;
+
+
     }
 
     static class ViewHolder {

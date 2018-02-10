@@ -1,7 +1,9 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -49,12 +51,14 @@ import com.koushikdutta.ion.Ion;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Constants.BeachConstants;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
+import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -77,6 +81,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private ArrayList<Beach> mBeaches = new ArrayList<>();
     private ArrayList<Marker> mFriendsMarkers = new ArrayList<>();
     private ArrayList<Polygon> mPolygons = new ArrayList<>();
+    private HashMap<String, Polygon> mPolygons2 = new HashMap<>();
     private CameraPosition mCameraPosition;
     private Marker mUserMarker;
     private User mUser;
@@ -87,6 +92,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private static final String ACTION_BEACHES = "Beaches";
     private static final String ACTION_USER = "User";
+    private static final String ACTION_ADD_FAVORITE_BEACH = "add_favorite_beach";
     private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
 
         @Override
@@ -173,18 +179,45 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         mPolygons.clear();
         for (int i = 0; i < mBeaches.size(); i++) {
             int color = BeachConstants.getTrafficColorByString(mBeaches.get(i).getTraffic());
-            final Polygon mPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).
+            final Polygon aPolygon = mGoogleMap.addPolygon(new PolygonOptions().clickable(true).
                     addAll(mBeaches.get(i).getBeachCoordinates()).
                     fillColor(color).
                     strokeColor(color).strokeWidth(0));
-            mPolygons.add(mPolygon);
-            mPolygon.getId();
+            mPolygons.add(aPolygon);
+            mPolygons2.put(mBeaches.get(i).getBeachKey(), aPolygon);
             final int finalI = i;
             mGoogleMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
                 @Override
                 public void onPolygonClick(Polygon polygon) {
-                    if (mPolygon.getId().equals(polygon.getId())) {
+                    if (aPolygon.getId().equals(polygon.getId())) {
+                        final Beach beach = mBeaches.get(finalI);
                         Log.d(TAG, mBeaches.get(finalI).getBeachName() + " beach pressed");
+                        AlertDialog.Builder beachAlert = new AlertDialog.Builder(getContext());
+                        beachAlert.setTitle(beach.getBeachName());
+                        beachAlert.setMessage(String.format("Beach occupation Status: %s, Number Of Friends in the beach: %s",
+                                beach.getTraffic(), beach.getFriends().size()));
+                        if (!mUser.getFavoriteBeaches().containsKey(beach.getBeachKey())) {
+                            beachAlert.setPositiveButton("Add To Favorite", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Log.i(TAG, "Adding beach to favorite beach list");
+                                    FavoriteBeach favoriteBeach = new FavoriteBeach(beach.getBeachKey(), beach.getBeachName(), beach.getCountry());
+                                    Intent intent = new Intent();
+                                    intent.setAction(ACTION_ADD_FAVORITE_BEACH);
+                                    Gson gson = new Gson();
+                                    String favorite = gson.toJson(favoriteBeach);
+                                    intent.putExtra("favorite_beach", favorite);
+                                    getContext().sendBroadcast(intent);
+                                }
+                            });
+                        }
+                        beachAlert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+                        beachAlert.show();
                     }
                 }
             });

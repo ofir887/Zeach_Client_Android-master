@@ -58,6 +58,7 @@ public class AppController {
 
     public void setUser(com.zeach.ofirmonis.zeach.Objects.User user) {
         User = user;
+        UpdateUserInfo();
     }
 
     public static AppController getInstance() {
