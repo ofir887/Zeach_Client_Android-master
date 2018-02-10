@@ -3,6 +3,9 @@ package com.zeach.ofirmonis.zeach.Activities;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -20,11 +23,18 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.AppController;
@@ -51,6 +61,8 @@ public class MainActivity extends AppCompatActivity
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private ProgressBar spinner;
     private View header;
+    private FirebaseStorage mStorage;
+    private StorageReference mStorageRef;
 
     private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
 
@@ -65,7 +77,6 @@ public class MainActivity extends AppCompatActivity
                     setDrawerProfileInforamtion();
                     break;
                 }
-
             }
         }
     };
@@ -75,6 +86,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PreferenceManager.getDefaultSharedPreferences(this).edit().clear().commit();
+        mStorage = FirebaseStorage.getInstance();
+        mStorageRef = mStorage.getReference();
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
@@ -86,6 +99,7 @@ public class MainActivity extends AppCompatActivity
             //Map the intent filter to the receiver
             registerReceiver(activityReceiver, intentFilter);
         }
+
         //
         // this.spinner.setVisibility(View.VISIBLE);
         //  getUser();
@@ -108,8 +122,22 @@ public class MainActivity extends AppCompatActivity
     public void setDrawerProfileInforamtion() {
         TextView navigationName = (TextView) header.findViewById(R.id.profileName);
         navigationName.setText(zeachUser.getName());
-        CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
-        new AppController.DownloadImageTask(image).execute(zeachUser.getProfilePictureUri());
+        final CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
+        mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
+        //Glide.with(getApplicationContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(image);
+        mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
+                bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 150, 150, true);
+                image.setImageBitmap(smallMarker);
+            }
+        });
+        //  Bitmap smallMarker = Bitmap.createScaledBitmap(aBitmap, 200, 200, true);
+        //  image.setImageBitmap(smallMarker);
     }
 
     @Override

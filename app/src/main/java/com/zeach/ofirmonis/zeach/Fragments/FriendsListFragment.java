@@ -31,7 +31,7 @@ import java.util.ArrayList;
  */
 
 public class FriendsListFragment extends Fragment implements View.OnClickListener {
-
+    private static final String TAG = FriendsListFragment.class.getSimpleName();
     private View rootView;
     private User ZeachUser;
     private ArrayList friends = new ArrayList();
@@ -48,9 +48,9 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_USER: {
-                    Log.d(MapFragment.class.getSimpleName(), "lets see new");
+                    Log.d(TAG, "lets see new");
                     User user = (User) intent.getSerializableExtra("User");
-                    Log.d(MapFragment.class.getSimpleName(), user.toString());
+                    Log.d(TAG, user.toString());
                     break;
                 }
             }

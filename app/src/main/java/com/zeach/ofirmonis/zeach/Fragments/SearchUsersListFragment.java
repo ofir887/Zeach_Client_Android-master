@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class SearchUsersListFragment extends Fragment implements View.OnClickListener,SearchView.OnQueryTextListener{
+public class SearchUsersListFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
 
     private View rootView;
     private User ZeachUser;
@@ -41,9 +41,9 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        this.rootView  =inflater.inflate(R.layout.fragment_users_list,container,false);
-        this.UsersListView = (ListView)rootView.findViewById(R.id.users_list);
-        this.searchView = (SearchView)rootView.findViewById(R.id.users_search_widget);
+        this.rootView = inflater.inflate(R.layout.fragment_users_list, container, false);
+        this.UsersListView = (ListView) rootView.findViewById(R.id.users_list);
+        this.searchView = (SearchView) rootView.findViewById(R.id.users_search_widget);
 
         this.ZeachUser = AppController.getInstance().getUser();
         this.data = FirebaseDatabase.getInstance().getReference("Users/");
@@ -52,8 +52,8 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         return this.rootView;
     }
 
-    public void getUsersFromServer(final String str){
-        userListAdapter = new UserListAdapter(getContext(),this.users,this.ZeachUser.getUID(),getActivity());
+    public void getUsersFromServer(final String str) {
+        userListAdapter = new UserListAdapter(getContext(), this.users, this.ZeachUser.getFriendsList(), getActivity());
 
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
@@ -61,7 +61,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
                 userListAdapter.clear();
 
                 userListAdapter.notifyDataSetChanged();
-                for(DataSnapshot user: dataSnapshot.getChildren()){
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
                     if (!user.getKey().equals(ZeachUser.getUID()))
                         if (user.getValue(User.class).getName().toLowerCase().contains(str))
                             users.add(user.getValue(User.class));
@@ -84,8 +84,8 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (this.isVisible())
-            if (!isVisibleToUser){
-                Log.d("not","visible anymore");
+            if (!isVisibleToUser) {
+                Log.d("not", "visible anymore");
             }
     }
 
@@ -95,6 +95,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
 
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //  super.onActivityResult(requestCode, resultCode, data);
@@ -107,6 +108,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
 
 
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -117,9 +119,10 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         super.onActivityCreated(savedInstanceState);
 
     }
+
     @Override
     public void onDetach() {
-        Log.d("nir","nir1222");
+        Log.d("nir", "nir1222");
 
         super.onDetach();
     }

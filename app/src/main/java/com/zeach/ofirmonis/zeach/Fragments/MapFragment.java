@@ -7,14 +7,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -26,7 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -39,8 +40,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.ion.Ion;
@@ -50,13 +52,11 @@ import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-import static android.content.Context.LOCATION_SERVICE;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 
@@ -80,6 +80,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private CameraPosition mCameraPosition;
     private Marker mUserMarker;
     private User mUser;
+    private FirebaseStorage mStorage;
+    private StorageReference mStorageRef;
     ///
     private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
@@ -264,6 +266,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
         mUser = new User();
         this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
+        mStorage = FirebaseStorage.getInstance();
+        mStorageRef = mStorage.getReference();
         //
 
         checkPermissions();
@@ -272,9 +276,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         return this.rootView;
     }
 
-    private void sendBroadcast() {
+    private void sendBroadcast(String aAction) {
         Intent new_intent = new Intent();
-        new_intent.setAction(ACTION_STRING_SERVICE);
+        new_intent.setAction(aAction);
         getActivity().sendBroadcast(new_intent);
     }
 
@@ -292,6 +296,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             //Map the intent filter to the receiver
             getActivity().registerReceiver(activityReceiver, intentFilter);
         }
+        //  sendBroadcast(ACTION_BEACHES);
         super.onResume();
     }
 
@@ -348,8 +353,30 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     public void setUserLocationOnMap() {
         if (mUser != null) {
-            try {
-                Bitmap bmp = Ion.with(getApplicationContext()).load(mUser.getProfilePictureUri().toString()).asBitmap().get();
+            //  try {
+            mStorageRef = mStorage.getReference(mUser.getProfilePictureUri());
+            mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                    bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.WHITE);
+                    bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                    Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 150, 150, true);
+                    if (mUserMarker != null) {
+                        mUserMarker.remove();
+                    } else {
+                        setMapLocation(userLocation);
+                    }
+                    MarkerOptions marker = new MarkerOptions().position(userLocation).
+                            title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+                    mUserMarker = mGoogleMap.addMarker(marker);
+            /*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
+                    title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*/
+                    setMapLocation(userLocation);
+                }
+            });
+                /*Bitmap bmp = Ion.with(getApplicationContext()).load(mUser.getProfilePictureUri().toString()).asBitmap().get();
                 bmp = AppController.SetCircleMarkerIcon(bmp);
                 bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
                 bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
@@ -362,14 +389,14 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                 MarkerOptions marker = new MarkerOptions().position(userLocation).
                         title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
                 mUserMarker = mGoogleMap.addMarker(marker);
-            /*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
-                    title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*/
-                setMapLocation(this.userLocation);
-            } catch (InterruptedException e) {
+            *//*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
+                    title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*//*
+                setMapLocation(this.userLocation);*/
+            /*} catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 

@@ -7,10 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -22,6 +26,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,8 +36,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
@@ -43,7 +51,11 @@ import com.zeach.ofirmonis.zeach.Objects.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +86,8 @@ public class BackgroundService extends Service {
     private FirebaseUser mFirebaseUser;
     private User mUser;
     private LatLng mLocation;
+    private FirebaseStorage mStorage;
+    private StorageReference mStorageRef;
 
     ////
     private static final String ACTION_STRING_SERVICE = "ToService";
@@ -93,6 +107,12 @@ public class BackgroundService extends Service {
                     //getSingleLocationUpdate();
                     //   sendBroadcast(ACTION_USER);
                     break;*/
+                /*case ACTION_BEACHES:
+                    Log.d(TAG, "Received Beaches request from Map Fragment. Sending Beaches..");
+                    if (beaches.size() > 0) {
+                        sendBroadcast(ACTION_BEACHES);
+                    }
+                    break;*/
                 case ACTION_DELETE_FRIEND:
                     String friendUid = intent.getStringExtra("UID");
                     Log.d(TAG, String.format("Received: [%s]", friendUid));
@@ -108,6 +128,7 @@ public class BackgroundService extends Service {
                     Log.d(TAG, String.format("Received: [%s]", friend));
                     addUserAsFriend(friend);
                     break;
+
             }
             //sendBroadcast();
         }
@@ -228,6 +249,9 @@ public class BackgroundService extends Service {
                     Log.d(TAG, "User not in the beach..Updating");
                     ref.child("BeachesListener").child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
                     ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+                } else {
+                    ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).
+                            child("currentBeach").child("mTimeStamp").setValue(userAtBeach.getmTimeStamp());
                 }
             }
 
@@ -298,7 +322,6 @@ public class BackgroundService extends Service {
     public void getBeachesFromFirebase() {
         beaches.clear();
         final DatabaseReference ref = data.getDatabase().getReference("Beaches");
-
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -354,8 +377,8 @@ public class BackgroundService extends Service {
                     //    Runnable runnable = new Runnable() {
                     //       @Override
                     //      public void run() {
-                            Log.d("Beach1", beach1.toString());
-                            sendBroadcast(ACTION_BEACHES);
+                    Log.d("Beach1", beach1.toString());
+                    sendBroadcast(ACTION_BEACHES);
                     //        }
                     //      };
                     //     handler.postDelayed(runnable, 1000);
@@ -410,6 +433,25 @@ public class BackgroundService extends Service {
     }
 
 
+    public static String tempFileImage(Context context, Bitmap bitmap, String name) {
+
+        File outputDir = context.getCacheDir();
+        File imageFile = new File(outputDir, name + ".jpg");
+
+        OutputStream os;
+        try {
+            os = new FileOutputStream(imageFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
+        } catch (Exception e) {
+            Log.e(context.getClass().getSimpleName(), "Error writing file", e);
+        }
+
+        return imageFile.getAbsolutePath();
+    }
+
+
     @Override
     public void onCreate() {
 
@@ -429,6 +471,8 @@ public class BackgroundService extends Service {
         this.data = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser();
+        mStorage = FirebaseStorage.getInstance();
+        mStorageRef = mStorage.getReference();
         beaches = new ArrayList<Beach>();
         getUserDetailsFromServer();
 
