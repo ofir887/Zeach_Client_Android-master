@@ -49,6 +49,8 @@
         android:layout_alignBottom="@+id/friend_current_beach"
         android:layout_toEndOf="@+id/friend_name"
         android:layout_marginStart="50dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:textAllCaps="false"
+        android:background="@drawable/circlebutton" />
 
 </RelativeLayout>

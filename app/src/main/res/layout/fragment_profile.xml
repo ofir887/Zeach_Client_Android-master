@@ -12,12 +12,14 @@
 
     <Button
         android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
         android:text="Button"
+        android:layout_marginTop="40dp"
+        android:textAllCaps="false"
+        android:background="@drawable/circlebutton"
         android:layout_below="@+id/gender_field"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="23dp" />
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/name"
@@ -45,7 +47,7 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text=""
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="43dp"
         android:layout_below="@+id/name_field"
         android:layout_alignStart="@+id/name_field" />
 
@@ -56,9 +58,8 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name"
-        android:layout_below="@+id/browse"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="13dp" />
+        android:layout_below="@+id/update_photo"
+        android:layout_centerHorizontal="true" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="200dp"
@@ -73,20 +74,23 @@
     <Button
         android:id="@+id/browse"
         android:layout_width="100dp"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
         android:text="Browse"
-        android:layout_alignBaseline="@+id/update_photo"
-        android:layout_alignBottom="@+id/update_photo"
-        android:layout_toEndOf="@+id/name" />
+        android:textAllCaps="false"
+        android:background="@drawable/circlebutton"
+
+        android:layout_above="@+id/name_field"
+        android:layout_alignStart="@+id/imageView2" />
 
     <Button
         android:id="@+id/update_photo"
-        android:layout_width="130dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="24dp"
         android:text="Update Photo"
+        android:textAllCaps="false"
+        android:background="@drawable/circlebutton"
         android:layout_below="@+id/imageView2"
-        android:layout_toEndOf="@+id/browse"
-        android:layout_marginStart="19dp" />
+        android:layout_alignEnd="@+id/name_field" />
 
 </RelativeLayout>
