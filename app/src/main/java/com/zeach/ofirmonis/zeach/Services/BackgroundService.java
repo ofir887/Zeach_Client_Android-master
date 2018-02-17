@@ -8,13 +8,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -25,13 +22,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-import com.facebook.appevents.internal.Constants;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,24 +47,19 @@ import com.zeach.ofirmonis.zeach.Objects.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TreeMap;
-
-import com.google.gson.Gson;
-
-import static com.facebook.GraphRequest.TAG;
 
 
 /**
@@ -93,6 +82,7 @@ public class BackgroundService extends Service {
     private LatLng mLocation;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
+    private String mNearestBeach;
 
     ////
     private static final String ACTION_STRING_SERVICE = "ToService";
@@ -106,6 +96,7 @@ public class BackgroundService extends Service {
     private static final String ACTION_REQUEST_FAVORITE_BEACHES = "request_favorite_beaches";
     private static final String ACTION_RECEIVE_FAVORITE_BEACHES = "receive_favorite";
     private static final String ACTION_REMOVE_FAVORITE_BEACHE = "remove_favorite_beach";
+    private static final String ACTION_NEAREST_BEACH = "nearest_beach";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
@@ -205,11 +196,17 @@ public class BackgroundService extends Service {
             for (int i = 0; i < beaches.size(); i++) {
                 boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
                 Log.i(TAG, "checking against:" + beaches.get(i).getBeachName());
-                // if (isUserInBeach) {
-                //Asign user in this beach and break loop after it
-                Log.i(TAG, "ofir is here fucking worikng !!!");
-                updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), userCurrentLocation.longitude, userCurrentLocation.latitude);
-                break;
+                if (isUserInBeach) {
+                    //Asign user in this beach and break loop after it
+                    Log.i(TAG, "ofir is here fucking worikng !!!");
+                    updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), userCurrentLocation.longitude, userCurrentLocation.latitude);
+                    //break;
+                } else {
+                    mNearestBeach = findNearsetBeach(userCurrentLocation);
+                    Log.i(TAG, String.format("Nearest beach found:[%s]", mNearestBeach));
+                    //TODO - send to map and show popup
+                    sendBroadcast(ACTION_NEAREST_BEACH);
+                }
                 //  onDestroy();
 
                 //   }
@@ -439,6 +436,53 @@ public class BackgroundService extends Service {
         });
     }
 
+    private String findNearsetBeach(LatLng aUserLocation) {
+        HashMap<String, LatLng> beachesCenter = new HashMap<>();
+        for (int i = 0; i < beaches.size(); i++) {
+            beachesCenter.put(beaches.get(i).getBeachKey(), computeCentreBeach(beaches.get(i).getBeachCoordinates()));
+        }
+
+        return computeDistance(aUserLocation, beachesCenter);
+    }
+
+    private String computeDistance(LatLng aUserLocation, HashMap<String, LatLng> beachLocation) {
+        Location user = new Location("User");
+        user.setLatitude(aUserLocation.latitude);
+        user.setLongitude(aUserLocation.longitude);
+        HashMap<String, Float> beachesDistance = new HashMap<>();
+        for (Map.Entry<String, LatLng> entry : beachLocation.entrySet()) {
+            Location location = new Location(entry.getKey());
+            location.setLongitude(entry.getValue().longitude);
+            location.setLatitude(entry.getValue().latitude);
+            float distance = user.distanceTo(location);
+            beachesDistance.put(entry.getKey(), distance);
+        }
+        float minDistance = Collections.min(beachesDistance.values());
+        return getKeyFromValue(beachesDistance, minDistance);
+    }
+
+    public static String getKeyFromValue(Map hm, Object value) {
+        for (Object o : hm.keySet()) {
+            if (hm.get(o).equals(value)) {
+                return (String) o;
+            }
+        }
+        return null;
+    }
+
+    private LatLng computeCentreBeach(ArrayList<LatLng> points) {
+        double latitude = 0;
+        double longitude = 0;
+        int n = points.size();
+
+        for (LatLng point : points) {
+            latitude += point.latitude;
+            longitude += point.longitude;
+        }
+
+        return new LatLng(latitude / n, longitude / n);
+    }
+
     public void getUserDetailsFromServer() {
         DatabaseReference mUserRef = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
         mUserRef.addValueEventListener(new ValueEventListener() {
@@ -513,6 +557,7 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_ADD_FAVORITE_BEACH);
             intentFilter.addAction(ACTION_REQUEST_FAVORITE_BEACHES);
             intentFilter.addAction(ACTION_REMOVE_FAVORITE_BEACHE);
+            intentFilter.addAction(ACTION_NEAREST_BEACH);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //
@@ -537,7 +582,7 @@ public class BackgroundService extends Service {
                 }
             }
         };
-        handler.postDelayed(runnable, 1000 * 15);
+        handler.postDelayed(runnable, 1000 * 5);
 
     }
 
@@ -574,6 +619,11 @@ public class BackgroundService extends Service {
                 new_intent.setAction("receive_favorite");
                 break;
             }
+            case ACTION_NEAREST_BEACH:
+                Log.i(TAG, "Sending nearest beach to map..");
+                new_intent.putExtra("nearest_beach", mNearestBeach);
+                new_intent.setAction(action);
+                break;
         }
         sendBroadcast(new_intent);
 

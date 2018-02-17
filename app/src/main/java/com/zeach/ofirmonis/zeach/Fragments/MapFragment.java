@@ -19,21 +19,15 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import android.support.v7.widget.ActionBarOverlayLayout;
+
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -59,7 +53,7 @@ import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
-import com.zeach.ofirmonis.zeach.OnMapActions;
+import com.zeach.ofirmonis.zeach.interfaces.OnMapActions;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.lang.reflect.Type;
@@ -94,12 +88,14 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private User mUser;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
+    private boolean mNearestBeachDialogShowed = false;
     ///
     private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private static final String ACTION_BEACHES = "Beaches";
     private static final String ACTION_USER = "User";
     private static final String ACTION_ADD_FAVORITE_BEACH = "add_favorite_beach";
+    private static final String ACTION_NEAREST_BEACH = "nearest_beach";
     private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
 
         @Override
@@ -138,6 +134,15 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                         setUserLocationOnMap();*/
                     break;
                 }
+                case ACTION_NEAREST_BEACH:
+                    final String nearestBeach = intent.getStringExtra("nearest_beach");
+                    Log.i(TAG, String.format("Received nearest beach id:[%s]", nearestBeach));
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            popupNearestBeach(nearestBeach);
+                        }
+                    }, 1000 * 10);
             }
         }
     };
@@ -228,6 +233,37 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     }
                 }
             });
+        }
+    }
+
+    public void popupNearestBeach(String aBeachId) {
+        if (!mNearestBeachDialogShowed) {
+            Beach nearestBeach = null;
+            for (int i = 0; i < mBeaches.size(); i++) {
+                if (mBeaches.get(i).getBeachKey().equals(aBeachId)) {
+                    nearestBeach = mBeaches.get(i);
+                    break;
+                }
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Found nearest beach!");
+            builder.setMessage(String.format("Nearset beach found:[%s]\nCapacity:[%s]\nNumber of friends in beach:[%d]", nearestBeach.getBeachName(), nearestBeach.getTraffic(), nearestBeach.getFriends().size()));
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            final Beach finalNearestBeach = nearestBeach;
+            builder.setNeutralButton("See Beach", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    setMapLocation(computeCentreBeach(finalNearestBeach.getBeachCoordinates()));
+                }
+            });
+            AlertDialog nearestBeachDialog = builder.create();
+            nearestBeachDialog.show();
+            mNearestBeachDialogShowed = true;
         }
     }
 
@@ -336,6 +372,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
             intentFilter.addAction(ACTION_BEACHES);
             intentFilter.addAction(ACTION_USER);
+            intentFilter.addAction(ACTION_NEAREST_BEACH);
             //Map the intent filter to the receiver
             getActivity().registerReceiver(activityReceiver, intentFilter);
         }
@@ -506,9 +543,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     }
 
     @Override
-    public void onMapLocationChange(LatLng aNewLocation) {
+    public void onMapLocationChange(Beach aBeach) {
         Log.i(TAG, "changing map focus");
-        setMapLocation(aNewLocation);
+        setMapLocation(computeCentreBeach(aBeach.getBeachCoordinates()));
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSearchBeachListView.getLayoutParams();
         params.height = 0;
         params.width = 0;
@@ -563,5 +600,17 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public boolean onClose() {
         Log.i(TAG, "closed button pressed");
         return false;
+    }
+
+    private LatLng computeCentreBeach(ArrayList<LatLng> points) {
+        double latitude = 0;
+        double longitude = 0;
+        int n = points.size();
+
+        for (LatLng point : points) {
+            latitude += point.latitude;
+            longitude += point.longitude;
+        }
+        return new LatLng(latitude / n, longitude / n);
     }
 }

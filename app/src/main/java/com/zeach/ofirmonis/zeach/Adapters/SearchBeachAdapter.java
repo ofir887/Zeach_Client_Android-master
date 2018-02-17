@@ -7,12 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
-import com.zeach.ofirmonis.zeach.OnMapActions;
+import com.zeach.ofirmonis.zeach.interfaces.OnMapActions;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
@@ -59,26 +57,13 @@ public class SearchBeachAdapter extends ArrayAdapter<Beach> {
                 @Override
                 public void onClick(View v) {
                     Log.i(TAG, String.format("Beach %s Clicked. focusing on beach", mBeaches.get(position).getBeachName()));
-                    mMapActions.onMapLocationChange(computeCentroid(mBeaches.get(position).getBeachCoordinates()));
+                    mMapActions.onMapLocationChange(mBeaches.get(position));
                 }
             });
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
         return convertView;
-    }
-
-    private LatLng computeCentroid(ArrayList<LatLng> points) {
-        double latitude = 0;
-        double longitude = 0;
-        int n = points.size();
-
-        for (LatLng point : points) {
-            latitude += point.latitude;
-            longitude += point.longitude;
-        }
-
-        return new LatLng(latitude / n, longitude / n);
     }
 
 
