@@ -105,6 +105,7 @@ public class BackgroundService extends Service {
     private static final String ACTION_ADD_FAVORITE_BEACH = "add_favorite_beach";
     private static final String ACTION_REQUEST_FAVORITE_BEACHES = "request_favorite_beaches";
     private static final String ACTION_RECEIVE_FAVORITE_BEACHES = "receive_favorite";
+    private static final String ACTION_REMOVE_FAVORITE_BEACHE = "remove_favorite_beach";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
@@ -150,6 +151,10 @@ public class BackgroundService extends Service {
                     Log.i(TAG, "Received user favorite beaches request");
                     sendUserFavoriteBeaches();
                     break;
+                case ACTION_REMOVE_FAVORITE_BEACHE:
+                    Log.i(TAG, "Remove favorite beach request received.");
+                    String beachKey = intent.getStringExtra("favorite_beach");
+                    deleteFavoriteBeach(beachKey);
 
             }
             //sendBroadcast();
@@ -305,6 +310,13 @@ public class BackgroundService extends Service {
         ref.child(FirebaseConstants.USERS).child(aFriendUid).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).removeValue();
         Log.i(TAG, String.format("Friend: [%s] removed from friends list. refreshing beaches..", aFriendUid));
         //  getBeachesFromFirebase();
+    }
+
+    private void deleteFavoriteBeach(String aBeachId) {
+        DatabaseReference ref = data.getDatabase().getReference();
+        Log.i(TAG, String.format("Removing user favorite beach. Beach Id:[%s]", aBeachId));
+        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).child(aBeachId).removeValue();
+        // getUserDetailsFromServer();
     }
 
     public void getSingleLocationUpdate() {
@@ -500,6 +512,7 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_CONFIRM_FRIEND);
             intentFilter.addAction(ACTION_ADD_FAVORITE_BEACH);
             intentFilter.addAction(ACTION_REQUEST_FAVORITE_BEACHES);
+            intentFilter.addAction(ACTION_REMOVE_FAVORITE_BEACHE);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //

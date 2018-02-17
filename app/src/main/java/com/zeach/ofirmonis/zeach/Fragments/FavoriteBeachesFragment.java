@@ -130,15 +130,9 @@ public class FavoriteBeachesFragment extends Fragment {
                 favoriteBeachesAdapter.clear();
                 favoriteBeachesAdapter.notifyDataSetChanged();
                 for (DataSnapshot beach : dataSnapshot.getChildren()) {
-                    //final Friend friend1 = friend.getValue(Friend.class);
-                    String mBeachKey = (String) beach.child("mBeachKey").getValue();
-                    String mBeachName = (String) beach.child("mBeachName").getValue();
-                    FavoriteBeach beachObj = new FavoriteBeach(mBeachName, mBeachKey, "hh");
-                    mFavoriteBeaches.add(beachObj);
-                    //  Log.d("fgf",friend.toString());
+                    final FavoriteBeach favoriteBeach = beach.getValue(FavoriteBeach.class);
+                    mFavoriteBeaches.add(favoriteBeach);
                 }
-
-
                 beachListView.setAdapter(favoriteBeachesAdapter);
                 favoriteBeachesAdapter.notifyDataSetChanged();
             }
