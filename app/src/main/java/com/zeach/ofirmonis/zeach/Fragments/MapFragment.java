@@ -19,6 +19,8 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
+import android.support.v7.widget.ActionBarOverlayLayout;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +28,8 @@ import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
@@ -48,12 +52,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.ion.Ion;
+import com.zeach.ofirmonis.zeach.Adapters.SearchBeachAdapter;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Constants.BeachConstants;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
+import com.zeach.ofirmonis.zeach.OnMapActions;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.lang.reflect.Type;
@@ -68,14 +74,15 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class MapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, View.OnClickListener {
+public class MapFragment extends android.support.v4.app.Fragment implements OnMapReadyCallback, View.OnClickListener, SearchView.OnQueryTextListener, SearchView.OnCloseListener, OnMapActions {
 
     private static final String TAG = MapFragment.class.getSimpleName();
     private View rootView;
     private static GoogleMap mGoogleMap;
     private MapView mMapView;
-    private Button SearchButton;
-    private AutoCompleteTextView autoCompleteSearch;
+    private SearchView autoCompleteSearch;
+    private ListView mSearchBeachListView;
+    private SearchBeachAdapter mSearchBeachAdapter;
     private LatLng userLocation;
     private LatLng CurrentUserLocation;
     private ArrayList<Beach> mBeaches = new ArrayList<>();
@@ -298,7 +305,10 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
         mUser = new User();
-        this.autoCompleteSearch = (AutoCompleteTextView) rootView.findViewById(R.id.autoCompleteSearchTextView);
+        this.autoCompleteSearch = rootView.findViewById(R.id.beach_search_widget);
+        mSearchBeachListView = rootView.findViewById(R.id.map_beach_list);
+        this.autoCompleteSearch.setOnQueryTextListener(this);
+        autoCompleteSearch.setOnSearchClickListener(this);
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
         //
@@ -375,6 +385,13 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         /*mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(mCameraPosition.target).
                 zoom(mCameraPosition.zoom).bearing(mCameraPosition.bearing).tilt(mCameraPosition.tilt).build()));*/
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
+        // mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
+        //  mGoogleMap.getUiSettings().setIndoorLevelPickerEnabled(false);
+        //  mGoogleMap.setIndoorEnabled(false);
+        //  mGoogleMap.getUiSettings().setTiltGesturesEnabled(false);
+        mGoogleMap.getUiSettings().setCompassEnabled(false);
+        mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
         checkPermissions();
 
     }
@@ -436,7 +453,13 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onClick(View v) {
         if (v == autoCompleteSearch) {
-            this.autoCompleteSearch.setText("");
+            Log.i(TAG, "Search button clicked. changing list view layout");
+            autoCompleteSearch.setIconifiedByDefault(true);
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSearchBeachListView.getLayoutParams();
+            params.height = RelativeLayout.LayoutParams.MATCH_PARENT;
+            params.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+            params.addRule(RelativeLayout.BELOW, R.id.beach_search_widget);
+            mSearchBeachListView.setLayoutParams(params);
         }
     }
 
@@ -480,5 +503,65 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onMapLocationChange(LatLng aNewLocation) {
+        Log.i(TAG, "changing map focus");
+        setMapLocation(aNewLocation);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSearchBeachListView.getLayoutParams();
+        params.height = 0;
+        params.width = 0;
+        params.addRule(RelativeLayout.BELOW, R.id.beach_search_widget);
+        mSearchBeachListView.setLayoutParams(params);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSearchBeachListView.getLayoutParams();
+        params.height = 0;
+        params.width = 0;
+        params.addRule(RelativeLayout.BELOW, R.id.beach_search_widget);
+        mSearchBeachListView.setLayoutParams(params);
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        ArrayList<Beach> foundedBeaches = new ArrayList<>();
+        mSearchBeachAdapter = new SearchBeachAdapter(getContext(), foundedBeaches, this);
+        mSearchBeachAdapter.clear();
+        mSearchBeachAdapter.notifyDataSetChanged();
+        if (newText.isEmpty()) {
+            Log.i(TAG, "empty string. clearing");
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSearchBeachListView.getLayoutParams();
+            params.height = 0;
+            params.width = 0;
+            params.addRule(RelativeLayout.BELOW, R.id.beach_search_widget);
+            mSearchBeachListView.setLayoutParams(params);
+            mSearchBeachAdapter.clear();
+            mSearchBeachAdapter.notifyDataSetChanged();
+        } else {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSearchBeachListView.getLayoutParams();
+            params.height = RelativeLayout.LayoutParams.MATCH_PARENT;
+            params.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+            params.addRule(RelativeLayout.BELOW, R.id.beach_search_widget);
+            mSearchBeachListView.setLayoutParams(params);
+            for (int i = 0; i < mBeaches.size(); i++) {
+                if (mBeaches.get(i).getBeachName().toLowerCase().contains(newText)) {
+                    foundedBeaches.add(mBeaches.get(i));
+                }
+            }
+        }
+
+        mSearchBeachListView.setAdapter(mSearchBeachAdapter);
+        mSearchBeachAdapter.notifyDataSetChanged();
+        return false;
+    }
+
+    @Override
+    public boolean onClose() {
+        Log.i(TAG, "closed button pressed");
+        return false;
     }
 }
