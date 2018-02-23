@@ -22,7 +22,6 @@ import com.zeach.ofirmonis.zeach.Fragments.LoginFragment;
 import com.zeach.ofirmonis.zeach.R;
 
 public class SignInLogInActivity extends AppCompatActivity {
-    private FirebaseAuth mAuth;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -58,16 +57,6 @@ public class SignInLogInActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
     }
 
 

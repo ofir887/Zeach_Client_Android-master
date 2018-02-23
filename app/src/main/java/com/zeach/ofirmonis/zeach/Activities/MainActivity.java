@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
         //
-
         if (activityReceiver != null) {
             //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
