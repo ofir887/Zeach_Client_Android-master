@@ -1,10 +1,13 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -28,7 +31,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.zeach.ofirmonis.zeach.AppController;
-import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -53,8 +55,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private Bitmap bit = null;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
-    private boolean mImageFromDevice;
-    private Button mUpdatePhotoButton;
     private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
     private BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
         @Override
@@ -73,13 +73,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         this.ZeachUser = AppController.getInstance().getUser();
         this.btn = (Button) this.rootView.findViewById(R.id.button3);
         this.Name = (EditText) this.rootView.findViewById(R.id.name_field);
-        this.Gender = (EditText) this.rootView.findViewById(R.id.gender_field);
         this.getFromGallery = (Button) this.rootView.findViewById(R.id.browse);
         this.image = (ImageView) this.rootView.findViewById(R.id.imageView2);
         this.getFromGallery.setOnClickListener(this);
         this.btn.setOnClickListener(this);
-        mUpdatePhotoButton = this.rootView.findViewById(R.id.update_photo);
-        this.mUpdatePhotoButton.setOnClickListener(this);
         setElements();
 
 
@@ -94,25 +91,52 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         if (this.ZeachUser.getProfilePictureUri() != null) {
             if (this.ZeachUser.getFacebookUID() != null && !this.ZeachUser.getProfilePictureUri().startsWith("/Users/")) {
                 new AppController.DownloadImageTask(this.image).execute(this.ZeachUser.getProfilePictureUri().toString());
+                AlertDialog.Builder uploadPhotoDialog = new AlertDialog.Builder(getContext());
+                uploadPhotoDialog.setTitle("Upload Alert");
+                uploadPhotoDialog.setMessage("Upload Facebook photo ?");
+                uploadPhotoDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        addImageToStorage();
+                        dialog.cancel();
+                    }
+                });
+                uploadPhotoDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                uploadPhotoDialog.show();
             } else {
                 Log.i(TAG, "Loading photo from storage");
                 mStorageRef = mStorage.getReference(this.ZeachUser.getProfilePictureUri());
-                Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(image);
+                mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                        Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
+                        image.setImageBitmap(smallMarker);
+                        image.invalidate();
+                    }
+                });
             }
-            /*if ((getActivity().getClass().getSimpleName().equals("ProfileActivity"))) {
-                Log.i(TAG, "Activity");
-                new AppController.DownloadImageTask(this.image).execute(this.ZeachUser.getProfilePictureUri().toString());
-            } else {
-                Log.i(TAG, "Fragment" + this.ZeachUser.getProfilePictureUri());
-                mStorageRef = mStorage.getReference(this.ZeachUser.getProfilePictureUri());
-                Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(image);
-            }*/
         } else {
             Log.i(TAG, "User not from facebook. showing default icon image");
             String profilePictureUri = "/PersonIcon.png";
             this.ZeachUser.setProfilePictureUri(profilePictureUri);
             mStorageRef = mStorage.getReference(profilePictureUri);
-            Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(image);
+            mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                    Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
+                    image.setImageBitmap(smallMarker);
+                    image.invalidate();
+                }
+            });
         }
 
     }
@@ -126,7 +150,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //  super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == -1) {
             if (requestCode == 1) {
                 Uri returnUri = data.getData();
@@ -137,8 +160,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                mImageFromDevice = true;
                 this.image.setImageBitmap(bitmapImage);
+                addImageToStorage();
             }
         }
     }
@@ -154,8 +177,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             if (getActivity().getClass().getSimpleName().equals("MainActivity")) {
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new PreferencesFragment()).commit();
                 onDestroy();
-            } else if ((getActivity().getClass().getSimpleName().equals("ProfileActivity"))) {
-                ((ProfileActivity) getActivity()).setCurrentItem(1);
             }
 
         }
@@ -165,21 +186,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(i, RESULT_LOAD_IMAGE);
         }
-        if (v == mUpdatePhotoButton) {
-            String imagePath = "/Users/" + this.ZeachUser.getUID();
-            this.ZeachUser.setProfilePictureUri(imagePath);
-            mStorageRef = mStorage.getReference().child(imagePath);
-            if (mImageFromDevice) {
-                Log.i(TAG, "Adding image from file");
-                addImageToStorage();
-            } else {
-                Log.i(TAG, "Adding image from facebook");
-                addImageToStorage();
-
-            }
-        }
-
-
     }
 
     private void sendBroadcast() {
@@ -191,15 +197,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
     public void addImageToStorage() {
+        String imagePath = "/Users/" + ZeachUser.getUID();
+        ZeachUser.setProfilePictureUri(imagePath);
+        mStorageRef = mStorage.getReference().child(imagePath);
         image.setDrawingCacheEnabled(true);
         image.buildDrawingCache();
         Bitmap bmp = image.getDrawingCache();
-        //
         bmp = AppController.SetCircleMarkerIcon(bmp);
-        bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.BLACK);
-        bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
         Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 200, 200, true);
-        //
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         smallMarker.compress(Bitmap.CompressFormat.PNG, 0, out);
         byte[] data = out.toByteArray();
@@ -214,6 +219,17 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.i(TAG, "Success");
+                sendBroadcast();
+                AlertDialog.Builder uploadPhotoDialog = new AlertDialog.Builder(getContext());
+                uploadPhotoDialog.setTitle("Upload Process Completed");
+                uploadPhotoDialog.setMessage("Success");
+                uploadPhotoDialog.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                uploadPhotoDialog.show();
             }
         });
     }

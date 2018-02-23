@@ -4,7 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.v4.app.FragmentActivity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.nfc.Tag;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +20,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -76,7 +82,26 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
         }
         holder.friendName.setText(friends.get(position).getName());
         mStorageRef = mStorage.getReference(friends.get(position).getPhotoUrl());
-        Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(holder.friendPhoto);
+        final Handler handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Log.i(TAG, "refreshing");
+                mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                        bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
+                        bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                        Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
+                        holder.friendPhoto.setImageBitmap(smallMarker);
+                        holder.friendPhoto.invalidate();
+                    }
+                });
+                handler.postDelayed(this, 1000 * 10);
+            }
+        });
         holder.AddFriendUnfriend.setText("Unfriend");
         if (friends.get(position).getCurrentBeach() != null)
             holder.CurrentBeach.setText(friends.get(position).getCurrentBeach().getmBeachName());
@@ -92,7 +117,6 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
         });
         return convertView;
     }
-
 
     static class ViewHolder {
         ImageView friendPhoto;

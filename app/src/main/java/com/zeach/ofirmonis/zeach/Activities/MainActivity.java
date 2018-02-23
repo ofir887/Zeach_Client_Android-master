@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity
     private View header;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
+    private boolean mOpenMap;
+
 
     private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
 
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
         //
+
         if (activityReceiver != null) {
             //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
@@ -92,9 +95,14 @@ public class MainActivity extends AppCompatActivity
 
         //
         // this.spinner.setVisibility(View.VISIBLE);
-        //  getUser();
+        mOpenMap = getIntent().getBooleanExtra("map", false);
+        Log.i(TAG, String.format("opening map:[%b]", mOpenMap));
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+        if (mOpenMap) {
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+        } else {
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
+        }
         //mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -113,7 +121,12 @@ public class MainActivity extends AppCompatActivity
         TextView navigationName = (TextView) header.findViewById(R.id.profileName);
         navigationName.setText(zeachUser.getName());
         final CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
-        mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
+        if (zeachUser.getProfilePictureUri().startsWith("https://")) {
+            mStorageRef = mStorage.getReference("/PersonIcon.png");
+        } else {
+            mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
+        }
+        // mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
         mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {

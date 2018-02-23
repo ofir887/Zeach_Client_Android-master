@@ -14,10 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
-import com.google.firebase.database.FirebaseDatabase;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
-import com.zeach.ofirmonis.zeach.Activities.ProfileActivity;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -27,6 +25,7 @@ import com.zeach.ofirmonis.zeach.R;
 
 public class PreferencesFragment extends Fragment implements View.OnClickListener {
     Button btn;
+    private static final String TAG = PreferencesFragment.class.getSimpleName();
     private CheckBox importFacebookFriendsCheckbox;
     private CheckBox isUserPrivate;
     private User ZeachUser;
@@ -103,28 +102,18 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         if (v == btn) {
-            if (checkOnWhatActivityUserIs() == 1) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
-            } else if (checkOnWhatActivityUserIs() == 0)
-                ((ProfileActivity) getActivity()).setCurrentItem(0);
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
         }
         if (v == this.SaveButton) {
+            Log.i(TAG, "clicked");
             AppController.getInstance().setUser(this.ZeachUser);
             if (AppController.getInstance().getUser().isImportFacebookFriends()) {
                 AppController.getInstance().getFacebookFriends();
 
             }
-            //TODO - send to receiver
-            //  AppController.getInstance().UpdateUserInfo();
             sendBroadcast();
-            if (checkOnWhatActivityUserIs() == 1) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
-
-            } else {
-                Intent mainActivity = new Intent(getActivity(), MainActivity.class);
-                startActivity(mainActivity);
-                getActivity().finish();
-            }
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+            onDestroy();
         }
 
 

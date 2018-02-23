@@ -64,10 +64,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA6ijHmrM6uZUi19xuROcNSQyQlxfkW2JQ" />
 
-        <activity
-            android:name=".Activities.ProfileActivity"
-            android:label="@string/title_activity_profile"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
         <service
             android:name=".Services.BackgroundService"
             android:process=":convertprc"
