@@ -185,8 +185,8 @@ public class MainActivity extends AppCompatActivity
             finish();
             LoginManager.getInstance().logOut();
 
-            Intent SignInLogInActivity = new Intent(getApplicationContext(), SignInLogInActivity.class);
-            startActivity(SignInLogInActivity);
+            Intent SignUpLogInActivity = new Intent(getApplicationContext(), SignUpLogInActivity.class);
+            startActivity(SignUpLogInActivity);
             return true;
         }
 

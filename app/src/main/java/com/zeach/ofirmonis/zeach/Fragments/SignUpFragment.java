@@ -37,12 +37,12 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class SignInFragment extends Fragment implements View.OnClickListener {
+public class SignUpFragment extends Fragment implements View.OnClickListener {
     private CallbackManager callbackManager;
     private DatabaseReference data;
     private FirebaseAuth mAuth;
     private View rootView;
-    private Button SignInButton;
+    private Button SignUpButton;
     private TextView EmailTextView;
     private TextView PasswordTextView;
 
@@ -51,13 +51,13 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        this.rootView = inflater.inflate(R.layout.signin_fragment, container, false);
+        this.rootView = inflater.inflate(R.layout.signup_fragment, container, false);
 
-        SignInButton = (Button) this.rootView.findViewById(R.id.signin_button);
+        SignUpButton = (Button) this.rootView.findViewById(R.id.signup_button);
         EmailTextView = (TextView) this.rootView.findViewById(R.id.email_textfield);
         PasswordTextView = (TextView) this.rootView.findViewById(R.id.password_textfield);
         this.data = FirebaseDatabase.getInstance().getReference();
-        SignInButton.setOnClickListener(this);
+        SignUpButton.setOnClickListener(this);
 
 
         return rootView;
@@ -80,7 +80,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v == SignInButton) {
+        if (v == SignUpButton) {
             String email = this.EmailTextView.getText().toString();
             String password = this.PasswordTextView.getText().toString();
             createNewFirebaseUser(email, password);
@@ -104,14 +104,14 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        AlertDialog.Builder signInDialog = new AlertDialog.Builder(getContext());
+                        AlertDialog.Builder signUpDialog = new AlertDialog.Builder(getContext());
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             FirebaseUser user = mAuth.getCurrentUser();
                             User = new User(user.getEmail(), user.getUid(), user.getProviderId());
-                            signInDialog.setTitle("SignIn Completed");
-                            signInDialog.setMessage("Success !");
-                            signInDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                            signUpDialog.setTitle("SignIn Completed");
+                            signUpDialog.setMessage("Success !");
+                            signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();
@@ -119,16 +119,16 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
                                 }
                             });
                         } else {
-                            signInDialog.setTitle("SignIn Failed");
-                            signInDialog.setMessage("Failed. Try again !");
-                            signInDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                            signUpDialog.setTitle("SignIn Failed");
+                            signUpDialog.setMessage("Failed. Try again !");
+                            signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.cancel();
                                 }
                             });
                         }
-                        signInDialog.show();
+                        signUpDialog.show();
                     }
                 });
     }
