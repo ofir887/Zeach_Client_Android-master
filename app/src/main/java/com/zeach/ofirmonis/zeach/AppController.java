@@ -44,8 +44,6 @@ public class AppController {
     private static AppController mInstance;
 
     public static JSONArray arr;
-    public static Bitmap mProfileBitmap;
-    public static File mImageFile;
 
     public com.zeach.ofirmonis.zeach.Objects.User User;
 
@@ -58,7 +56,6 @@ public class AppController {
 
     public void setUser(com.zeach.ofirmonis.zeach.Objects.User user) {
         User = user;
-        //UpdateUserInfo();
     }
 
     public static AppController getInstance() {
@@ -67,34 +64,6 @@ public class AppController {
         }
         return mInstance;
     }
-
-    public Bitmap getmProfileBitmap() {
-        return mProfileBitmap;
-    }
-
-    public void UpdateUserInfo() {
-        final DatabaseReference data = FirebaseDatabase.getInstance().getReference();
-        //  AppController.getInstance().setUser(this.ZeachUser);
-        // Log.d("singleton",AppController.getInstance().getUser().toString());
-        //Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
-        //  user.put(this.User.getUID(), this.User);
-        data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
-        //TODO
-//        if (User.getCurrentBeach() != null) {
-//            data.child(FirebaseConstants.BEACHES).child("Country").child(User.getCurrentBeach().
-//                    getCountry()).child(User.getCurrentBeach().getmBeachID()).child("Peoplelist")
-//                    .child(User.getUID()).child("profilePrivate").setValue(User.isProfilePrivate());
-//
-//            //Add seperate parent ! need to check if this is good or can out this on Users in nested map
-//            //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
-//        /*
-//        Intent profileActivity = new Intent(getActivity(),ProfileActivity.class);
-//        profileActivity.putExtra("User",User);
-//        getActivity().finish();
-//        startActivity(profileActivity);*/
-//        }
-    }
-
 
     public void getFacebookFriends() {
         //get friends list

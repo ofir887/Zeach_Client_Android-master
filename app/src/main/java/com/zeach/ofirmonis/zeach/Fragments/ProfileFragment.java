@@ -1,6 +1,9 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -52,6 +55,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private StorageReference mStorageRef;
     private boolean mImageFromDevice;
     private Button mUpdatePhotoButton;
+    private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
+    private BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
 
 
     @Nullable
@@ -138,7 +148,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if (v == btn) {
             this.ZeachUser.setName(this.Name.getText().toString()); // set the updated name
-            AppController.getInstance().setUser(this.ZeachUser);
+            //    AppController.getInstance().setUser(this.ZeachUser);
+            //TODO - send broadcast
+            sendBroadcast();
             if (getActivity().getClass().getSimpleName().equals("MainActivity")) {
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new PreferencesFragment()).commit();
                 onDestroy();
@@ -168,6 +180,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
 
 
+    }
+
+    private void sendBroadcast() {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_UPDATE_USER_PROFILE);
+        intent.putExtra("name", ZeachUser.getName());
+        intent.putExtra("photo_url", ZeachUser.getProfilePictureUri());
+        getContext().sendBroadcast(intent);
     }
 
     public void addImageToStorage() {
@@ -215,5 +235,20 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         AppController.getInstance().setUser(this.ZeachUser);
         super.onDetach();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mProfileReceiver != null) {
+            IntentFilter intentFilter = new IntentFilter(ACTION_UPDATE_USER_PROFILE);
+            getContext().registerReceiver(mProfileReceiver, intentFilter);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        getContext().unregisterReceiver(mProfileReceiver);
+        super.onPause();
     }
 }

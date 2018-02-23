@@ -23,32 +23,22 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
-import com.firebase.ui.storage.images.FirebaseImageLoader;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
 import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
-import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -124,7 +114,6 @@ public class MainActivity extends AppCompatActivity
         navigationName.setText(zeachUser.getName());
         final CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
         mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
-        //Glide.with(getApplicationContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(image);
         mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
@@ -132,12 +121,10 @@ public class MainActivity extends AppCompatActivity
                 bitmap = AppController.SetCircleMarkerIcon(bitmap);
                 bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
                 bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
-                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 150, 150, true);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
                 image.setImageBitmap(smallMarker);
             }
         });
-        //  Bitmap smallMarker = Bitmap.createScaledBitmap(aBitmap, 200, 200, true);
-        //  image.setImageBitmap(smallMarker);
     }
 
     @Override
@@ -182,7 +169,6 @@ public class MainActivity extends AppCompatActivity
                 Log.d("Provider", "Provider: " + profile.getProviderId());
             }
 
-            // Log.d("log" , mAuth.getCurrentUser().getProviderId());
             FirebaseAuth.getInstance().signOut();
             finish();
             LoginManager.getInstance().logOut();
@@ -221,31 +207,12 @@ public class MainActivity extends AppCompatActivity
             fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
 
         } else if (id == R.id.feedback) {
-
-        } else if (id == R.id.nav_send) {
-
+            //TODO
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    /*
-    public void UpdateUserInfo(){
-       // this.data = FirebaseDatabase.getInstance().getReference();
-        AppController.getInstance().setUser(this.ZeachUser);
-        Log.d("singleton",AppController.getInstance().getUser().toString());
-        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
-        user.put(this.ZeachUser.getUID(),this.ZeachUser);
-        this.data.child("Users").child(this.ZeachUser.getUID()).setValue(this.ZeachUser);
-        //Add seperate parent ! need to check if this is good or can out this on Users in nested map
-        //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
-        /*
-        Intent profileActivity = new Intent(getActivity(),ProfileActivity.class);
-        profileActivity.putExtra("User",User);
-        getActivity().finish();
-        startActivity(profileActivity);
-
-    }*/
 
 }

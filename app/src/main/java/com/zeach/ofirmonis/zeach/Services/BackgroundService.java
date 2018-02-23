@@ -99,6 +99,8 @@ public class BackgroundService extends Service {
     private static final String ACTION_RECEIVE_FAVORITE_BEACHES = "receive_favorite";
     private static final String ACTION_REMOVE_FAVORITE_BEACHE = "remove_favorite_beach";
     private static final String ACTION_NEAREST_BEACH = "nearest_beach";
+    private static final String ACTION_UPDATE_USER_PREFERENCES = "update_user_preferences";
+    private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
@@ -152,7 +154,20 @@ public class BackgroundService extends Service {
                     friend = (Friend) intent.getSerializableExtra("friend");
                     Log.i(TAG, String.format("Friend request message received:[%s]", friend));
                     AddFriendRequest(friend);
-
+                    break;
+                case ACTION_UPDATE_USER_PREFERENCES:
+                    boolean importFacebookFriends = intent.getBooleanExtra("add_facebook_friends", false);
+                    boolean isUserPrivate = intent.getBooleanExtra("private_profile", false);
+                    Log.i(TAG, String.format("User Preferences Update Request Received. import from facebook:[%b], private profile:[%b]",
+                            importFacebookFriends, isUserPrivate));
+                    updateUserPreferences(importFacebookFriends, isUserPrivate);
+                    break;
+                case ACTION_UPDATE_USER_PROFILE:
+                    String name = intent.getStringExtra("name");
+                    String photoUrl = intent.getStringExtra("photo_url");
+                    Log.i(TAG, String.format("Update User Profile message request received. " +
+                            "name:[%s], photo url:[%s]", name, photoUrl));
+                    updateUserProfile(name, photoUrl);
 
             }
             //sendBroadcast();
@@ -269,7 +284,6 @@ public class BackgroundService extends Service {
         mUser.AddBeachToList(aFavoriteBeach);
         DatabaseReference ref = data.getDatabase().getReference();
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).setValue(mUser.getFavoriteBeaches());
-        AppController.getInstance().setUser(mUser);
     }
 
     public void sendUserFavoriteBeaches() {
@@ -452,6 +466,24 @@ public class BackgroundService extends Service {
         });
     }
 
+    private void updateUserPreferences(boolean aImportFriendsFromFacebook, boolean aPrivateProfile) {
+        mUser.setImportFacebookFriends(aImportFriendsFromFacebook);
+        mUser.setProfilePrivate(aPrivateProfile);
+        DatabaseReference ref = data.getDatabase().getReference();
+        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).setValue(mUser);
+        if (mUser.getCurrentBeach().getmBeachID() != null) {
+            ref.child(FirebaseConstants.BEACHES).child(mUser.getCurrentBeach().getmBeachID()).
+                    child("Peoplelist").child(mUser.getUID()).child("profilePrivate").setValue(mUser.isProfilePrivate());
+        }
+    }
+
+    private void updateUserProfile(String aName, String aPhotoUrl) {
+        mUser.setName(aName);
+        mUser.setProfilePictureUri(aPhotoUrl);
+        DatabaseReference ref = data.getDatabase().getReference();
+        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).setValue(mUser);
+    }
+
     private String findNearsetBeach(LatLng aUserLocation) {
         HashMap<String, LatLng> beachesCenter = new HashMap<>();
         for (int i = 0; i < beaches.size(); i++) {
@@ -576,6 +608,8 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_NEAREST_BEACH);
             intentFilter.addAction(ACTION_REQUEST_USER);
             intentFilter.addAction(ACTION_ADD_FRIEND_REQUEST);
+            intentFilter.addAction(ACTION_UPDATE_USER_PREFERENCES);
+            intentFilter.addAction(ACTION_UPDATE_USER_PROFILE);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //
@@ -605,6 +639,7 @@ public class BackgroundService extends Service {
     }
 
     private void sendBroadcast(String action) {
+        AppController.getInstance().setUser(mUser);
         Intent new_intent = new Intent();
         Gson gson = new Gson();
         switch (action) {
