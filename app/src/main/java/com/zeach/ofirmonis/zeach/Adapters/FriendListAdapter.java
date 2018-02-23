@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,10 +18,7 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.zeach.ofirmonis.zeach.AppController;
-import com.zeach.ofirmonis.zeach.Fragments.FriendsListFragment;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
-import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
@@ -47,23 +42,17 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String imagePath = intent.getStringExtra("bitmap");
-            Log.d(TAG, "Received user photo bitmap: " + imagePath);
-            Bitmap bmp = BitmapFactory.decodeFile(imagePath);
-            holder.friendPhoto.setImageBitmap(bmp);
+
         }
     };
 
-    public FriendListAdapter(Context context, ArrayList<Friend> friends, FragmentActivity activity) {
+    public FriendListAdapter(Context context, ArrayList<Friend> friends) {
         super(context, 0, friends);
         this.friends = friends;
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
         if (adapterReceiver != null) {
-            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
             IntentFilter intentFilter = new IntentFilter(ACTION_DELETE_FRIEND);
-            //  intentFilter.addAction(ACTION_DELETE_FRIEND);
-            //Map the intent filter to the receiver
             context.registerReceiver(adapterReceiver, intentFilter);
         }
         //
@@ -86,7 +75,6 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.friendName.setText(friends.get(position).getName());
-        //new AppController.DownloadImageTask(holder.friendPhoto).execute(friends.get(position).getPhotoUrl().toString());
         mStorageRef = mStorage.getReference(friends.get(position).getPhotoUrl());
         Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(holder.friendPhoto);
         holder.AddFriendUnfriend.setText("Unfriend");

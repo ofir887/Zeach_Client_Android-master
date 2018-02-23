@@ -1,7 +1,8 @@
 package com.zeach.ofirmonis.zeach.Adapters;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.support.v4.app.FragmentActivity;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +16,13 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,13 +31,24 @@ import java.util.Map;
 
 public class UserListAdapter extends ArrayAdapter<User> {
 
+    private static final String TAG = UserListAdapter.class.getSimpleName();
+
     private ArrayList<User> users = new ArrayList<>();
-    private String UserId;
     private Map<String, Friend> mUserFriends;
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
+    private static final String ACTION_ADD_FRIEND_REQUEST = "friend_request";
+    private BroadcastReceiver mFriendRequestReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_ADD_FRIEND_REQUEST:
+                    break;
+            }
+        }
+    };
 
-    public UserListAdapter(Context context, ArrayList<User> users, Map<String, Friend> aUserFriends, FragmentActivity activity) {
+    public UserListAdapter(Context context, ArrayList<User> users, Map<String, Friend> aUserFriends) {
         super(context, 0, users);
         this.users = users;
         this.mUserFriends = aUserFriends;
@@ -62,27 +74,32 @@ public class UserListAdapter extends ArrayAdapter<User> {
         if (users.get(position).getName() != null)
             holder.userName.setText(users.get(position).getName());
         if (users.get(position).getProfilePictureUri() != null) {
-            // new AppController.DownloadImageTask(holder.userPhoto).execute(users.get(position).getProfilePictureUri());
             mStorageRef = mStorage.getReference(users.get(position).getProfilePictureUri());
             Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(holder.userPhoto);
         }
-        // holder.userPhoto.setImageURI(Uri.parse(users.get(position).getProfilePictureUri()));
         if (mUserFriends.containsKey(users.get(position).getUID())) {
-            //    if (users.get(position).getFriendsList().containsKey(this.UserId)) {
             holder.AddAsFriend.setText("Already Friend");
             holder.AddAsFriend.setClickable(false);
 
         } else {
-            holder.AddAsFriend.setText("Add");
-            holder.AddAsFriend.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d("clicked", users.get(position).getName());
-                    Friend friend = new Friend(users.get(position).getName(), users.get(position).getUID(), users.get(position).getProfilePictureUri());
-                    AppController.getInstance().AddFriendRequest(UserId, friend);
+            if (1 == 5) {
+            } else {
+                holder.AddAsFriend.setText("Add");
+                holder.AddAsFriend.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("clicked", users.get(position).getName());
+                        Friend friend = new Friend(users.get(position).getName(), users.get(position).getUID(), users.get(position).getProfilePictureUri());
+                        //  AppController.getInstance().AddFriendRequest(friend);
+                        Log.i(TAG, String.format("Sending friend request. Friend to add:[%s]", friend));
+                        Intent intent = new Intent();
+                        intent.setAction(ACTION_ADD_FRIEND_REQUEST);
+                        intent.putExtra("friend", friend);
+                        getContext().sendBroadcast(intent);
 
-                }
-            });
+                    }
+                });
+            }
         }
 
         return convertView;

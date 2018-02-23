@@ -3,6 +3,7 @@ package com.zeach.ofirmonis.zeach.Fragments;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -33,64 +34,43 @@ import java.util.ArrayList;
 public class FriendsListFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = FriendsListFragment.class.getSimpleName();
     private View rootView;
-    private User ZeachUser;
+    private User ZeachUser = new User();
     private ArrayList friends = new ArrayList();
     private FriendListAdapter friendListAdapter;
     private ListView friendsListView;
     private DatabaseReference data;
     //
-    private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_USER = "User";
-    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
+    private static final String ACTION_REQUEST_USER = "request_user";
     private BroadcastReceiver mFriendsReciever = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_USER: {
-                    Log.d(TAG, "lets see new");
                     User user = (User) intent.getSerializableExtra("User");
-                    Log.d(TAG, user.toString());
+                    Log.d(TAG, String.format("User received:[%s]", user.toString()));
+                    ZeachUser = user;
+                    data = FirebaseDatabase.getInstance().getReference("Users/" + ZeachUser.getUID() + "/friendsList/");
+                    getFriendsFromServer();
                     break;
                 }
             }
         }
     };
 
-    private void sendBroadcast() {
-        Intent new_intent = new Intent();
-        new_intent.setAction(ACTION_STRING_SERVICE);
-        getActivity().sendBroadcast(new_intent);
-    }
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.friends_list_fragment, container, false);
         this.friendsListView = (ListView) rootView.findViewById(R.id.friends_list);
-        this.ZeachUser = AppController.getInstance().getUser();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/friendsList/");
         String s = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("user", "defaultStringIfNothingFound");
-        Log.d("listfragment", s);
-        //
-        /*if (mFriendsReciever!= null) {
-            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
-            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
-            intentFilter.addAction(ACTION_USER);
-            //Map the intent filter to the receiver
-            getActivity().registerReceiver(mFriendsReciever, intentFilter);
-        }*/
-        //
-
-        getFriendsFromServer();
-
 
         return this.rootView;
     }
 
     public void getFriendsFromServer() {
-        friendListAdapter = new FriendListAdapter(getContext(), friends, getActivity());
+        friendListAdapter = new FriendListAdapter(getContext(), friends);
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -132,7 +112,6 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //  super.onActivityResult(requestCode, resultCode, data);
 
     }
 
@@ -155,8 +134,29 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/friendsList/");
+        ZeachUser = new User();
+        if (mFriendsReciever != null) {
+            IntentFilter intentFilter = new IntentFilter(ACTION_USER);
+            intentFilter.addAction(ACTION_REQUEST_USER);
+            getActivity().registerReceiver(mFriendsReciever, intentFilter);
+        }
+        Intent intent = new Intent();
+        intent.setAction(ACTION_REQUEST_USER);
+        getContext().sendBroadcast(intent);
+    }
+
+    @Override
+    public void onPause() {
+        getContext().unregisterReceiver(mFriendsReciever);
+        super.onPause();
+    }
+
+    @Override
     public void onDetach() {
-        Log.d("nir", "nir1222");
+        Log.d(TAG, "Detach");
 
         super.onDetach();
     }

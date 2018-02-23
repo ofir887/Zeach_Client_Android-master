@@ -27,7 +27,7 @@ import java.util.ArrayList;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener{
+public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener {
 
     private View rootView;
     private User ZeachUser;
@@ -40,8 +40,8 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        this.rootView  =inflater.inflate(R.layout.fragment_friends_requests,container,false);
-        this.UsersListView = (ListView)rootView.findViewById(R.id.freinds_requests_list);
+        this.rootView = inflater.inflate(R.layout.fragment_friends_requests, container, false);
+        this.UsersListView = (ListView) rootView.findViewById(R.id.freinds_requests_list);
 
 
         this.ZeachUser = AppController.getInstance().getUser();
@@ -50,15 +50,15 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
         return this.rootView;
     }
 
-    public void getFriendsRequestsFromServer(){
-        this.friendsRequestsListAdapter = new FriendsRequestsListAdapter(getContext(),this.friendsRequests,this.ZeachUser.getUID(),getActivity());
+    public void getFriendsRequestsFromServer() {
+        this.friendsRequestsListAdapter = new FriendsRequestsListAdapter(getContext(), this.friendsRequests, this.ZeachUser.getUID(), getActivity());
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 friendsRequests.clear();
 
                 friendsRequestsListAdapter.notifyDataSetChanged();
-                for(DataSnapshot user: dataSnapshot.getChildren()){
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
                     friendsRequests.add(user.getValue(Friend.class));
                 }
 
@@ -78,8 +78,8 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (this.isVisible())
-            if (!isVisibleToUser){
-                Log.d("not","visible anymore");
+            if (!isVisibleToUser) {
+                Log.d("not", "visible anymore");
             }
     }
 
@@ -89,6 +89,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //  super.onActivityResult(requestCode, resultCode, data);
@@ -101,6 +102,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
 
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -111,9 +113,10 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
         super.onActivityCreated(savedInstanceState);
 
     }
+
     @Override
     public void onDetach() {
-        Log.d("nir","nir1222");
+        Log.d("nir", "nir1222");
 
         super.onDetach();
     }
