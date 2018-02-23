@@ -89,6 +89,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
     private boolean mNearestBeachDialogShowed = false;
+    private boolean mUserDetailesReceived;
+    private boolean mBeachesDetailsReceived;
+    private boolean mUserLocationRecieved;
     ///
     private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
@@ -106,6 +109,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     User user = (User) intent.getSerializableExtra("User");
                     mUser = user;
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
+                    mUserDetailesReceived = true;
+                    setUserLocationOnMap();
                     break;
                 }
                 case ACTION_STRING_ACTIVITY: {
@@ -113,6 +118,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     LatLng latLng = new LatLng(b.getDouble("lat"), b.getDouble("lng"));
                     Log.d(MapFragment.class.getSimpleName(), latLng.toString());
                     userLocation = latLng;
+                    mUserLocationRecieved = true;
                     setUserLocationOnMap();
                     break;
                 }
@@ -132,6 +138,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     showFriendsOnMap();
 /*                    if (userLocation != null)
                         setUserLocationOnMap();*/
+                    mBeachesDetailsReceived = true;
+                    setUserLocationOnMap();
                     break;
                 }
                 case ACTION_NEAREST_BEACH:
@@ -159,21 +167,37 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     @Override
                     public void run() {
                         Bitmap bmp = null;
-                        try {
+                        //    try {
+                        //
+                        mStorageRef = mStorage.getReference(friend.getPhotoUrl());
+                        mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                                bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
+                                bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 150, 150, true);
+                                MarkerOptions marker = new MarkerOptions().position(friendLocation).
+                                        title(friend.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+                                mFriendsMarkers.add(mGoogleMap.addMarker(marker));
+                            }
+                        });
+                        //
 
-                            bmp = Ion.with(getApplicationContext()).load(friend.getPhotoUrl()).asBitmap().get();
-                        } catch (InterruptedException e) {
+                        //  bmp = Ion.with(getApplicationContext()).load(friend.getPhotoUrl()).asBitmap().get();
+                        /*} catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
                             e.printStackTrace();
-                        }
-                        bmp = AppController.SetCircleMarkerIcon(bmp);
+                        }*/
+                        /*bmp = AppController.SetCircleMarkerIcon(bmp);
                         bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
                         bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
                         Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
                         MarkerOptions marker = new MarkerOptions().position(friendLocation).
                                 title(friend.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
-                        mFriendsMarkers.add(mGoogleMap.addMarker(marker));
+                        mFriendsMarkers.add(mGoogleMap.addMarker(marker));*/
                     }
                 });
             }
@@ -439,30 +463,31 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     }
 
     public void setUserLocationOnMap() {
-        if (mUser != null) {
-            //  try {
-            mStorageRef = mStorage.getReference(mUser.getProfilePictureUri());
-            mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    bitmap = AppController.SetCircleMarkerIcon(bitmap);
-                    bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.WHITE);
-                    bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
-                    Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 150, 150, true);
-                    if (mUserMarker != null) {
-                        mUserMarker.remove();
-                    } else {
-                        setMapLocation(userLocation);
-                    }
-                    MarkerOptions marker = new MarkerOptions().position(userLocation).
-                            title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
-                    mUserMarker = mGoogleMap.addMarker(marker);
+        if (mBeachesDetailsReceived && mUserLocationRecieved && mUserDetailesReceived) {
+            if (mUser != null) {
+                //  try {
+                mStorageRef = mStorage.getReference(mUser.getProfilePictureUri());
+                mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                        bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.WHITE);
+                        bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                        Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 150, 150, true);
+                        if (mUserMarker != null) {
+                            mUserMarker.remove();
+                        } else {
+                            setMapLocation(userLocation);
+                        }
+                        MarkerOptions marker = new MarkerOptions().position(userLocation).
+                                title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
+                        mUserMarker = mGoogleMap.addMarker(marker);
             /*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
                     title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*/
-                    setMapLocation(userLocation);
-                }
-            });
+                        setMapLocation(userLocation);
+                    }
+                });
                 /*Bitmap bmp = Ion.with(getApplicationContext()).load(mUser.getProfilePictureUri().toString()).asBitmap().get();
                 bmp = AppController.SetCircleMarkerIcon(bmp);
                 bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
@@ -484,6 +509,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }*/
+            }
         }
     }
 

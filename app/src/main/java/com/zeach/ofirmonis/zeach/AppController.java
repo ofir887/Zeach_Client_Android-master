@@ -58,7 +58,7 @@ public class AppController {
 
     public void setUser(com.zeach.ofirmonis.zeach.Objects.User user) {
         User = user;
-        UpdateUserInfo();
+        //UpdateUserInfo();
     }
 
     public static AppController getInstance() {
@@ -95,15 +95,6 @@ public class AppController {
 //        }
     }
 
-    //add friend to awaiting aproval.
-    public void AddFriendRequest(String userId, Friend friend) {
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
-        //create awaiting confirmation on current user
-        data.child(FirebaseConstants.USERS).child(this.User.getUID()).child("AwaitingConfirmation").child(friend.getUID()).setValue(friend);
-        //create awaiting confirmation on current user
-        Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
-        data.child(FirebaseConstants.USERS).child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);
-    }
 
     public void getFacebookFriends() {
         //get friends list
@@ -299,17 +290,6 @@ public class AppController {
                 paint // Paint
         );
 
-        /*
-            public void recycle ()
-                Free the native object associated with this bitmap, and clear the reference to the
-                pixel data. This will not free the pixel data synchronously; it simply allows it to
-                be garbage collected if there are no other references. The bitmap is marked as
-                "dead", meaning it will throw an exception if getPixels() or setPixels() is called,
-                and will draw nothing. This operation cannot be reversed, so it should only be
-                called if you are sure there are no further uses for the bitmap. This is an advanced
-                call, and normally need not be called, since the normal GC process will free up this
-                memory when there are no more references to this bitmap.
-        */
         srcBitmap.recycle();
 
         // Return the circular bitmap with shadow

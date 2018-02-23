@@ -89,8 +89,10 @@ public class BackgroundService extends Service {
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private static final String ACTION_BEACHES = "Beaches";
     private static final String ACTION_USER = "User";
+    private static final String ACTION_REQUEST_USER = "request_user";
     private static final String GPS = "GPS";
     private static final String ACTION_DELETE_FRIEND = "deleteFriend";
+    private static final String ACTION_ADD_FRIEND_REQUEST = "friend_request";
     private static final String ACTION_CONFIRM_FRIEND = "confirmFriend";
     private static final String ACTION_ADD_FAVORITE_BEACH = "add_favorite_beach";
     private static final String ACTION_REQUEST_FAVORITE_BEACHES = "request_favorite_beaches";
@@ -103,18 +105,17 @@ public class BackgroundService extends Service {
         public void onReceive(Context context, Intent intent) {
             Type type;
             Gson gson = new Gson();
+            Friend friend;
             switch (intent.getAction()) {
-                /*case ACTION_USER:
-                    Log.i(TAG, "received gps request from receiver");
-                    //getSingleLocationUpdate();
-                    //   sendBroadcast(ACTION_USER);
-                    break;*/
                 /*case ACTION_BEACHES:
                     Log.i(TAG, "Received Beaches request from Map Fragment. Sending Beaches..");
                     if (beaches.size() > 0) {
                         sendBroadcast(ACTION_BEACHES);
                     }
                     break;*/
+                case ACTION_REQUEST_USER:
+                    sendBroadcast(ACTION_USER);
+                    break;
                 case ACTION_DELETE_FRIEND:
                     String friendUid = intent.getStringExtra("UID");
                     Log.i(TAG, String.format("Received: [%s]", friendUid));
@@ -125,7 +126,7 @@ public class BackgroundService extends Service {
                     String friendjson = intent.getStringExtra("Friend");
                     type = new TypeToken<Friend>() {
                     }.getType();
-                    Friend friend = gson.fromJson(friendjson, type);
+                    friend = gson.fromJson(friendjson, type);
                     Log.i(TAG, String.format("Received: [%s]", friend));
                     addUserAsFriend(friend);
                     break;
@@ -146,6 +147,12 @@ public class BackgroundService extends Service {
                     Log.i(TAG, "Remove favorite beach request received.");
                     String beachKey = intent.getStringExtra("favorite_beach");
                     deleteFavoriteBeach(beachKey);
+                    break;
+                case ACTION_ADD_FRIEND_REQUEST:
+                    friend = (Friend) intent.getSerializableExtra("friend");
+                    Log.i(TAG, String.format("Friend request message received:[%s]", friend));
+                    AddFriendRequest(friend);
+
 
             }
             //sendBroadcast();
@@ -314,6 +321,15 @@ public class BackgroundService extends Service {
         Log.i(TAG, String.format("Removing user favorite beach. Beach Id:[%s]", aBeachId));
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).child(aBeachId).removeValue();
         // getUserDetailsFromServer();
+    }
+
+    private void AddFriendRequest(Friend friend) {
+        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
+        //create awaiting confirmation on current user
+        data.child(FirebaseConstants.USERS).child(mUser.getUID()).child("AwaitingConfirmation").child(friend.getUID()).setValue(friend);
+        //create awaiting confirmation on current user
+        Friend destinationFriend = new Friend(mUser.getName(), mUser.getUID(), mUser.getProfilePictureUri());
+        data.child(FirebaseConstants.USERS).child(friend.getUID()).child("FriendsRequest").child(mUser.getUID()).setValue(destinationFriend);
     }
 
     public void getSingleLocationUpdate() {
@@ -558,6 +574,8 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_REQUEST_FAVORITE_BEACHES);
             intentFilter.addAction(ACTION_REMOVE_FAVORITE_BEACHE);
             intentFilter.addAction(ACTION_NEAREST_BEACH);
+            intentFilter.addAction(ACTION_REQUEST_USER);
+            intentFilter.addAction(ACTION_ADD_FRIEND_REQUEST);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //

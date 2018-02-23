@@ -1,5 +1,7 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -27,6 +29,15 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     private CheckBox isUserPrivate;
     private User ZeachUser;
     private Button SaveButton;
+    private static final String ACTION_UPDATE_USER_PREFERENCES = "user_preferences";
+
+    private BroadcastReceiver mPreferencesReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -102,6 +113,12 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
                         AppController.getInstance().getFacebookFriends();
 
             }
+            //TODO - send to receiver
+            Intent intent = new Intent();
+            intent.setAction(ACTION_UPDATE_USER_PREFERENCES);
+            intent.putExtra("add_facebook_friends", importFacebookFriendsCheckbox.isChecked());
+            intent.putExtra("private_profile", isUserPrivate.isChecked());
+            //
             AppController.getInstance().UpdateUserInfo();
             if (checkOnWhatActivityUserIs()==1){
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
