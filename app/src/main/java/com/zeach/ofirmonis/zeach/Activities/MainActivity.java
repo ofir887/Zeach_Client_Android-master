@@ -30,7 +30,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.zeach.ofirmonis.zeach.AppController;
+import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
