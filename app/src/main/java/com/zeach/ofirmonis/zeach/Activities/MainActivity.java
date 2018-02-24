@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeach.ofirmonis.zeach.Fragments.FeedbackFragment;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
@@ -210,12 +211,12 @@ public class MainActivity extends AppCompatActivity
         MapFragment map = new MapFragment();
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
         if (id == R.id.map) {
-            Log.d("fragment", "fragment pressed");
+            Log.i(TAG, "fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
 
             // Handle the camera action
         } else if (id == R.id.favorite_beaches) {
-            Log.d("fragment", "favorite fragment pressed");
+            Log.i(TAG, "favorite fragment pressed");
 
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FavoriteBeachesFragment()).commit();
 
@@ -223,11 +224,12 @@ public class MainActivity extends AppCompatActivity
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FriendsFragment()).commit();
 
         } else if (id == R.id.profile) {
-            Log.d("fragment", "favorite fragment pressed");
+            Log.i(TAG, "favorite fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
 
         } else if (id == R.id.feedback) {
-            //TODO
+            Log.i(TAG, "feedback fragment pressed");
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new FeedbackFragment()).commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
