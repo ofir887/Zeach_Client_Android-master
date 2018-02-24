@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 import java.util.ArrayList;
 
@@ -71,6 +72,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
                 intent.setAction(ACTION_REMOVE_FAVORITE_BEACH);
                 intent.putExtra("favorite_beach", mBeach.get(position).getmBeachKey());
                 getContext().sendBroadcast(intent);
+                MapSingleton.getInstance().getmUser().getFavoriteBeaches().remove(mBeach.get(position).getmBeachKey());
             }
         });
         return convertView;
