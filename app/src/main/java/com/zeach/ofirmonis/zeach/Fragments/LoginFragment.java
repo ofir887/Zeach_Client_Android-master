@@ -262,6 +262,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         AppController.getInstance().setUser(this.mZeachUser);
         Intent mainActivity = new Intent(getActivity(), MainActivity.class);
         mainActivity.putExtra("map", aOpenMap);
+        mainActivity.putExtra("background", getActivity().getIntent().getBooleanExtra("background", false));
         startActivity(mainActivity);
         getActivity().finish();
     }

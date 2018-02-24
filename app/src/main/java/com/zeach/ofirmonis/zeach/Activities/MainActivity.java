@@ -6,6 +6,8 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -77,7 +79,11 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isActive", true);
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", true).commit();
+        boolean moveToBackground = getIntent().getBooleanExtra("background", false);
+        /*if (moveToBackground) {
+            moveTaskToBack(true);
+        }*/
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
@@ -90,8 +96,6 @@ public class MainActivity extends AppCompatActivity
             registerReceiver(activityReceiver, intentFilter);
         }
 
-        //
-        // this.spinner.setVisibility(View.VISIBLE);
         mOpenMap = getIntent().getBooleanExtra("map", false);
         Log.i(TAG, String.format("opening map:[%b]", mOpenMap));
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -136,11 +140,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Intent intent = new Intent();
+        sendBroadcast(intent);
+    }
+
+    @Override
     protected void onDestroy() {
         unregisterReceiver(activityReceiver);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isActive", false);
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", false);
         stopService(new Intent(this, BackgroundService.class));
-        Log.d(TAG, "on destroy");
+        Log.i(TAG, "on destroy");
         super.onDestroy();
     }
 

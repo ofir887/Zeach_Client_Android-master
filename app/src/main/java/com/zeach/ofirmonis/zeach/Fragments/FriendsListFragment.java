@@ -63,8 +63,6 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.friends_list_fragment, container, false);
         this.friendsListView = (ListView) rootView.findViewById(R.id.friends_list);
-        String s = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("user", "defaultStringIfNothingFound");
-
         return this.rootView;
     }
 

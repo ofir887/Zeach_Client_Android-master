@@ -1,7 +1,11 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -16,6 +20,8 @@ import android.view.MenuItem;
 import com.zeach.ofirmonis.zeach.Fragments.LoginFragment;
 import com.zeach.ofirmonis.zeach.Fragments.SignUpFragment;
 import com.zeach.ofirmonis.zeach.R;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class SignUpLogInActivity extends AppCompatActivity {
     /**
@@ -40,7 +46,10 @@ public class SignUpLogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_log_in);
-
+        boolean moveToBackground = getIntent().getBooleanExtra("background", false);
+        if (moveToBackground) {
+            moveTaskToBack(true);
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -53,6 +62,29 @@ public class SignUpLogInActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        checkPermissions();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 10:
+                checkPermissions();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void checkPermissions() {
+        // first check for permissions
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
+                        , 10);
+            }
+            return;
+        }
     }
 
 

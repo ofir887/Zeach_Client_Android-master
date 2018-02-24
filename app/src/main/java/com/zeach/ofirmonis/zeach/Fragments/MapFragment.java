@@ -284,10 +284,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         autoCompleteSearch.setOnSearchClickListener(this);
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
-
-        checkPermissions();
-
-
         return this.rootView;
     }
 
@@ -307,7 +303,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             mUserLocationRecieved = MapSingleton.getInstance().ismUserLocationRecieved();
             setUserLocationOnMap();
         }
-
         addBeachesAsPolygons();
         if (activityReceiver != null) {
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
@@ -358,8 +353,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
         mGoogleMap.getUiSettings().setCompassEnabled(false);
         mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
-        checkPermissions();
-
     }
 
     public void setMapLocation(LatLng location) {
@@ -406,28 +399,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             params.width = RelativeLayout.LayoutParams.MATCH_PARENT;
             params.addRule(RelativeLayout.BELOW, R.id.beach_search_widget);
             mSearchBeachListView.setLayoutParams(params);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 10:
-                checkPermissions();
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void checkPermissions() {
-        // first check for permissions
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
-                        , 10);
-            }
-            return;
         }
     }
 

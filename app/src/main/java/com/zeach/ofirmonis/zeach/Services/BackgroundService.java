@@ -35,6 +35,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.zeach.ofirmonis.zeach.Activities.SignUpLogInActivity;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
@@ -71,7 +72,7 @@ public class BackgroundService extends Service {
     private static final String TAG = BackgroundService.class.getSimpleName();
     public static final int ID = 0;
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000 * 30;
+    private static final int LOCATION_INTERVAL = 1000 * 60 * 3;
     private static final float LOCATION_DISTANCE = 0;
     private Timer timer;
     private ArrayList<Beach> beaches;
@@ -210,7 +211,7 @@ public class BackgroundService extends Service {
             mLastLocation.set(location);
             mLocation = userCurrentLocation;
             //
-            if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", true)) {
+            if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", false)) {
                 Log.i(TAG, "Activity is active. sending broadcast...");
                 sendBroadcast(ACTION_STRING_ACTIVITY);
             }
@@ -269,8 +270,9 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand");
-
-        return START_NOT_STICKY;
+        initializeLocationManager();
+        getMultipleLocationUpdates();
+        return START_STICKY;
     }
 
     private void initializeLocationManager() {
@@ -356,6 +358,26 @@ public class BackgroundService extends Service {
         } catch (IllegalArgumentException ex) {
             Log.i(TAG, "network provider does not exist, " + ex.getMessage());
         }
+        /*try {
+            mLocationManager.requestSingleUpdate(
+                    "gps", mLocationListeners[0], looper);
+        } catch (java.lang.SecurityException ex) {
+            Log.i(TAG, "fail to request location update, ignore", ex);
+        } catch (IllegalArgumentException ex) {
+            Log.i(TAG, "gps provider does not exist " + ex.getMessage());
+        }*/
+    }
+
+    public void getSingleLocationUpdate2() {
+        Looper looper = null;
+        try {
+            mLocationManager.requestSingleUpdate(
+                    LocationManager.NETWORK_PROVIDER, mLocationListeners[1], looper);
+        } catch (java.lang.SecurityException ex) {
+            Log.i(TAG, "fail to request location update, ignore", ex);
+        } catch (IllegalArgumentException ex) {
+            Log.i(TAG, "network provider does not exist, " + ex.getMessage());
+        }
         try {
             mLocationManager.requestSingleUpdate(
                     "gps", mLocationListeners[0], looper);
@@ -407,27 +429,30 @@ public class BackgroundService extends Service {
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
                     String mCountry = (String) beach.child("Country").getValue();
                     int currentDevices = (int) (long) beach.child("CurrentDevices").getValue();
-                    //get Friends
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
-                    if (mUser != null && !mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
-                        final DatabaseReference userRef = data.getDatabase().getReference("Users");
-                        for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
-                            if (beach.child("Peoplelist").hasChild(entry.getKey())) {
-                                boolean privateProfile = beach.child("Peoplelist").child(entry.getKey()).child("profilePrivate").getValue(boolean.class);
-                                if (!privateProfile) {
-                                    Log.i(TAG, "Found Friend: " + beach.child("Peoplelist").child(entry.getKey()).getValue());
-                                    String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
-                                    String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
-                                    String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
-                                    UserAtBeach userAtBeach = beach.child("Peoplelist").child(entry.getKey()).child("currentBeach").getValue(UserAtBeach.class);
-                                    Friend friend = new Friend(name, uid, photoUrl, userAtBeach, privateProfile);
-                                    friends.add(friend);
+                    if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", false)) {
+                        //get Friends
+                        if (mUser != null && !mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
+                            final DatabaseReference userRef = data.getDatabase().getReference("Users");
+                            for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
+                                if (beach.child("Peoplelist").hasChild(entry.getKey())) {
+                                    boolean privateProfile = beach.child("Peoplelist").child(entry.getKey()).child("profilePrivate").getValue(boolean.class);
+                                    if (!privateProfile) {
+                                        Log.i(TAG, "Found Friend: " + beach.child("Peoplelist").child(entry.getKey()).getValue());
+                                        String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
+                                        String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
+                                        String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
+                                        UserAtBeach userAtBeach = beach.child("Peoplelist").child(entry.getKey()).child("currentBeach").getValue(UserAtBeach.class);
+                                        Friend friend = new Friend(name, uid, photoUrl, userAtBeach, privateProfile);
+                                        friends.add(friend);
+                                    }
                                 }
                             }
-                        }
 
+
+                        }
+                        Log.i(TAG, "Friends = " + friends.toString());
                     }
-                    Log.i(TAG, "Friends = " + friends.toString());
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
                             beach.child("Coords").getValue();
                     Map<String, HashMap<String, Double>> map = new TreeMap<String, HashMap<String, Double>>(mBeachCoords);
@@ -540,8 +565,6 @@ public class BackgroundService extends Service {
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("User", mUser.toString());
-                    //TODO fix asyncTask
-                    PreferenceManager.getDefaultSharedPreferences(getApplication()).edit().putString("user", jsonObject.toString()).apply();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -628,9 +651,9 @@ public class BackgroundService extends Service {
             public void run() {
                 if (checkPermission(getApplicationContext())) {
                     getBeachesFromFirebase();
-                    initializeLocationManager();
+                    //    initializeLocationManager();
                     //     getSingleLocationUpdate();
-                    getMultipleLocationUpdates();
+                    //     getMultipleLocationUpdates();
                 }
             }
         };
@@ -687,7 +710,6 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         Log.i(TAG, "onDestroy");
-        super.onDestroy();
         if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", true))
             unregisterReceiver(serviceReceiver);
         if (mLocationManager != null) {
@@ -703,6 +725,7 @@ public class BackgroundService extends Service {
             }
         }
         Process.killProcess(Process.myPid());
+        super.onDestroy();
     }
 
 
