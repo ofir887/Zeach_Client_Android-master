@@ -29,7 +29,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
 
     private static final String TAG = FavoriteBeachesAdapter.class.getSimpleName();
     private ArrayList<FavoriteBeach> mBeach;
-    private static final String ACTION_REMOVE_FAVORITE_BEACHE = "remove_favorite_beach";
+    private static final String ACTION_REMOVE_FAVORITE_BEACH = "remove_favorite_beach";
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -41,7 +41,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
         super(context, 0, beaches);
         mBeach = beaches;
         if (mReceiver != null) {
-            IntentFilter intentFilter = new IntentFilter(ACTION_REMOVE_FAVORITE_BEACHE);
+            IntentFilter intentFilter = new IntentFilter(ACTION_REMOVE_FAVORITE_BEACH);
             context.registerReceiver(mReceiver, intentFilter);
         }
     }
@@ -68,7 +68,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
             public void onClick(View v) {
                 Log.i(TAG, String.format("Remove button clicked. removing favorite beach: %s", mBeach.get(position).getmBeachName()));
                 Intent intent = new Intent();
-                intent.setAction(ACTION_REMOVE_FAVORITE_BEACHE);
+                intent.setAction(ACTION_REMOVE_FAVORITE_BEACH);
                 intent.putExtra("favorite_beach", mBeach.get(position).getmBeachKey());
                 getContext().sendBroadcast(intent);
             }

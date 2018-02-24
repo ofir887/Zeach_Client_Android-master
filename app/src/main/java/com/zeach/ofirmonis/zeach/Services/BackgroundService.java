@@ -409,7 +409,7 @@ public class BackgroundService extends Service {
                     int currentDevices = (int) (long) beach.child("CurrentDevices").getValue();
                     //get Friends
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
-                    if (!mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
+                    if (mUser != null && !mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
                         final DatabaseReference userRef = data.getDatabase().getReference("Users");
                         for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
                             if (beach.child("Peoplelist").hasChild(entry.getKey())) {

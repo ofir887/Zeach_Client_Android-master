@@ -87,7 +87,7 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
             @Override
             public void run() {
                 Log.i(TAG, "refreshing");
-                mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -96,10 +96,9 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
                         bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
                         Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
                         holder.friendPhoto.setImageBitmap(smallMarker);
-                        holder.friendPhoto.invalidate();
                     }
                 });
-                handler.postDelayed(this, 1000 * 10);
+                handler.postDelayed(this, 1000 * 60);
             }
         });
         holder.AddFriendUnfriend.setText("Unfriend");

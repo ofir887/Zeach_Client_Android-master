@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().clear().commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isActive", true);
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
         this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
@@ -85,10 +85,8 @@ public class MainActivity extends AppCompatActivity
         startService(backgroundService);
         //
         if (activityReceiver != null) {
-            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
             intentFilter.addAction(ACTION_USER);
-            //Map the intent filter to the receiver
             registerReceiver(activityReceiver, intentFilter);
         }
 
@@ -102,7 +100,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
         }
-        //mAuth = FirebaseAuth.getInstance();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -125,8 +122,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
         }
-        // mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
-        mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+        mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -142,6 +138,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         unregisterReceiver(activityReceiver);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isActive", false);
         stopService(new Intent(this, BackgroundService.class));
         Log.d(TAG, "on destroy");
         super.onDestroy();

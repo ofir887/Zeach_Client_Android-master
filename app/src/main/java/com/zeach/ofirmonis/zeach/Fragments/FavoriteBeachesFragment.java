@@ -70,30 +70,7 @@ public class FavoriteBeachesFragment extends Fragment {
     private DatabaseReference data;
     private View rootView;
     private User mUser;
-    private static final String ACTION_REQUEST_FAVORITE_BEACHES = "request_favorite_beaches";
-    private static final String ACTION_RECEIVE_FAVORITE_BEACHES = "receive_favorite";
-    private BroadcastReceiver mFavoriteBeachesReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "received");
-            switch (intent.getAction()) {
-                case ACTION_RECEIVE_FAVORITE_BEACHES: {
-                    Log.i(TAG, "Received user favorite beaches");
-                    Gson gson = new Gson();
-                    String favoriteBeachString = intent.getStringExtra("favorite_beaches");
-                    Type type = new TypeToken<ArrayList<FavoriteBeach>>() {
-                    }.getType();
-                    //   mFavoriteBeaches = gson.fromJson(favoriteBeachString, type);
-                    Log.i(TAG, "Favorite beach to add was send " + mFavoriteBeaches);
-                    if (mFavoriteBeaches != null) {
-                        // setFavoriteBeaches2();
-                    }
-                    break;
-                }
 
-            }
-        }
-    };
 
     @Nullable
     @Override
@@ -103,24 +80,9 @@ public class FavoriteBeachesFragment extends Fragment {
         mUser = AppController.getInstance().getUser();
         data = FirebaseDatabase.getInstance().getReference("Users/" + this.mUser.getUID() + "/favoriteBeaches/");
         setFavoriteBeaches();
-        /*if (mFavoriteBeachesReceiver == null) {
-            IntentFilter intentFilter = new IntentFilter(ACTION_RECEIVE_FAVORITE_BEACHES);
-            getActivity().registerReceiver(mFavoriteBeachesReceiver, intentFilter);
-        }
-        Intent intent = new Intent();
-        intent.setAction(ACTION_REQUEST_FAVORITE_BEACHES);
-        Log.i(TAG, "Requesting favorite user beaches");
-        getContext().sendBroadcast(intent);*/
-        //  this.data = FirebaseDatabase.getInstance().getReference("Beaches/Country/Israel/");
-        //   setFavoriteBeaches();
         return this.rootView;
     }
 
-    public void setFavoriteBeaches2() {
-        favoriteBeachesAdapter = new FavoriteBeachesAdapter(getContext(), mFavoriteBeaches);
-        beachListView.setAdapter(favoriteBeachesAdapter);
-        favoriteBeachesAdapter.notifyDataSetChanged();
-    }
 
     public void setFavoriteBeaches() {
         favoriteBeachesAdapter = new FavoriteBeachesAdapter(getContext(), mFavoriteBeaches);
@@ -148,20 +110,10 @@ public class FavoriteBeachesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
     }
 
     @Override
     public void onResume() {
-        /*if (mFavoriteBeachesReceiver != null) {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(ACTION_RECEIVE_FAVORITE_BEACHES);
-            getActivity().registerReceiver(mFavoriteBeachesReceiver, intentFilter);
-        }
-        Intent intent = new Intent();
-        intent.setAction(ACTION_REQUEST_FAVORITE_BEACHES);
-        Log.i(TAG, "Requesting favorite user beaches");
-        getContext().sendBroadcast(intent);*/
         super.onResume();
     }
 }

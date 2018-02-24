@@ -110,14 +110,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             } else {
                 Log.i(TAG, "Loading photo from storage");
                 mStorageRef = mStorage.getReference(this.mUser.getProfilePictureUri());
-                mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         bitmap = AppController.SetCircleMarkerIcon(bitmap);
                         Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
                         image.setImageBitmap(smallMarker);
-                        image.invalidate();
                     }
                 });
             }
@@ -126,14 +125,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             String profilePictureUri = "/PersonIcon.png";
             this.mUser.setProfilePictureUri(profilePictureUri);
             mStorageRef = mStorage.getReference(profilePictureUri);
-            mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                     bitmap = AppController.SetCircleMarkerIcon(bitmap);
                     Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
                     image.setImageBitmap(smallMarker);
-                    image.invalidate();
                 }
             });
         }

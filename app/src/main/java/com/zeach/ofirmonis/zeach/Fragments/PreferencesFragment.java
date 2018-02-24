@@ -17,6 +17,9 @@ import android.widget.CheckBox;
 import com.zeach.ofirmonis.zeach.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
+
+import java.util.Map;
 
 /**
  * Created by ofirmonis on 31/05/2017.
@@ -102,6 +105,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
                 AppController.getInstance().getFacebookFriends();
 
             }
+            MapSingleton.getInstance().updateUser(mUser);
             sendBroadcast();
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
             onDestroy();

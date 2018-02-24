@@ -53,12 +53,14 @@ import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 import com.zeach.ofirmonis.zeach.interfaces.OnMapActions;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -78,12 +80,10 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private ListView mSearchBeachListView;
     private SearchBeachAdapter mSearchBeachAdapter;
     private LatLng userLocation;
-    private LatLng CurrentUserLocation;
     private ArrayList<Beach> mBeaches = new ArrayList<>();
     private ArrayList<Marker> mFriendsMarkers = new ArrayList<>();
     private ArrayList<Polygon> mPolygons = new ArrayList<>();
     private HashMap<String, Polygon> mPolygons2 = new HashMap<>();
-    private CameraPosition mCameraPosition;
     private Marker mUserMarker;
     private User mUser;
     private FirebaseStorage mStorage;
@@ -93,7 +93,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private boolean mBeachesDetailsReceived;
     private boolean mUserLocationRecieved;
     ///
-    private static final String ACTION_STRING_SERVICE = "ToService";
     private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private static final String ACTION_BEACHES = "Beaches";
     private static final String ACTION_USER = "User";
@@ -110,6 +109,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     mUser = user;
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
                     mUserDetailesReceived = true;
+                    MapSingleton.getInstance().updateUser(mUser, mUserDetailesReceived);
                     setUserLocationOnMap();
                     break;
                 }
@@ -119,6 +119,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     Log.d(MapFragment.class.getSimpleName(), latLng.toString());
                     userLocation = latLng;
                     mUserLocationRecieved = true;
+                    MapSingleton.getInstance().updateUserLocation(userLocation, mUserLocationRecieved);
                     setUserLocationOnMap();
                     break;
                 }
@@ -129,16 +130,15 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     }.getType();
                     ArrayList<Beach> beaches = gson.fromJson(str, type);
                     mBeaches = beaches;
-                    Log.d(MapFragment.class.getSimpleName(), beaches.toString());
+                    mBeachesDetailsReceived = true;
+                    MapSingleton.getInstance().updateBeaches(mBeaches, mBeachesDetailsReceived);
+                    Log.i(TAG, beaches.toString());
                     removePolygon();
                     addBeachesAsPolygons();
                     for (int i = 0; i < mFriendsMarkers.size(); i++) {
                         mFriendsMarkers.get(i).remove();
                     }
                     showFriendsOnMap();
-/*                    if (userLocation != null)
-                        setUserLocationOnMap();*/
-                    mBeachesDetailsReceived = true;
                     setUserLocationOnMap();
                     break;
                 }
@@ -158,7 +158,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public void showFriendsOnMap() {
         for (int i = 0; i < mBeaches.size(); i++) {
             for (int j = 0; j < mBeaches.get(i).getFriends().size(); j++) {
-
                 final Friend friend = mBeaches.get(i).getFriends().get(j);
                 final LatLng friendLocation = new LatLng(mBeaches.get(i).getFriends().get(j).
                         getCurrentBeach().getLatitude(), mBeaches.get(i).getFriends().get(j).
@@ -166,11 +165,8 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                 new Handler().post(new Runnable() {
                     @Override
                     public void run() {
-                        Bitmap bmp = null;
-                        //    try {
-                        //
                         mStorageRef = mStorage.getReference(friend.getPhotoUrl());
-                        mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                             @Override
                             public void onSuccess(byte[] bytes) {
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -183,21 +179,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                                 mFriendsMarkers.add(mGoogleMap.addMarker(marker));
                             }
                         });
-                        //
-
-                        //  bmp = Ion.with(getApplicationContext()).load(friend.getPhotoUrl()).asBitmap().get();
-                        /*} catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        }*/
-                        /*bmp = AppController.SetCircleMarkerIcon(bmp);
-                        bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-                        bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
-                        Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
-                        MarkerOptions marker = new MarkerOptions().position(friendLocation).
-                                title(friend.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
-                        mFriendsMarkers.add(mGoogleMap.addMarker(marker));*/
                     }
                 });
             }
@@ -291,79 +272,16 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         }
     }
 
-    private void readDataFromPref() {
-        Log.d(TAG, "loading beaches from pref");
-        Gson gson = new Gson();
-        Type type;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String beaches = prefs.getString("beaches", "");
-        if (!beaches.isEmpty()) {
-            type = new TypeToken<ArrayList<Beach>>() {
-            }.getType();
-            mBeaches = gson.fromJson(beaches, type);
-        }
-        Log.d(TAG, "loading user from pref");
-        String user = prefs.getString("user", "");
-        if (!user.isEmpty()) {
-            type = new TypeToken<User>() {
-            }.getType();
-            mUser = gson.fromJson(user, type);
-        }
-        float bearing = prefs.getFloat("bearing", 0);
-        float tilt = prefs.getFloat("tilt", 0);
-        float zoom = prefs.getFloat("zoom", 0);
-        double mapLatitude = prefs.getFloat("mapLatitude", 0);
-        double mapLongitude = prefs.getFloat("mapLongitude", 0);
-        LatLng mapLocation = new LatLng(mapLatitude, mapLongitude);
-        mCameraPosition = new CameraPosition(mapLocation, zoom, bearing, tilt);
-        float userLatitude = prefs.getFloat("userLatitude", 0);
-        float userLongitude = prefs.getFloat("userLongitude", 0);
-        userLocation = new LatLng(userLatitude, userLongitude);
-        //   Log.d(TAG, "loading from pref2");
-        //   Log.d(TAG, markers);
-
-    }
-
-    private void saveDataInPref() {
-        Log.d(TAG, "Saving Beaches To Pref..");
-        Gson gson = new Gson();
-        String beaches = gson.toJson(mBeaches);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("beaches", beaches);
-        Log.d(TAG, "Saving User To Pref..");
-        String user = gson.toJson(mUser);
-        editor.putString("user", user);
-        Log.d(TAG, "Saving MapView To Pref..");
-        float bearing = mGoogleMap.getCameraPosition().bearing;
-        float tilt = mGoogleMap.getCameraPosition().tilt;
-        float zoom = mGoogleMap.getCameraPosition().zoom;
-        double mapLatitude = mGoogleMap.getCameraPosition().target.latitude;
-        double mapLongitude = mGoogleMap.getCameraPosition().target.longitude;
-        editor.putFloat("bearing", bearing);
-        editor.putFloat("tilt", tilt);
-        editor.putFloat("mapLatitude", (float) mapLatitude);
-        editor.putFloat("mapLongitude", (float) mapLongitude);
-        float userLatitude = (float) userLocation.latitude;
-        float userLongitude = (float) userLocation.longitude;
-        editor.putFloat("userLatitude", userLatitude);
-        editor.putFloat("userLongitude", userLongitude);
-        editor.commit();
-
-
-    }
-
     @Override
     public void onStop() {
         super.onStop();
-        //   saveDataInPref();
+        //saveDataInPref();
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
-        PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putBoolean("isActive", true);
         mUser = new User();
         this.autoCompleteSearch = rootView.findViewById(R.id.beach_search_widget);
         mSearchBeachListView = rootView.findViewById(R.id.map_beach_list);
@@ -371,7 +289,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         autoCompleteSearch.setOnSearchClickListener(this);
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
-        //
 
         checkPermissions();
 
@@ -379,34 +296,35 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         return this.rootView;
     }
 
-    private void sendBroadcast(String aAction) {
-        Intent new_intent = new Intent();
-        new_intent.setAction(aAction);
-        getActivity().sendBroadcast(new_intent);
-    }
-
 
     @Override
     public void onResume() {
-        //TODO - request beach update from service..
-        readDataFromPref();
+
+        super.onResume();
+        if (MapSingleton.getInstance() == null) {
+            MapSingleton.createInstance();
+        } else {
+            mBeaches = MapSingleton.getInstance().getmBeaches();
+            mUser = MapSingleton.getInstance().getmUser();
+            userLocation = MapSingleton.getInstance().getmUserLocation();
+            mUserDetailesReceived = MapSingleton.getInstance().ismUserDetailesReceived();
+            mBeachesDetailsReceived = MapSingleton.getInstance().ismBeachesDetailsReceived();
+            mUserLocationRecieved = MapSingleton.getInstance().ismUserLocationRecieved();
+            setUserLocationOnMap();
+        }
+
         addBeachesAsPolygons();
         if (activityReceiver != null) {
-            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
             intentFilter.addAction(ACTION_BEACHES);
             intentFilter.addAction(ACTION_USER);
             intentFilter.addAction(ACTION_NEAREST_BEACH);
-            //Map the intent filter to the receiver
             getActivity().registerReceiver(activityReceiver, intentFilter);
         }
-        //  sendBroadcast(ACTION_BEACHES);
-        super.onResume();
     }
 
     @Override
     public void onDestroy() {
-
         super.onDestroy();
 
     }
@@ -434,23 +352,15 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public void onMapReady(GoogleMap googleMap) {
         MapsInitializer.initialize(getApplicationContext());
         mGoogleMap = googleMap;
+        if (MapSingleton.getInstance() != null) {
+            setUserLocationOnMap();
+        }
         if (mBeaches != null) {
             showFriendsOnMap();
             addBeachesAsPolygons();
         }
-        if (mUser.getProfilePictureUri() != null) {
-            Log.d(TAG, "kkk" + mUser.toString());
-            setUserLocationOnMap();
-        }
-        //    setMapLocation(mCameraPosition.target);
-        /*mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.builder().target(mCameraPosition.target).
-                zoom(mCameraPosition.zoom).bearing(mCameraPosition.bearing).tilt(mCameraPosition.tilt).build()));*/
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
-        // mGoogleMap.getUiSettings().setAllGesturesEnabled(false);
-        //  mGoogleMap.getUiSettings().setIndoorLevelPickerEnabled(false);
-        //  mGoogleMap.setIndoorEnabled(false);
-        //  mGoogleMap.getUiSettings().setTiltGesturesEnabled(false);
         mGoogleMap.getUiSettings().setCompassEnabled(false);
         mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
         checkPermissions();
@@ -465,9 +375,9 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     public void setUserLocationOnMap() {
         if (mBeachesDetailsReceived && mUserLocationRecieved && mUserDetailesReceived) {
             if (mUser != null) {
-                //  try {
+                //  setMapLocation(userLocation);
                 mStorageRef = mStorage.getReference(mUser.getProfilePictureUri());
-                mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
@@ -483,32 +393,10 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                         MarkerOptions marker = new MarkerOptions().position(userLocation).
                                 title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
                         mUserMarker = mGoogleMap.addMarker(marker);
-            /*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
-                    title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*/
                         setMapLocation(userLocation);
                     }
                 });
-                /*Bitmap bmp = Ion.with(getApplicationContext()).load(mUser.getProfilePictureUri().toString()).asBitmap().get();
-                bmp = AppController.SetCircleMarkerIcon(bmp);
-                bmp = AppController.addBorderToCircularBitmap(bmp, 5, Color.WHITE);
-                bmp = AppController.addShadowToCircularBitmap(bmp, 4, Color.LTGRAY);
-                Bitmap smallMarker = Bitmap.createScaledBitmap(bmp, 150, 150, true);
-                if (mUserMarker != null) {
-                    mUserMarker.remove();
-                } else {
-                    setMapLocation(userLocation);
-                }
-                MarkerOptions marker = new MarkerOptions().position(userLocation).
-                        title(mUser.getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker));
-                mUserMarker = mGoogleMap.addMarker(marker);
-            *//*mGoogleMap.addMarker((new MarkerOptions().position(this.userLocation).
-                    title(AppController.getInstance().getUser().getName()).icon(BitmapDescriptorFactory.fromBitmap(smallMarker))));*//*
-                setMapLocation(this.userLocation);*/
-            /*} catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }*/
+
             }
         }
     }
@@ -556,9 +444,12 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
 
     @Override
     public void onPause() {
-        saveDataInPref();
+        //    saveDataInPref();
+        MapSingleton.getInstance().updateBeaches(mBeaches, mBeachesDetailsReceived);
+        MapSingleton.getInstance().updateUserLocation(userLocation, mUserLocationRecieved);
+        MapSingleton.getInstance().updateUser(mUser, mUserDetailesReceived);
         removePolygon();
-        mBeaches.clear();
+        //    mBeaches.clear();
         getActivity().unregisterReceiver(activityReceiver);
         super.onPause();
     }
