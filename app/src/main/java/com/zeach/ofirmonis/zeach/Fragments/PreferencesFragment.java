@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.zeach.ofirmonis.zeach.AppController;
-import com.zeach.ofirmonis.zeach.Activities.MainActivity;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -24,12 +23,12 @@ import com.zeach.ofirmonis.zeach.R;
  */
 
 public class PreferencesFragment extends Fragment implements View.OnClickListener {
-    Button btn;
+    private Button mReturnButton;
     private static final String TAG = PreferencesFragment.class.getSimpleName();
     private CheckBox importFacebookFriendsCheckbox;
     private CheckBox isUserPrivate;
-    private User ZeachUser;
-    private Button SaveButton;
+    private User mUser;
+    private Button mSaveButton;
     private static final String ACTION_UPDATE_USER_PREFERENCES = "update_user_preferences";
 
     private BroadcastReceiver mPreferencesReceiver = new BroadcastReceiver() {
@@ -43,35 +42,36 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_preferences, container, false);
-        this.ZeachUser = AppController.getInstance().getUser();
-        this.btn = (Button) rootView.findViewById(R.id.button3s);
-        this.SaveButton = (Button) rootView.findViewById(R.id.save_button);
-        this.btn.setOnClickListener(this);
-        this.SaveButton.setOnClickListener(this);
-        this.importFacebookFriendsCheckbox = (CheckBox) rootView.findViewById(R.id.importFriendsFromFacebookCheckbox);
-        this.isUserPrivate = (CheckBox) rootView.findViewById(R.id.HideFromFriends);
-        if (this.ZeachUser.getFacebookUID() == null) {
-            Log.d("is clickable", "false");
-            this.importFacebookFriendsCheckbox.setClickable(false);
-            this.importFacebookFriendsCheckbox.setText(this.importFacebookFriendsCheckbox.getText() + " (Unavilable)");
+        mUser = AppController.getInstance().getUser();
+        mReturnButton = rootView.findViewById(R.id.button3s);
+        mSaveButton = rootView.findViewById(R.id.save_button);
+        mReturnButton.setOnClickListener(this);
+        mSaveButton.setOnClickListener(this);
+        importFacebookFriendsCheckbox = rootView.findViewById(R.id.importFriendsFromFacebookCheckbox);
+        isUserPrivate = rootView.findViewById(R.id.HideFromFriends);
+        if (mUser.getFacebookUID() == null || mUser.getFacebookUID().isEmpty()) {
+            Log.d(TAG, "false");
+            importFacebookFriendsCheckbox.setClickable(false);
+            importFacebookFriendsCheckbox.setText(this.importFacebookFriendsCheckbox.getText() + " (Unavilable)");
         } else {
-            this.importFacebookFriendsCheckbox.setChecked(this.ZeachUser.isImportFacebookFriends());
+            Log.d(TAG, "true");
+            importFacebookFriendsCheckbox.setChecked(this.mUser.isImportFacebookFriends());
+            importFacebookFriendsCheckbox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mUser.setImportFacebookFriends(!mUser.isImportFacebookFriends());
+                }
+            });
         }
 
-        this.isUserPrivate.setChecked(this.ZeachUser.isProfilePrivate());
+        this.isUserPrivate.setChecked(this.mUser.isProfilePrivate());
 
         this.isUserPrivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ZeachUser.setProfilePrivate(!ZeachUser.isProfilePrivate());
+                mUser.setProfilePrivate(!mUser.isProfilePrivate());
 
 
-            }
-        });
-        this.importFacebookFriendsCheckbox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ZeachUser.setImportFacebookFriends(!ZeachUser.isImportFacebookFriends());
             }
         });
         return rootView;
@@ -90,23 +90,14 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
 
     }
 
-    public int checkOnWhatActivityUserIs() {
-        if (getActivity().getClass().getSimpleName().equals("MainActivity")) {
-            return 1;
-        } else
-            return 0;
-
-
-    }
-
     @Override
     public void onClick(View v) {
-        if (v == btn) {
+        if (v == mReturnButton) {
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
         }
-        if (v == this.SaveButton) {
+        if (v == this.mSaveButton) {
             Log.i(TAG, "clicked");
-            AppController.getInstance().setUser(this.ZeachUser);
+            AppController.getInstance().setUser(this.mUser);
             if (AppController.getInstance().getUser().isImportFacebookFriends()) {
                 AppController.getInstance().getFacebookFriends();
 
@@ -133,11 +124,9 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     }
 
 
-    //Update User datails when leaving fragment
     @Override
     public void onDetach() {
-        Log.d("nir", "nir1222");
-        //check if needed because there is a save button
+        Log.d(TAG, "Screen detach");
         super.onDetach();
     }
 
