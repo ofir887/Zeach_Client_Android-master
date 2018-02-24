@@ -102,6 +102,7 @@ public class BackgroundService extends Service {
     private static final String ACTION_NEAREST_BEACH = "nearest_beach";
     private static final String ACTION_UPDATE_USER_PREFERENCES = "update_user_preferences";
     private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
+    private static final String ACTION_UPDATE_USER_FEEDBACK = "update_user_feedback";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
@@ -169,12 +170,24 @@ public class BackgroundService extends Service {
                     Log.i(TAG, String.format("Update User Profile message request received. " +
                             "name:[%s], photo url:[%s]", name, photoUrl));
                     updateUserProfile(name, photoUrl);
+                    break;
+                case ACTION_UPDATE_USER_FEEDBACK:
+                    boolean accurate = intent.getBooleanExtra("is_accurate", true);
+                    boolean easyToUse = intent.getBooleanExtra("easy_to_use", true);
+                    float rating = intent.getFloatExtra("rating", 0);
+                    Log.i(TAG, String.format("Feedback received. accurate:[%b], easy to use:[%b], rating:[%f]", accurate, easyToUse, rating));
+                    updateUserFeedback(accurate, easyToUse, rating);
 
             }
             //sendBroadcast();
         }
     };
-    //
+
+    private void updateUserFeedback(boolean aAccurate, boolean aEasyToUse, float aRating) {
+        data.child("Feedback").child(mUser.getUID()).child("Accurate").setValue(aAccurate);
+        data.child("Feedback").child(mUser.getUID()).child("EasyToUse").setValue(aEasyToUse);
+        data.child("Feedback").child(mUser.getUID()).child("Rating").setValue(aRating);
+    }
 
 
     private class LocationListener implements android.location.LocationListener {
@@ -282,18 +295,18 @@ public class BackgroundService extends Service {
         }
     }
 
-    public void addFavoriteBeach(FavoriteBeach aFavoriteBeach) {
+    private void addFavoriteBeach(FavoriteBeach aFavoriteBeach) {
         mUser.AddBeachToList(aFavoriteBeach);
         DatabaseReference ref = data.getDatabase().getReference();
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).setValue(mUser.getFavoriteBeaches());
     }
 
-    public void sendUserFavoriteBeaches() {
+    private void sendUserFavoriteBeaches() {
         // ArrayList <FavoriteBeach> favoriteBeaches = new ArrayList(mUser.getFavoriteBeaches().values());
         sendBroadcast(ACTION_RECEIVE_FAVORITE_BEACHES);
     }
 
-    public void updateUserInBeach(final Beach beach, final String userId, double aLongitude, double aLatitude) {
+    private void updateUserInBeach(final Beach beach, final String userId, double aLongitude, double aLatitude) {
         final DatabaseReference ref = data.getDatabase().getReference();
         long timeStamp = System.currentTimeMillis() / 1000;
         final UserAtBeach userAtBeach = new UserAtBeach(beach.getBeachName(), beach.getBeachKey(),
@@ -324,7 +337,7 @@ public class BackgroundService extends Service {
         ref.child(FirebaseConstants.TIMESTAMPS).child(userId).setValue(userAtBeach);
     }
 
-    public void deleteFriendFromList(String aFriendUid) {
+    private void deleteFriendFromList(String aFriendUid) {
         DatabaseReference ref = data.getDatabase().getReference();
         ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriendUid).removeValue();
         ref.child(FirebaseConstants.USERS).child(aFriendUid).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).removeValue();
@@ -348,7 +361,7 @@ public class BackgroundService extends Service {
         data.child(FirebaseConstants.USERS).child(friend.getUID()).child("FriendsRequest").child(mUser.getUID()).setValue(destinationFriend);
     }
 
-    public void getSingleLocationUpdate() {
+    private void getSingleLocationUpdate() {
         Looper looper = null;
         try {
             mLocationManager.requestSingleUpdate(
@@ -368,7 +381,7 @@ public class BackgroundService extends Service {
         }*/
     }
 
-    public void getSingleLocationUpdate2() {
+    private void getSingleLocationUpdate2() {
         Looper looper = null;
         try {
             mLocationManager.requestSingleUpdate(
@@ -388,7 +401,7 @@ public class BackgroundService extends Service {
         }
     }
 
-    public void getMultipleLocationUpdates() {
+    private void getMultipleLocationUpdates() {
         try {
             mLocationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
@@ -409,12 +422,12 @@ public class BackgroundService extends Service {
         }
     }
 
-    public static boolean checkPermission(final Context context) {
+    private static boolean checkPermission(final Context context) {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public void getBeachesFromFirebase() {
+    private void getBeachesFromFirebase() {
         beaches.clear();
         final DatabaseReference ref = data.getDatabase().getReference("Beaches");
         ref.addValueEventListener(new ValueEventListener() {
@@ -534,7 +547,7 @@ public class BackgroundService extends Service {
         return getKeyFromValue(beachesDistance, minDistance);
     }
 
-    public static String getKeyFromValue(Map hm, Object value) {
+    private static String getKeyFromValue(Map hm, Object value) {
         for (Object o : hm.keySet()) {
             if (hm.get(o).equals(value)) {
                 return (String) o;
@@ -556,7 +569,7 @@ public class BackgroundService extends Service {
         return new LatLng(latitude / n, longitude / n);
     }
 
-    public void getUserDetailsFromServer() {
+    private void getUserDetailsFromServer() {
         DatabaseReference mUserRef = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
         mUserRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -594,7 +607,7 @@ public class BackgroundService extends Service {
     }
 
 
-    public static String tempFileImage(Context context, Bitmap bitmap, String name) {
+    private static String tempFileImage(Context context, Bitmap bitmap, String name) {
 
         File outputDir = context.getCacheDir();
         File imageFile = new File(outputDir, name + ".jpg");
@@ -633,6 +646,7 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_ADD_FRIEND_REQUEST);
             intentFilter.addAction(ACTION_UPDATE_USER_PREFERENCES);
             intentFilter.addAction(ACTION_UPDATE_USER_PROFILE);
+            intentFilter.addAction(ACTION_UPDATE_USER_FEEDBACK);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //

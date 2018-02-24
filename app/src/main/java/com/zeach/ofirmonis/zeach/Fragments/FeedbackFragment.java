@@ -1,7 +1,9 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
@@ -19,7 +21,6 @@ import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
 
-import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 /**
  * Created by ofirmonis on 24/02/2018.
@@ -51,7 +52,6 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
         mAccurateCheckbox = rootView.findViewById(R.id.accurate_checkbox);
         mFriendlyCheckbox = rootView.findViewById(R.id.friendly_checkbox);
         mRatingBar = rootView.findViewById(R.id.ratingBar);
-
         return rootView;
     }
 
@@ -70,18 +70,9 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
         if (v == mFinishButton) {
             Log.i(TAG, "clicked");
-            AppController.getInstance().setUser(this.mUser);
-            if (AppController.getInstance().getUser().isImportFacebookFriends()) {
-                AppController.getInstance().getFacebookFriends();
-
-            }
-            MapSingleton.getInstance().updateUser(mUser);
             sendBroadcast();
-            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
-            onDestroy();
         }
 
 
@@ -90,9 +81,27 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
     private void sendBroadcast() {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_USER_FEEDBACK);
-        intent.putExtra("add_facebook_friends", mAccurateCheckbox.isChecked());
-        intent.putExtra("private_profile", mAccurateCheckbox.isChecked());
+        intent.putExtra("is_accurate", mAccurateCheckbox.isChecked());
+        intent.putExtra("easy_to_use", mFriendlyCheckbox.isChecked());
+        intent.putExtra("rating", mRatingBar.getRating());
         getContext().sendBroadcast(intent);
+        showDialog();
+    }
+
+    private void showDialog() {
+        AlertDialog.Builder feedbackDialog = new AlertDialog.Builder(getContext());
+        feedbackDialog.setTitle("Feedback sent !");
+        feedbackDialog.setMessage("Thank you for answering !");
+        feedbackDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+                onDestroy();
+            }
+        });
+        feedbackDialog.show();
+
     }
 
     @Override
