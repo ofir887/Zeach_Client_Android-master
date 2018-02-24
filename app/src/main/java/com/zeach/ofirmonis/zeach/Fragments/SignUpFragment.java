@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
@@ -43,8 +44,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener {
     private FirebaseAuth mAuth;
     private View rootView;
     private Button SignUpButton;
-    private TextView EmailTextView;
-    private TextView PasswordTextView;
+    private EditText mEmailTextView;
+    private EditText mPasswordTextView;
 
     private com.zeach.ofirmonis.zeach.Objects.User User;
 
@@ -54,8 +55,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener {
         this.rootView = inflater.inflate(R.layout.signup_fragment, container, false);
 
         SignUpButton = (Button) this.rootView.findViewById(R.id.signup_button);
-        EmailTextView = (TextView) this.rootView.findViewById(R.id.email_textfield);
-        PasswordTextView = (TextView) this.rootView.findViewById(R.id.password_textfield);
+        mEmailTextView = this.rootView.findViewById(R.id.email_textfield);
+        mPasswordTextView = this.rootView.findViewById(R.id.password_textfield);
         this.data = FirebaseDatabase.getInstance().getReference();
         SignUpButton.setOnClickListener(this);
 
@@ -81,8 +82,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v == SignUpButton) {
-            String email = this.EmailTextView.getText().toString();
-            String password = this.PasswordTextView.getText().toString();
+            String email = mEmailTextView.getText().toString();
+            String password = mPasswordTextView.getText().toString();
             createNewFirebaseUser(email, password);
         }
     }
@@ -100,37 +101,49 @@ public class SignUpFragment extends Fragment implements View.OnClickListener {
     }
 
     public void createNewFirebaseUser(String email, String password) {
-        this.mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        AlertDialog.Builder signUpDialog = new AlertDialog.Builder(getContext());
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            User = new User(user.getEmail(), user.getUid(), user.getProviderId());
-                            signUpDialog.setTitle("SignIn Completed");
-                            signUpDialog.setMessage("Success !");
-                            signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                    SendUserAndMoveToProfileFragment();
-                                }
-                            });
-                        } else {
-                            signUpDialog.setTitle("SignIn Failed");
-                            signUpDialog.setMessage("Failed. Try again !");
-                            signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
+        final AlertDialog.Builder signUpDialog = new AlertDialog.Builder(getContext());
+        if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
+            this.mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                User = new User(user.getEmail(), user.getUid(), user.getProviderId());
+                                signUpDialog.setTitle("SignIn Completed");
+                                signUpDialog.setMessage("Success !");
+                                signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                        SendUserAndMoveToProfileFragment();
+                                    }
+                                });
+                            } else {
+                                signUpDialog.setTitle("SignIn Failed");
+                                signUpDialog.setMessage("Failed. Try again !");
+                                signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                            }
+                            signUpDialog.show();
                         }
-                        signUpDialog.show();
-                    }
-                });
+                    });
+        } else {
+            signUpDialog.setTitle("SignIn Failed");
+            signUpDialog.setMessage("Failed. Try again !");
+            signUpDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            signUpDialog.show();
+        }
     }
 
 }
