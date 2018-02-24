@@ -35,4 +35,24 @@
         android:text="Finish And Send"
         android:textAllCaps="false" />
 
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="13dp"
+        android:layout_above="@+id/finish_button"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/rate_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:text="Rate This App"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="63dp"
+        android:layout_alignBottom="@+id/ratingBar"
+        android:layout_alignStart="@+id/ratingBar" />
+
 </RelativeLayout>

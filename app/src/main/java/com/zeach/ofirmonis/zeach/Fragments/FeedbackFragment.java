@@ -13,10 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.RatingBar;
 
+import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
-import com.zeach.ofirmonis.zeach.R;
+
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 /**
@@ -27,6 +29,7 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = FeedbackFragment.class.getSimpleName();
     private CheckBox mAccurateCheckbox;
     private CheckBox mFriendlyCheckbox;
+    private RatingBar mRatingBar;
     private User mUser;
     private Button mFinishButton;
     private static final String ACTION_UPDATE_USER_FEEDBACK = "update_user_feedback";
@@ -47,6 +50,7 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
         mFinishButton.setOnClickListener(this);
         mAccurateCheckbox = rootView.findViewById(R.id.accurate_checkbox);
         mFriendlyCheckbox = rootView.findViewById(R.id.friendly_checkbox);
+        mRatingBar = rootView.findViewById(R.id.ratingBar);
 
         return rootView;
     }
