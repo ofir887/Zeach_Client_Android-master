@@ -43,16 +43,15 @@ import java.io.IOException;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = ProfileFragment.class.getSimpleName();
-    Button btn;
+
+    private Button mNextButton;
     private EditText Name;
-    private EditText Gender;
     private Button getFromGallery;
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int RESULT_OK = -1;
     private ImageView image;
-    private User ZeachUser;
+    private User mUser;
     private View rootView;
-    private Bitmap bit = null;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
     private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
@@ -70,13 +69,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         this.rootView = inflater.inflate(R.layout.fragment_profile, container, false);
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
-        this.ZeachUser = AppController.getInstance().getUser();
-        this.btn = (Button) this.rootView.findViewById(R.id.button3);
-        this.Name = (EditText) this.rootView.findViewById(R.id.name_field);
-        this.getFromGallery = (Button) this.rootView.findViewById(R.id.browse);
-        this.image = (ImageView) this.rootView.findViewById(R.id.imageView2);
-        this.getFromGallery.setOnClickListener(this);
-        this.btn.setOnClickListener(this);
+        mUser = AppController.getInstance().getUser();
+        mNextButton = rootView.findViewById(R.id.next_button);
+        Name = rootView.findViewById(R.id.name_field);
+        getFromGallery = rootView.findViewById(R.id.browse);
+        image = rootView.findViewById(R.id.profile_image);
+        getFromGallery.setOnClickListener(this);
+        mNextButton.setOnClickListener(this);
         setElements();
 
 
@@ -84,13 +83,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     }
 
     public void setElements() {
-        if (this.ZeachUser.getName().length() > 0) {
-            this.Name.setText(this.ZeachUser.getName());
+        if (this.mUser.getName().length() > 0) {
+            this.Name.setText(this.mUser.getName());
             this.Name.setOnKeyListener(null);
         }
-        if (this.ZeachUser.getProfilePictureUri() != null) {
-            if (this.ZeachUser.getFacebookUID() != null && !this.ZeachUser.getProfilePictureUri().startsWith("/Users/")) {
-                new AppController.DownloadImageTask(this.image).execute(this.ZeachUser.getProfilePictureUri().toString());
+        if (this.mUser.getProfilePictureUri() != null) {
+            if (mUser.getFacebookUID() != null && !mUser.getProfilePictureUri().startsWith("/Users/")) {
+                new AppController.DownloadImageTask(this.image).execute(mUser.getProfilePictureUri().toString());
                 AlertDialog.Builder uploadPhotoDialog = new AlertDialog.Builder(getContext());
                 uploadPhotoDialog.setTitle("Upload Alert");
                 uploadPhotoDialog.setMessage("Upload Facebook photo ?");
@@ -110,7 +109,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 uploadPhotoDialog.show();
             } else {
                 Log.i(TAG, "Loading photo from storage");
-                mStorageRef = mStorage.getReference(this.ZeachUser.getProfilePictureUri());
+                mStorageRef = mStorage.getReference(this.mUser.getProfilePictureUri());
                 mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
@@ -125,7 +124,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         } else {
             Log.i(TAG, "User not from facebook. showing default icon image");
             String profilePictureUri = "/PersonIcon.png";
-            this.ZeachUser.setProfilePictureUri(profilePictureUri);
+            this.mUser.setProfilePictureUri(profilePictureUri);
             mStorageRef = mStorage.getReference(profilePictureUri);
             mStorageRef.getBytes(4096 * 4096).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
@@ -169,16 +168,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v == btn) {
-            this.ZeachUser.setName(this.Name.getText().toString()); // set the updated name
-            //    AppController.getInstance().setUser(this.ZeachUser);
-            //TODO - send broadcast
+        if (v == mNextButton) {
+            mUser.setName(this.Name.getText().toString()); // set the updated name
             sendBroadcast();
-            if (getActivity().getClass().getSimpleName().equals("MainActivity")) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new PreferencesFragment()).commit();
-                onDestroy();
-            }
-
+            getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new PreferencesFragment()).commit();
         }
         if (v == getFromGallery) {
             Intent i = new Intent(
@@ -191,14 +184,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private void sendBroadcast() {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_USER_PROFILE);
-        intent.putExtra("name", ZeachUser.getName());
-        intent.putExtra("photo_url", ZeachUser.getProfilePictureUri());
+        intent.putExtra("name", mUser.getName());
+        intent.putExtra("photo_url", mUser.getProfilePictureUri());
         getContext().sendBroadcast(intent);
     }
 
     public void addImageToStorage() {
-        String imagePath = "/Users/" + ZeachUser.getUID();
-        ZeachUser.setProfilePictureUri(imagePath);
+        String imagePath = "/Users/" + mUser.getUID();
+        mUser.setProfilePictureUri(imagePath);
         mStorageRef = mStorage.getReference().child(imagePath);
         image.setDrawingCacheEnabled(true);
         image.buildDrawingCache();
@@ -247,9 +240,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onDetach() {
-        Log.d("nir", "nir1222");
+        Log.d(TAG, "fragment detach");
 
-        AppController.getInstance().setUser(this.ZeachUser);
+        AppController.getInstance().setUser(this.mUser);
         super.onDetach();
     }
 

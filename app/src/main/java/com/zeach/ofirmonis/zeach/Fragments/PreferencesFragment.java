@@ -43,7 +43,7 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_preferences, container, false);
         mUser = AppController.getInstance().getUser();
-        mReturnButton = rootView.findViewById(R.id.button3s);
+        mReturnButton = rootView.findViewById(R.id.return_button);
         mSaveButton = rootView.findViewById(R.id.save_button);
         mReturnButton.setOnClickListener(this);
         mSaveButton.setOnClickListener(this);

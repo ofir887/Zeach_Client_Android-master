@@ -72,7 +72,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         this.rootView = inflater.inflate(R.layout.login_fragment, container, false);
         loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
         FirebaseLoginButton = (Button) this.rootView.findViewById(R.id.firebase_login_button);
-        this.data = FirebaseDatabase.getInstance().getReference();
+        data = FirebaseDatabase.getInstance().getReference();
         mEmailTextField = this.rootView.findViewById(R.id.email_login_textfield);
         mPasswordTextField = this.rootView.findViewById(R.id.password_login_textfield);
         FirebaseLoginButton.setOnClickListener(this);
