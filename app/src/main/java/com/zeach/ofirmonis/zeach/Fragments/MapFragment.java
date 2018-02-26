@@ -59,6 +59,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FAVORITE_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_NEAREST_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
 
 
 /**
@@ -87,12 +93,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     private boolean mUserDetailesReceived;
     private boolean mBeachesDetailsReceived;
     private boolean mUserLocationRecieved;
-    ///
-    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
-    private static final String ACTION_BEACHES = "Beaches";
-    private static final String ACTION_USER = "User";
-    private static final String ACTION_ADD_FAVORITE_BEACH = "add_favorite_beach";
-    private static final String ACTION_NEAREST_BEACH = "nearest_beach";
+
     private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
 
         @Override

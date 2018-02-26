@@ -23,6 +23,8 @@ import com.zeach.ofirmonis.zeach.Objects.User;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FRIEND_REQUEST;
+
 /**
  * Created by ofirmonis on 18/07/2017.
  */
@@ -35,7 +37,6 @@ public class UserListAdapter extends ArrayAdapter<User> {
     private Map<String, Friend> mUserFriends;
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
-    private static final String ACTION_ADD_FRIEND_REQUEST = "friend_request";
     private BroadcastReceiver mFriendRequestReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

@@ -23,10 +23,13 @@ import com.google.firebase.storage.StorageReference;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_DELETE_FRIEND;
 
 /**
  * Created by ofirmonis on 18/07/2017.
@@ -36,7 +39,6 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
     private static final String TAG = FriendListAdapter.class.getSimpleName();
     private ArrayList<Friend> friends = new ArrayList<>();
 
-    private static final String ACTION_DELETE_FRIEND = "deleteFriend";
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
     private ViewHolder holder;
@@ -109,6 +111,7 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
                 intent.setAction(ACTION_DELETE_FRIEND);
                 intent.putExtra("UID", friends.get(position).getUID());
                 getContext().sendBroadcast(intent);
+                MapSingleton.getInstance().getmUser().getFriendsList().remove(friends.get(position).getUID());
             }
         });
         return convertView;

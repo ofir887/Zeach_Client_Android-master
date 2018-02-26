@@ -46,6 +46,7 @@ import com.zeach.ofirmonis.zeach.R;
 import org.json.JSONObject;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 
 /**
  * Created by ofirmonis on 31/05/2017.
@@ -140,7 +141,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                             final FirebaseUser user = mAuth.getCurrentUser();
                             data = FirebaseDatabase.getInstance().getReference();
                             DatabaseReference searchId = data.getDatabase().getReference();
-                            searchId.child(FirebaseConstants.USERS).child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                            searchId.child(USERS).child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
@@ -171,7 +172,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     public void SendUserAndMoveToProfileFragment() {
         this.data = FirebaseDatabase.getInstance().getReference();
-        data.child(FirebaseConstants.USERS).child(this.mZeachUser.getUID()).setValue(this.mZeachUser);
+        data.child(USERS).child(this.mZeachUser.getUID()).setValue(this.mZeachUser);
         startMainActivity(false);
     }
 
@@ -195,7 +196,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            DatabaseReference ref = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
+                            DatabaseReference ref = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
                             FirebaseUser user = mAuth.getCurrentUser();
                             Log.i(TAG, "Success " + user.getEmail().toString());
                             ref.addValueEventListener(new ValueEventListener() {
@@ -238,7 +239,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            DatabaseReference ref = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
+            DatabaseReference ref = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
             Log.i(TAG, "User is defined in this device. login..");
             ref.addValueEventListener(new ValueEventListener() {
                 @Override

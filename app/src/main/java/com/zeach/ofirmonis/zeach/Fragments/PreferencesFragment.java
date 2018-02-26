@@ -19,6 +19,8 @@ import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_PREFERENCES;
+
 /**
  * Created by ofirmonis on 31/05/2017.
  */
@@ -30,7 +32,6 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     private CheckBox isUserPrivate;
     private User mUser;
     private Button mSaveButton;
-    private static final String ACTION_UPDATE_USER_PREFERENCES = "update_user_preferences";
 
     private BroadcastReceiver mPreferencesReceiver = new BroadcastReceiver() {
         @Override

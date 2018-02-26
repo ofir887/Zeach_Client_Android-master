@@ -45,13 +45,15 @@ import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.PERSON_ICON;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private User zeachUser;
-    private static final String ACTION_USER = "User";
-    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
     private ProgressBar spinner;
     private View header;
     private FirebaseStorage mStorage;
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity
         navigationName.setText(zeachUser.getName());
         final CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
         if (zeachUser.getProfilePictureUri().startsWith("https://")) {
-            mStorageRef = mStorage.getReference("/PersonIcon.png");
+            mStorageRef = mStorage.getReference(PERSON_ICON);
         } else {
             mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
         }

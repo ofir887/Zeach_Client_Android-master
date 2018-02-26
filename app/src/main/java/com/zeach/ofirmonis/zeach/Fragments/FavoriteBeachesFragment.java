@@ -21,6 +21,9 @@ import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
 
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FAVORITE_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
+
 /**
  * Created by ofirmonis on 31/05/2017.
  */
@@ -42,7 +45,7 @@ public class FavoriteBeachesFragment extends Fragment {
         this.rootView = inflater.inflate(R.layout.favorite_beaches_fragment, container, false);
         this.beachListView = (ListView) rootView.findViewById(R.id.favorite_beach_list);
         mUser = AppController.getInstance().getUser();
-        data = FirebaseDatabase.getInstance().getReference("Users/" + this.mUser.getUID() + "/favoriteBeaches/");
+        data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, mUser.getUID(), FAVORITE_BEACHES));
         setFavoriteBeaches();
         return this.rootView;
     }

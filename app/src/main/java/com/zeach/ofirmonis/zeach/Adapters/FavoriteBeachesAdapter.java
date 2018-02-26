@@ -22,6 +22,8 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REMOVE_FAVORITE_BEACH;
+
 /**
  * Created by ofirmonis on 21/10/2017.
  */
@@ -30,7 +32,6 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
 
     private static final String TAG = FavoriteBeachesAdapter.class.getSimpleName();
     private ArrayList<FavoriteBeach> mBeach;
-    private static final String ACTION_REMOVE_FAVORITE_BEACH = "remove_favorite_beach";
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

@@ -23,12 +23,13 @@ import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_CONFIRM_FRIEND;
+
 
 public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
 
     private ArrayList<Friend> friends = new ArrayList<>();
     private String UserId;
-    private static final String ACTION_CONFIRM_FRIEND = "confirmFriend";
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
     private BroadcastReceiver adapterReceiver = new BroadcastReceiver() {

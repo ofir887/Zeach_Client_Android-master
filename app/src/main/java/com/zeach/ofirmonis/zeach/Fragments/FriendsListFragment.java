@@ -26,6 +26,11 @@ import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FRIENDS_LIST;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
+
 /**
  * Created by ofirmonis on 31/05/2017.
  */
@@ -38,9 +43,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     private FriendListAdapter friendListAdapter;
     private ListView friendsListView;
     private DatabaseReference data;
-    //
-    private static final String ACTION_USER = "User";
-    private static final String ACTION_REQUEST_USER = "request_user";
+
     private BroadcastReceiver mFriendsReciever = new BroadcastReceiver() {
 
         @Override
@@ -50,7 +53,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
                     User user = (User) intent.getSerializableExtra("User");
                     Log.d(TAG, String.format("User received:[%s]", user.toString()));
                     ZeachUser = user;
-                    data = FirebaseDatabase.getInstance().getReference("Users/" + ZeachUser.getUID() + "/friendsList/");
+                    data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, ZeachUser.getUID(), FRIENDS_LIST));
                     getFriendsFromServer();
                     break;
                 }
@@ -133,7 +136,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/friendsList/");
+        this.data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, ZeachUser.getUID(), FRIENDS_LIST));
         ZeachUser = new User();
         if (mFriendsReciever != null) {
             IntentFilter intentFilter = new IntentFilter(ACTION_USER);

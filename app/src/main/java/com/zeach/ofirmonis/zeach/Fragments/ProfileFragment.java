@@ -34,6 +34,8 @@ import com.zeach.ofirmonis.zeach.R;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_PROFILE;
+
 /**
  * Created by ofirmonis on 31/05/2017.
  */
@@ -51,7 +53,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private View rootView;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
-    private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
+
     private BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

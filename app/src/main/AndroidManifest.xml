@@ -68,12 +68,6 @@
             android:exported="true"
             android:process=":convertprc"
             android:stopWithTask="false" />
-        <service
-            android:name=".Services.LocationService"
-            android:exported="true"
-            android:isolatedProcess="false"
-            android:process=":gpsofir"
-            android:stopWithTask="false" />
 
         <receiver
             android:name=".Receivers.StartUpServiceReceiver"

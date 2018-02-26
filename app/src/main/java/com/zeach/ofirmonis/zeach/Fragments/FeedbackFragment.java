@@ -21,6 +21,8 @@ import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_FEEDBACK;
+
 
 /**
  * Created by ofirmonis on 24/02/2018.
@@ -33,7 +35,6 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
     private RatingBar mRatingBar;
     private User mUser;
     private Button mFinishButton;
-    private static final String ACTION_UPDATE_USER_FEEDBACK = "update_user_feedback";
 
     private BroadcastReceiver mFeedbackReceiver = new BroadcastReceiver() {
         @Override

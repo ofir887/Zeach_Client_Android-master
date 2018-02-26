@@ -23,6 +23,9 @@ import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
 
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FRIENDS_REQUESTS;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
+
 /**
  * Created by ofirmonis on 31/05/2017.
  */
@@ -45,7 +48,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
 
         this.ZeachUser = AppController.getInstance().getUser();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID() + "/FriendsRequest/");
+        this.data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, ZeachUser.getUID(), FRIENDS_REQUESTS));
         getFriendsRequestsFromServer();
         return this.rootView;
     }

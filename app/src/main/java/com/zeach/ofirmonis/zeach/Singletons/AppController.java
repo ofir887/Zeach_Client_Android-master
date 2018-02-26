@@ -89,7 +89,7 @@ public class AppController {
         for (int i = 0; i < data1.length(); i++) {
             Query UserId = null;
             try {
-                UserId = searchUserId.child(FirebaseConstants.USERS).orderByChild(FirebaseConstants.FACEBOOK_UID).equalTo(data1.getJSONObject(i).getString(FirebaseConstants.ID));
+                UserId = searchUserId.child(FirebaseConstants.USERS).orderByChild(FirebaseConstants.FACEBOOK_UID).equalTo(data1.getJSONObject(i).getString("id"));
                 UserId.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {

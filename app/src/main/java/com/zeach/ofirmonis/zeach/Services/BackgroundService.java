@@ -35,7 +35,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.zeach.ofirmonis.zeach.Activities.SignUpLogInActivity;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
@@ -44,6 +43,7 @@ import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.UserAtBeach;
 import com.zeach.ofirmonis.zeach.Objects.User;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +62,48 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TreeMap;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FAVORITE_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FRIEND_REQUEST;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_CONFIRM_FRIEND;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_DELETE_FRIEND;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_NEAREST_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_RECEIVE_FAVORITE_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REMOVE_FAVORITE_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_FAVORITE_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_SERVICE;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_FEEDBACK;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_PREFERENCES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_PROFILE;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.ACCURATE;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.AWAITING_CONFIRMATION;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.BEACHES_LISTENER;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.BEACHES_NAME;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.BEACH_ID;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.BEACH_LISTENER_ID;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.COORDS;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.COUNTRY;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.CURRENT_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.CURRENT_DEVICES;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.EASY_TO_USE;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FEEDBACK;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FRIENDS_REQUESTS;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.LATITUDE;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.LONGITUDE;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.NAME;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.PEOPLE_LIST;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.PHOTO_URL;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.PRIVATE_PROFILE;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.RATING;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USER_ID;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USER_TIMESTAMP;
+
 
 /**
  * Created by ofirmonis on 27/05/2017.
@@ -72,7 +114,7 @@ public class BackgroundService extends Service {
     private static final String TAG = BackgroundService.class.getSimpleName();
     public static final int ID = 0;
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000 * 60 * 3;
+    private static final int LOCATION_INTERVAL = 1000 * 15;
     private static final float LOCATION_DISTANCE = 0;
     private Timer timer;
     private ArrayList<Beach> beaches;
@@ -85,24 +127,6 @@ public class BackgroundService extends Service {
     private StorageReference mStorageRef;
     private String mNearestBeach;
 
-    ////
-    private static final String ACTION_STRING_SERVICE = "ToService";
-    private static final String ACTION_STRING_ACTIVITY = "ToActivity";
-    private static final String ACTION_BEACHES = "Beaches";
-    private static final String ACTION_USER = "User";
-    private static final String ACTION_REQUEST_USER = "request_user";
-    private static final String GPS = "GPS";
-    private static final String ACTION_DELETE_FRIEND = "deleteFriend";
-    private static final String ACTION_ADD_FRIEND_REQUEST = "friend_request";
-    private static final String ACTION_CONFIRM_FRIEND = "confirmFriend";
-    private static final String ACTION_ADD_FAVORITE_BEACH = "add_favorite_beach";
-    private static final String ACTION_REQUEST_FAVORITE_BEACHES = "request_favorite_beaches";
-    private static final String ACTION_RECEIVE_FAVORITE_BEACHES = "receive_favorite";
-    private static final String ACTION_REMOVE_FAVORITE_BEACHE = "remove_favorite_beach";
-    private static final String ACTION_NEAREST_BEACH = "nearest_beach";
-    private static final String ACTION_UPDATE_USER_PREFERENCES = "update_user_preferences";
-    private static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
-    private static final String ACTION_UPDATE_USER_FEEDBACK = "update_user_feedback";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
@@ -111,12 +135,10 @@ public class BackgroundService extends Service {
             Gson gson = new Gson();
             Friend friend;
             switch (intent.getAction()) {
-                /*case ACTION_BEACHES:
+                case ACTION_REQUEST_BEACHES:
                     Log.i(TAG, "Received Beaches request from Map Fragment. Sending Beaches..");
-                    if (beaches.size() > 0) {
-                        sendBroadcast(ACTION_BEACHES);
-                    }
-                    break;*/
+                    sendBroadcast(ACTION_BEACHES);
+                    break;
                 case ACTION_REQUEST_USER:
                     sendBroadcast(ACTION_USER);
                     break;
@@ -147,7 +169,7 @@ public class BackgroundService extends Service {
                     Log.i(TAG, "Received user favorite beaches request");
                     sendUserFavoriteBeaches();
                     break;
-                case ACTION_REMOVE_FAVORITE_BEACHE:
+                case ACTION_REMOVE_FAVORITE_BEACH:
                     Log.i(TAG, "Remove favorite beach request received.");
                     String beachKey = intent.getStringExtra("favorite_beach");
                     deleteFavoriteBeach(beachKey);
@@ -184,11 +206,10 @@ public class BackgroundService extends Service {
     };
 
     private void updateUserFeedback(boolean aAccurate, boolean aEasyToUse, float aRating) {
-        data.child("Feedback").child(mUser.getUID()).child("Accurate").setValue(aAccurate);
-        data.child("Feedback").child(mUser.getUID()).child("EasyToUse").setValue(aEasyToUse);
-        data.child("Feedback").child(mUser.getUID()).child("Rating").setValue(aRating);
+        data.child(FEEDBACK).child(mUser.getUID()).child(ACCURATE).setValue(aAccurate);
+        data.child(FEEDBACK).child(mUser.getUID()).child(EASY_TO_USE).setValue(aEasyToUse);
+        data.child(FEEDBACK).child(mUser.getUID()).child(RATING).setValue(aRating);
     }
-
 
     private class LocationListener implements android.location.LocationListener {
         Location mLastLocation;
@@ -211,7 +232,6 @@ public class BackgroundService extends Service {
                 }
                 return null;
             } catch (IOException ignored) {
-                //do something
             }
             return null;
 
@@ -298,7 +318,7 @@ public class BackgroundService extends Service {
     private void addFavoriteBeach(FavoriteBeach aFavoriteBeach) {
         mUser.AddBeachToList(aFavoriteBeach);
         DatabaseReference ref = data.getDatabase().getReference();
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).setValue(mUser.getFavoriteBeaches());
+        ref.child(USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).setValue(mUser.getFavoriteBeaches());
     }
 
     private void sendUserFavoriteBeaches() {
@@ -313,17 +333,17 @@ public class BackgroundService extends Service {
                 beach.getBeachListenerID(), timeStamp, beach.getCountry(), aLongitude, aLatitude);
         final Friend user = new Friend(mUser.getName(), userId, mUser.getProfilePictureUri(), userAtBeach, mUser.isProfilePrivate());
         Log.i(TAG, "User with beach coords = " + user.toString());
-        DatabaseReference userRef = ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist");
+        DatabaseReference userRef = ref.child(BEACHES).child(beach.getBeachKey()).child(PEOPLE_LIST);
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild(user.getUID())) {
                     Log.i(TAG, "User not in the beach..Updating");
-                    ref.child("BeachesListener").child(beach.getBeachListenerID()).child("CurrentDevices").setValue(beach.getCurrentDevices() + 1);
-                    ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).setValue(user);
+                    ref.child(BEACHES_LISTENER).child(beach.getBeachListenerID()).child(CURRENT_DEVICES).setValue(beach.getCurrentDevices() + 1);
+                    ref.child(BEACHES).child(beach.getBeachKey()).child(PEOPLE_LIST).child(user.getUID()).setValue(user);
                 } else {
-                    ref.child("Beaches").child(beach.getBeachKey()).child("Peoplelist").child(user.getUID()).
-                            child("currentBeach").child("mTimeStamp").setValue(userAtBeach.getmTimeStamp());
+                    ref.child(BEACHES).child(beach.getBeachKey()).child(PEOPLE_LIST).child(user.getUID()).
+                            child(CURRENT_BEACH).child(USER_TIMESTAMP).setValue(userAtBeach.getmTimeStamp());
                 }
             }
 
@@ -333,32 +353,31 @@ public class BackgroundService extends Service {
             }
         });
         //update time stamp
-        ref.child("Users").child(userId).child("currentBeach").setValue(userAtBeach);
+        ref.child(USERS).child(userId).child(CURRENT_BEACH).setValue(userAtBeach);
         ref.child(FirebaseConstants.TIMESTAMPS).child(userId).setValue(userAtBeach);
     }
 
     private void deleteFriendFromList(String aFriendUid) {
         DatabaseReference ref = data.getDatabase().getReference();
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriendUid).removeValue();
-        ref.child(FirebaseConstants.USERS).child(aFriendUid).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).removeValue();
+        ref.child(USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriendUid).removeValue();
+        ref.child(USERS).child(aFriendUid).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).removeValue();
         Log.i(TAG, String.format("Friend: [%s] removed from friends list. refreshing beaches..", aFriendUid));
-        //  getBeachesFromFirebase();
     }
 
     private void deleteFavoriteBeach(String aBeachId) {
         DatabaseReference ref = data.getDatabase().getReference();
         Log.i(TAG, String.format("Removing user favorite beach. Beach Id:[%s]", aBeachId));
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).child(aBeachId).removeValue();
+        ref.child(USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).child(aBeachId).removeValue();
         // getUserDetailsFromServer();
     }
 
     private void AddFriendRequest(Friend friend) {
         DatabaseReference data = FirebaseDatabase.getInstance().getReference();
         //create awaiting confirmation on current user
-        data.child(FirebaseConstants.USERS).child(mUser.getUID()).child("AwaitingConfirmation").child(friend.getUID()).setValue(friend);
+        data.child(USERS).child(mUser.getUID()).child(AWAITING_CONFIRMATION).child(friend.getUID()).setValue(friend);
         //create awaiting confirmation on current user
         Friend destinationFriend = new Friend(mUser.getName(), mUser.getUID(), mUser.getProfilePictureUri());
-        data.child(FirebaseConstants.USERS).child(friend.getUID()).child("FriendsRequest").child(mUser.getUID()).setValue(destinationFriend);
+        data.child(USERS).child(friend.getUID()).child(FRIENDS_REQUESTS).child(mUser.getUID()).setValue(destinationFriend);
     }
 
     private void getSingleLocationUpdate() {
@@ -413,7 +432,7 @@ public class BackgroundService extends Service {
         }
         try {
             mLocationManager.requestLocationUpdates(
-                    "gps", LOCATION_INTERVAL, LOCATION_DISTANCE,
+                    LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
                     mLocationListeners[0]);
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "fail to request location update, ignore", ex);
@@ -429,33 +448,33 @@ public class BackgroundService extends Service {
 
     private void getBeachesFromFirebase() {
         beaches.clear();
-        final DatabaseReference ref = data.getDatabase().getReference("Beaches");
+        final DatabaseReference ref = data.getDatabase().getReference(BEACHES);
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 beaches.clear();
                 //TODO - change string to constants (beachid and...)
                 for (final DataSnapshot beach : dataSnapshot.getChildren()) {
-                    String mBeachKey = (String) beach.child("BeachID").getValue();
-                    String mBeachName = (String) beach.child("BeachName").getValue();
-                    String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
+                    String mBeachKey = (String) beach.child(BEACH_ID).getValue();
+                    String mBeachName = (String) beach.child(BEACHES_NAME).getValue();
+                    String mBeachListenerID = (String) beach.child(BEACH_LISTENER_ID).getValue();
                     String mTraffic = (String) beach.child(FirebaseConstants.TRAFFIC).getValue();
-                    String mCountry = (String) beach.child("Country").getValue();
-                    int currentDevices = (int) (long) beach.child("CurrentDevices").getValue();
+                    String mCountry = (String) beach.child(COUNTRY).getValue();
+                    int currentDevices = (int) (long) beach.child(CURRENT_DEVICES).getValue();
                     final ArrayList<Friend> friends = new ArrayList<Friend>();
                     if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", false)) {
                         //get Friends
-                        if (mUser != null && !mUser.isProfilePrivate() && beach.child("Peoplelist").exists()) {
-                            final DatabaseReference userRef = data.getDatabase().getReference("Users");
+                        if (mUser != null && !mUser.isProfilePrivate() && beach.child(PEOPLE_LIST).exists()) {
+                            final DatabaseReference userRef = data.getDatabase().getReference(USERS);
                             for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
-                                if (beach.child("Peoplelist").hasChild(entry.getKey())) {
-                                    boolean privateProfile = beach.child("Peoplelist").child(entry.getKey()).child("profilePrivate").getValue(boolean.class);
+                                if (beach.child(PEOPLE_LIST).hasChild(entry.getKey())) {
+                                    boolean privateProfile = beach.child(PEOPLE_LIST).child(entry.getKey()).child(PRIVATE_PROFILE).getValue(boolean.class);
                                     if (!privateProfile) {
-                                        Log.i(TAG, "Found Friend: " + beach.child("Peoplelist").child(entry.getKey()).getValue());
-                                        String name = (String) beach.child("Peoplelist").child(entry.getKey()).child("name").getValue();
-                                        String uid = (String) beach.child("Peoplelist").child(entry.getKey()).child("uid").getValue();
-                                        String photoUrl = (String) beach.child("Peoplelist").child(entry.getKey()).child("photoUrl").getValue();
-                                        UserAtBeach userAtBeach = beach.child("Peoplelist").child(entry.getKey()).child("currentBeach").getValue(UserAtBeach.class);
+                                        Log.i(TAG, "Found Friend: " + beach.child(PEOPLE_LIST).child(entry.getKey()).getValue());
+                                        String name = (String) beach.child(PEOPLE_LIST).child(entry.getKey()).child(NAME).getValue();
+                                        String uid = (String) beach.child(PEOPLE_LIST).child(entry.getKey()).child(USER_ID).getValue();
+                                        String photoUrl = (String) beach.child(PEOPLE_LIST).child(entry.getKey()).child(PHOTO_URL).getValue();
+                                        UserAtBeach userAtBeach = beach.child(PEOPLE_LIST).child(entry.getKey()).child(CURRENT_BEACH).getValue(UserAtBeach.class);
                                         Friend friend = new Friend(name, uid, photoUrl, userAtBeach, privateProfile);
                                         friends.add(friend);
                                     }
@@ -467,13 +486,13 @@ public class BackgroundService extends Service {
                         Log.i(TAG, "Friends = " + friends.toString());
                     }
                     HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
-                            beach.child("Coords").getValue();
+                            beach.child(COORDS).getValue();
                     Map<String, HashMap<String, Double>> map = new TreeMap<String, HashMap<String, Double>>(mBeachCoords);
 
                     ArrayList<LatLng> beachCoords = new ArrayList<LatLng>();
                     for (Map.Entry<String, HashMap<String, Double>> entry : map.entrySet()) {
                         HashMap<String, Double> coords = entry.getValue();
-                        LatLng latlng = new LatLng(coords.get("lat"), coords.get("lng"));
+                        LatLng latlng = new LatLng(coords.get(LATITUDE), coords.get(LONGITUDE));
                         beachCoords.add(latlng);
                         Log.i("Beach1", latlng.toString());
                     }
@@ -508,10 +527,10 @@ public class BackgroundService extends Service {
         mUser.setImportFacebookFriends(aImportFriendsFromFacebook);
         mUser.setProfilePrivate(aPrivateProfile);
         DatabaseReference ref = data.getDatabase().getReference();
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).setValue(mUser);
+        ref.child(USERS).child(mUser.getUID()).setValue(mUser);
         if (mUser.getCurrentBeach().getmBeachID() != null) {
-            ref.child(FirebaseConstants.BEACHES).child(mUser.getCurrentBeach().getmBeachID()).
-                    child("Peoplelist").child(mUser.getUID()).child("profilePrivate").setValue(mUser.isProfilePrivate());
+            ref.child(BEACHES).child(mUser.getCurrentBeach().getmBeachID()).
+                    child(PEOPLE_LIST).child(mUser.getUID()).child(PRIVATE_PROFILE).setValue(mUser.isProfilePrivate());
         }
     }
 
@@ -519,7 +538,7 @@ public class BackgroundService extends Service {
         mUser.setName(aName);
         mUser.setProfilePictureUri(aPhotoUrl);
         DatabaseReference ref = data.getDatabase().getReference();
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).setValue(mUser);
+        ref.child(USERS).child(mUser.getUID()).setValue(mUser);
     }
 
     private String findNearsetBeach(LatLng aUserLocation) {
@@ -570,7 +589,7 @@ public class BackgroundService extends Service {
     }
 
     private void getUserDetailsFromServer() {
-        DatabaseReference mUserRef = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
+        DatabaseReference mUserRef = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
         mUserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -597,12 +616,12 @@ public class BackgroundService extends Service {
     private void addUserAsFriend(Friend aFriend) {
         DatabaseReference ref = data.getDatabase().getReference();
         Friend user = new Friend(mUser.getName(), mUser.getUID(), mUser.getProfilePictureUri());
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriend.getUID()).setValue(aFriend);
-        ref.child(FirebaseConstants.USERS).child(aFriend.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).setValue(user);
+        ref.child(USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(aFriend.getUID()).setValue(aFriend);
+        ref.child(USERS).child(aFriend.getUID()).child(FirebaseConstants.FRIENDS_LIST).child(mUser.getUID()).setValue(user);
         Log.i(TAG, String.format("Friend: [%s] added to friends list. refreshing beaches..", aFriend));
         Log.i(TAG, String.format("Removing request after adding"));
-        ref.child(FirebaseConstants.USERS).child(mUser.getUID()).child(FirebaseConstants.FRIENDS_REQUESTS).child(aFriend.getUID()).removeValue();
-        ref.child(FirebaseConstants.USERS).child(aFriend.getUID()).child(FirebaseConstants.AWAITING_CONFIRMATION).child(mUser.getUID()).removeValue();
+        ref.child(USERS).child(mUser.getUID()).child(FRIENDS_REQUESTS).child(aFriend.getUID()).removeValue();
+        ref.child(USERS).child(aFriend.getUID()).child(AWAITING_CONFIRMATION).child(mUser.getUID()).removeValue();
         //   getBeachesFromFirebase();
     }
 
@@ -635,18 +654,18 @@ public class BackgroundService extends Service {
             IntentFilter intentFilter = new IntentFilter(ACTION_STRING_SERVICE);
             intentFilter.addAction(ACTION_BEACHES);
             intentFilter.addAction(ACTION_USER);
-            intentFilter.addAction(GPS);
             intentFilter.addAction(ACTION_DELETE_FRIEND);
             intentFilter.addAction(ACTION_CONFIRM_FRIEND);
             intentFilter.addAction(ACTION_ADD_FAVORITE_BEACH);
             intentFilter.addAction(ACTION_REQUEST_FAVORITE_BEACHES);
-            intentFilter.addAction(ACTION_REMOVE_FAVORITE_BEACHE);
+            intentFilter.addAction(ACTION_REMOVE_FAVORITE_BEACH);
             intentFilter.addAction(ACTION_NEAREST_BEACH);
             intentFilter.addAction(ACTION_REQUEST_USER);
             intentFilter.addAction(ACTION_ADD_FRIEND_REQUEST);
             intentFilter.addAction(ACTION_UPDATE_USER_PREFERENCES);
             intentFilter.addAction(ACTION_UPDATE_USER_PROFILE);
             intentFilter.addAction(ACTION_UPDATE_USER_FEEDBACK);
+            intentFilter.addAction(ACTION_REQUEST_BEACHES);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //
@@ -667,7 +686,7 @@ public class BackgroundService extends Service {
                     getBeachesFromFirebase();
                     //    initializeLocationManager();
                     //     getSingleLocationUpdate();
-                    //     getMultipleLocationUpdates();
+                    getMultipleLocationUpdates();
                 }
             }
         };

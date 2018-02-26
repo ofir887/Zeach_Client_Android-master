@@ -22,8 +22,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.UserListAdapter;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 import java.util.ArrayList;
+import java.util.Map;
+
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 
 /**
  * Created by ofirmonis on 31/05/2017.
@@ -39,8 +45,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
     private ListView UsersListView;
     private DatabaseReference data;
     private SearchView searchView;
-    private static final String ACTION_USER = "User";
-    private static final String ACTION_REQUEST_USER = "request_user";
+
     private BroadcastReceiver mUserReciever = new BroadcastReceiver() {
 
         @Override
@@ -98,8 +103,8 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
     @Override
     public void onResume() {
         super.onResume();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/");
-        ZeachUser = new User();
+        this.data = FirebaseDatabase.getInstance().getReference(USERS);
+        ZeachUser = MapSingleton.getInstance().getmUser();
         if (mUserReciever != null) {
             IntentFilter intentFilter = new IntentFilter(ACTION_USER);
             intentFilter.addAction(ACTION_REQUEST_USER);
@@ -156,7 +161,9 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        getUsersFromServer(newText);
+        if (ZeachUser != null && ZeachUser.getFriendsList() != null) {
+            getUsersFromServer(newText);
+        }
         return false;
     }
 }
