@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
@@ -116,8 +117,8 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
     private void sendBroadcast() {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_USER_PREFERENCES);
-        intent.putExtra("add_facebook_friends", importFacebookFriendsCheckbox.isChecked());
-        intent.putExtra("private_profile", isUserPrivate.isChecked());
+        intent.putExtra(IntentExtras.ADD_FRIENDS_FACEBOOK, importFacebookFriendsCheckbox.isChecked());
+        intent.putExtra(IntentExtras.PROFILE_PRIVATE, isUserPrivate.isChecked());
         getContext().sendBroadcast(intent);
     }
 

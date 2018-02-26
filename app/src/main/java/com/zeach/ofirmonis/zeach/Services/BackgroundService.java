@@ -35,6 +35,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.GpsHelper.RayCast;
@@ -103,6 +104,8 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.RATING;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USER_ID;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USER_TIMESTAMP;
+import static com.zeach.ofirmonis.zeach.Constants.IntentExtras.NEAREST_BEACH;
+import static com.zeach.ofirmonis.zeach.Constants.IntentExtras.RECEIVE_FAVORITE;
 
 
 /**
@@ -143,13 +146,13 @@ public class BackgroundService extends Service {
                     sendBroadcast(ACTION_USER);
                     break;
                 case ACTION_DELETE_FRIEND:
-                    String friendUid = intent.getStringExtra("UID");
+                    String friendUid = intent.getStringExtra(IntentExtras.UID);
                     Log.i(TAG, String.format("Received: [%s]", friendUid));
                     deleteFriendFromList(friendUid);
                     break;
 
                 case ACTION_CONFIRM_FRIEND:
-                    String friendjson = intent.getStringExtra("Friend");
+                    String friendjson = intent.getStringExtra(IntentExtras.FRIEND);
                     type = new TypeToken<Friend>() {
                     }.getType();
                     friend = gson.fromJson(friendjson, type);
@@ -157,7 +160,7 @@ public class BackgroundService extends Service {
                     addUserAsFriend(friend);
                     break;
                 case ACTION_ADD_FAVORITE_BEACH: {
-                    String favoriteBeachString = intent.getStringExtra("favorite_beach");
+                    String favoriteBeachString = intent.getStringExtra(IntentExtras.FAVORITE_BEACH);
                     type = new TypeToken<FavoriteBeach>() {
                     }.getType();
                     FavoriteBeach favoriteBeach = gson.fromJson(favoriteBeachString, type);
@@ -171,7 +174,7 @@ public class BackgroundService extends Service {
                     break;
                 case ACTION_REMOVE_FAVORITE_BEACH:
                     Log.i(TAG, "Remove favorite beach request received.");
-                    String beachKey = intent.getStringExtra("favorite_beach");
+                    String beachKey = intent.getStringExtra(IntentExtras.FAVORITE_BEACH);
                     deleteFavoriteBeach(beachKey);
                     break;
                 case ACTION_ADD_FRIEND_REQUEST:
@@ -180,23 +183,23 @@ public class BackgroundService extends Service {
                     AddFriendRequest(friend);
                     break;
                 case ACTION_UPDATE_USER_PREFERENCES:
-                    boolean importFacebookFriends = intent.getBooleanExtra("add_facebook_friends", false);
-                    boolean isUserPrivate = intent.getBooleanExtra("private_profile", false);
+                    boolean importFacebookFriends = intent.getBooleanExtra(IntentExtras.ADD_FRIENDS_FACEBOOK, false);
+                    boolean isUserPrivate = intent.getBooleanExtra(IntentExtras.PROFILE_PRIVATE, false);
                     Log.i(TAG, String.format("User Preferences Update Request Received. import from facebook:[%b], private profile:[%b]",
                             importFacebookFriends, isUserPrivate));
                     updateUserPreferences(importFacebookFriends, isUserPrivate);
                     break;
                 case ACTION_UPDATE_USER_PROFILE:
-                    String name = intent.getStringExtra("name");
-                    String photoUrl = intent.getStringExtra("photo_url");
+                    String name = intent.getStringExtra(IntentExtras.NAME);
+                    String photoUrl = intent.getStringExtra(IntentExtras.PHOTO_URL);
                     Log.i(TAG, String.format("Update User Profile message request received. " +
                             "name:[%s], photo url:[%s]", name, photoUrl));
                     updateUserProfile(name, photoUrl);
                     break;
                 case ACTION_UPDATE_USER_FEEDBACK:
-                    boolean accurate = intent.getBooleanExtra("is_accurate", true);
-                    boolean easyToUse = intent.getBooleanExtra("easy_to_use", true);
-                    float rating = intent.getFloatExtra("rating", 0);
+                    boolean accurate = intent.getBooleanExtra(IntentExtras.ACCURATE, true);
+                    boolean easyToUse = intent.getBooleanExtra(IntentExtras.EASY_TO_USE, true);
+                    float rating = intent.getFloatExtra(IntentExtras.RATING, 0);
                     Log.i(TAG, String.format("Feedback received. accurate:[%b], easy to use:[%b], rating:[%f]", accurate, easyToUse, rating));
                     updateUserFeedback(accurate, easyToUse, rating);
 
@@ -596,7 +599,7 @@ public class BackgroundService extends Service {
                 mUser = dataSnapshot.getValue(User.class);
                 JSONObject jsonObject = new JSONObject();
                 try {
-                    jsonObject.put("User", mUser.toString());
+                    jsonObject.put(IntentExtras.USER, mUser.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -702,20 +705,20 @@ public class BackgroundService extends Service {
             case ACTION_BEACHES: {
                 gson = new Gson();
                 String arr = gson.toJson(beaches);
-                new_intent.putExtra("beaches", arr);
+                new_intent.putExtra(IntentExtras.BEACHES, arr);
                 new_intent.setAction(ACTION_BEACHES);
                 Log.i(TAG, "Sending beach to map fragment" + arr.toString());
                 break;
             }
             case ACTION_USER: {
-                new_intent.putExtra("User", mUser);
+                new_intent.putExtra(IntentExtras.USER, mUser);
                 new_intent.setAction(ACTION_USER);
                 Log.i(TAG, "onvcvxCreate");
                 break;
             }
             case ACTION_STRING_ACTIVITY: {
-                new_intent.putExtra("lat", mLocation.latitude);
-                new_intent.putExtra("lng", mLocation.longitude);
+                new_intent.putExtra(IntentExtras.LATITUDE, mLocation.latitude);
+                new_intent.putExtra(IntentExtras.LONGITUDE, mLocation.longitude);
                 new_intent.setAction(ACTION_STRING_ACTIVITY);
                 break;
             }
@@ -724,13 +727,13 @@ public class BackgroundService extends Service {
                 ArrayList<FavoriteBeach> favoriteBeaches = new ArrayList<>(mUser.getFavoriteBeaches().values());
                 String favoriteBeachesString = gson.toJson(favoriteBeaches);
                 Log.i(TAG, favoriteBeachesString);
-                new_intent.putExtra("favorite_beaches", favoriteBeachesString);
-                new_intent.setAction("receive_favorite");
+                new_intent.putExtra(IntentExtras.FAVORITES_BEACH, favoriteBeachesString);
+                new_intent.setAction(RECEIVE_FAVORITE);
                 break;
             }
             case ACTION_NEAREST_BEACH:
                 Log.i(TAG, "Sending nearest beach to map..");
-                new_intent.putExtra("nearest_beach", mNearestBeach);
+                new_intent.putExtra(NEAREST_BEACH, mNearestBeach);
                 new_intent.setAction(action);
                 break;
         }

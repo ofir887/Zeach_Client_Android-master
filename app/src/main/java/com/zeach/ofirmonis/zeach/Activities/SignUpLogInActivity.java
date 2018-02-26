@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Fragments.LoginFragment;
 import com.zeach.ofirmonis.zeach.Fragments.SignUpFragment;
 import com.zeach.ofirmonis.zeach.R;
@@ -46,7 +47,7 @@ public class SignUpLogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_log_in);
-        boolean moveToBackground = getIntent().getBooleanExtra("background", false);
+        boolean moveToBackground = getIntent().getBooleanExtra(IntentExtras.BACKGROUND, false);
         if (moveToBackground) {
             moveTaskToBack(true);
         }

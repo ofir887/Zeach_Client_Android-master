@@ -38,6 +38,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.Objects.User;
@@ -262,8 +263,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private void startMainActivity(boolean aOpenMap) {
         AppController.getInstance().setUser(this.mZeachUser);
         Intent mainActivity = new Intent(getActivity(), MainActivity.class);
-        mainActivity.putExtra("map", aOpenMap);
-        mainActivity.putExtra("background", getActivity().getIntent().getBooleanExtra("background", false));
+        mainActivity.putExtra(IntentExtras.MAP, aOpenMap);
+        mainActivity.putExtra(IntentExtras.BACKGROUND, getActivity().getIntent().getBooleanExtra(IntentExtras.BACKGROUND, false));
         startActivity(mainActivity);
         getActivity().finish();
     }

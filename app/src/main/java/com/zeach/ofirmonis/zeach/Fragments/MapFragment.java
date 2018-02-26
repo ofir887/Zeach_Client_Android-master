@@ -44,6 +44,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.Adapters.SearchBeachAdapter;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Constants.BeachConstants;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
@@ -101,7 +102,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             switch (intent.getAction()) {
                 case ACTION_USER: {
                     Log.d(MapFragment.class.getSimpleName(), "lets see");
-                    User user = (User) intent.getSerializableExtra("User");
+                    User user = (User) intent.getSerializableExtra(IntentExtras.USER);
                     mUser = user;
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
                     mUserDetailesReceived = true;
@@ -111,7 +112,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                 }
                 case ACTION_STRING_ACTIVITY: {
                     Bundle b = intent.getExtras();
-                    LatLng latLng = new LatLng(b.getDouble("lat"), b.getDouble("lng"));
+                    LatLng latLng = new LatLng(b.getDouble(IntentExtras.LATITUDE), b.getDouble(IntentExtras.LONGITUDE));
                     Log.d(MapFragment.class.getSimpleName(), latLng.toString());
                     userLocation = latLng;
                     mUserLocationRecieved = true;
@@ -121,7 +122,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                 }
                 case ACTION_BEACHES: {
                     Gson gson = new Gson();
-                    String str = intent.getStringExtra("beaches");
+                    String str = intent.getStringExtra(IntentExtras.BEACHES);
                     Type type = new TypeToken<ArrayList<Beach>>() {
                     }.getType();
                     ArrayList<Beach> beaches = gson.fromJson(str, type);
@@ -139,7 +140,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     break;
                 }
                 case ACTION_NEAREST_BEACH:
-                    final String nearestBeach = intent.getStringExtra("nearest_beach");
+                    final String nearestBeach = intent.getStringExtra(IntentExtras.NEAREST_BEACH);
                     Log.i(TAG, String.format("Received nearest beach id:[%s]", nearestBeach));
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -219,7 +220,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                                     intent.setAction(ACTION_ADD_FAVORITE_BEACH);
                                     Gson gson = new Gson();
                                     String favorite = gson.toJson(favoriteBeach);
-                                    intent.putExtra("favorite_beach", favorite);
+                                    intent.putExtra(IntentExtras.FAVORITE_BEACH, favorite);
                                     getContext().sendBroadcast(intent);
                                 }
                             });

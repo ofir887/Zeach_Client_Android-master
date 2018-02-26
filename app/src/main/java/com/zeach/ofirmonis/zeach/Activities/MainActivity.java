@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Fragments.FeedbackFragment;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity
             switch (intent.getAction()) {
                 case ACTION_USER: {
                     Log.d(TAG, "lets see");
-                    User user = (User) intent.getSerializableExtra("User");
+                    User user = (User) intent.getSerializableExtra(IntentExtras.USER);
                     zeachUser = user;
                     Log.d(TAG, user.toString());
                     setDrawerProfileInforamtion();
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity
             registerReceiver(activityReceiver, intentFilter);
         }
 
-        mOpenMap = getIntent().getBooleanExtra("map", false);
+        mOpenMap = getIntent().getBooleanExtra(IntentExtras.MAP, false);
         Log.i(TAG, String.format("opening map:[%b]", mOpenMap));
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (mOpenMap) {

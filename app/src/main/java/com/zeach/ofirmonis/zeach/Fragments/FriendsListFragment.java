@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.FriendListAdapter;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
@@ -50,7 +51,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_USER: {
-                    User user = (User) intent.getSerializableExtra("User");
+                    User user = (User) intent.getSerializableExtra(IntentExtras.USER);
                     Log.d(TAG, String.format("User received:[%s]", user.toString()));
                     ZeachUser = user;
                     data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, ZeachUser.getUID(), FRIENDS_LIST));

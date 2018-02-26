@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.zeach.ofirmonis.zeach.Activities.BackgroundActivity;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 
 /**
  * Created by ofirmonis on 03/10/2017.
@@ -21,7 +22,7 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         mContext = context;
         Log.i(TAG, "StartUp service receiver has catch. starting gps background service..");
         Intent activity = new Intent(context, BackgroundActivity.class);
-        activity.putExtra("background", true);
+        activity.putExtra(IntentExtras.BACKGROUND, true);
 
         /*Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

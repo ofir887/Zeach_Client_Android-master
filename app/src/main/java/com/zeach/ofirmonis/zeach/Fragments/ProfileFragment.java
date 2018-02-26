@@ -27,6 +27,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
@@ -181,13 +183,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private void sendBroadcast() {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_USER_PROFILE);
-        intent.putExtra("name", mUser.getName());
-        intent.putExtra("photo_url", mUser.getProfilePictureUri());
+        intent.putExtra(IntentExtras.NAME, mUser.getName());
+        intent.putExtra(IntentExtras.PHOTO_URL, mUser.getProfilePictureUri());
         getContext().sendBroadcast(intent);
     }
 
     public void addImageToStorage() {
-        String imagePath = "/Users/" + mUser.getUID();
+        String imagePath = String.format("%s/%s", FirebaseConstants.USERS, mUser.getUID());
         mUser.setProfilePictureUri(imagePath);
         mStorageRef = mStorage.getReference().child(imagePath);
         image.setDrawingCacheEnabled(true);

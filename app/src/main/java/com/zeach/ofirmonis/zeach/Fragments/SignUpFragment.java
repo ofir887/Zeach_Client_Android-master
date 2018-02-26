@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.R;
@@ -90,11 +91,11 @@ public class SignUpFragment extends Fragment implements View.OnClickListener {
     public void SendUserAndMoveToProfileFragment() {
         this.data = FirebaseDatabase.getInstance().getReference();
         Map<String, com.zeach.ofirmonis.zeach.Objects.User> user = new HashMap<String, com.zeach.ofirmonis.zeach.Objects.User>();
-        User.setProfilePictureUri("/PersonIcon.png");
+        User.setProfilePictureUri(FirebaseConstants.PERSON_ICON);
         data.child(FirebaseConstants.USERS).child(this.User.getUID()).setValue(this.User);
         AppController.getInstance().setUser(this.User); // save user in singleton
         Intent profileActivity = new Intent(getActivity(), MainActivity.class);
-        profileActivity.putExtra("map", false);
+        profileActivity.putExtra(IntentExtras.MAP, false);
         getActivity().finish();
         startActivity(profileActivity);
     }

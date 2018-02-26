@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RatingBar;
 
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
@@ -82,9 +83,9 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
     private void sendBroadcast() {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_USER_FEEDBACK);
-        intent.putExtra("is_accurate", mAccurateCheckbox.isChecked());
-        intent.putExtra("easy_to_use", mFriendlyCheckbox.isChecked());
-        intent.putExtra("rating", mRatingBar.getRating());
+        intent.putExtra(IntentExtras.ACCURATE, mAccurateCheckbox.isChecked());
+        intent.putExtra(IntentExtras.EASY_TO_USE, mFriendlyCheckbox.isChecked());
+        intent.putExtra(IntentExtras.RATING, mRatingBar.getRating());
         getContext().sendBroadcast(intent);
         showDialog();
     }

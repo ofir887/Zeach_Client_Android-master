@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.UserListAdapter;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
@@ -52,7 +53,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_USER: {
-                    User user = (User) intent.getSerializableExtra("User");
+                    User user = (User) intent.getSerializableExtra(IntentExtras.USER);
                     Log.d(TAG, String.format("User received:[%s]", user.toString()));
                     ZeachUser = user;
                     getUsersFromServer("");
