@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
@@ -109,7 +110,7 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
                 Log.d("clicked", friends.get(position).getName());
                 Intent intent = new Intent();
                 intent.setAction(ACTION_DELETE_FRIEND);
-                intent.putExtra("UID", friends.get(position).getUID());
+                intent.putExtra(IntentExtras.UID, friends.get(position).getUID());
                 getContext().sendBroadcast(intent);
                 MapSingleton.getInstance().getmUser().getFriendsList().remove(friends.get(position).getUID());
             }

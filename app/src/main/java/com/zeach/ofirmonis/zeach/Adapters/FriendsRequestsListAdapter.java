@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 
@@ -88,7 +89,7 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
                 intent.setAction(ACTION_CONFIRM_FRIEND);
                 Gson gson = new Gson();
                 String friendJson = gson.toJson(friend);
-                intent.putExtra("Friend", friendJson);
+                intent.putExtra(IntentExtras.FRIEND, friendJson);
                 getContext().sendBroadcast(intent);
 
             }

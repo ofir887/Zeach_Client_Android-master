@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
@@ -93,7 +94,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
                         Log.i(TAG, String.format("Sending friend request. Friend to add:[%s]", friend));
                         Intent intent = new Intent();
                         intent.setAction(ACTION_ADD_FRIEND_REQUEST);
-                        intent.putExtra("friend", friend);
+                        intent.putExtra(IntentExtras.FRIEND, friend);
                         getContext().sendBroadcast(intent);
 
                     }

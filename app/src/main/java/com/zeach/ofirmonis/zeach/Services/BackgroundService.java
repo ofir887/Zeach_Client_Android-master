@@ -178,7 +178,7 @@ public class BackgroundService extends Service {
                     deleteFavoriteBeach(beachKey);
                     break;
                 case ACTION_ADD_FRIEND_REQUEST:
-                    friend = (Friend) intent.getSerializableExtra("friend");
+                    friend = (Friend) intent.getSerializableExtra(IntentExtras.FRIEND);
                     Log.i(TAG, String.format("Friend request message received:[%s]", friend));
                     AddFriendRequest(friend);
                     break;
@@ -727,7 +727,7 @@ public class BackgroundService extends Service {
                 ArrayList<FavoriteBeach> favoriteBeaches = new ArrayList<>(mUser.getFavoriteBeaches().values());
                 String favoriteBeachesString = gson.toJson(favoriteBeaches);
                 Log.i(TAG, favoriteBeachesString);
-                new_intent.putExtra(IntentExtras.FAVORITES_BEACH, favoriteBeachesString);
+                new_intent.putExtra(IntentExtras.FAVORITE_BEACHES, favoriteBeachesString);
                 new_intent.setAction(RECEIVE_FAVORITE);
                 break;
             }

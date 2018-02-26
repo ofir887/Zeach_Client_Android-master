@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.R;
@@ -71,7 +72,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
                 Log.i(TAG, String.format("Remove button clicked. removing favorite beach: %s", mBeach.get(position).getmBeachName()));
                 Intent intent = new Intent();
                 intent.setAction(ACTION_REMOVE_FAVORITE_BEACH);
-                intent.putExtra("favorite_beach", mBeach.get(position).getmBeachKey());
+                intent.putExtra(IntentExtras.FAVORITE_BEACH, mBeach.get(position).getmBeachKey());
                 getContext().sendBroadcast(intent);
                 MapSingleton.getInstance().getmUser().getFavoriteBeaches().remove(mBeach.get(position).getmBeachKey());
             }

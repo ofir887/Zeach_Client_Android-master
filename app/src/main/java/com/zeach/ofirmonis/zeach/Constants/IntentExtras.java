@@ -10,7 +10,7 @@ public class IntentExtras {
     public static final String UID = "UID";
     public static final String FRIEND = "Friend";
     public static final String FAVORITE_BEACH = "favorite_beach";
-    public static final String FAVORITES_BEACH = "favorite_beaches";
+    public static final String FAVORITE_BEACHES = "favorite_beaches";
     public static final String PROFILE_PRIVATE = "private_profile";
     public static final String ADD_FRIENDS_FACEBOOK = "add_facebook_friends";
     public static final String NAME = "name";
