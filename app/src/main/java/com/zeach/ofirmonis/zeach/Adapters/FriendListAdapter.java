@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -80,17 +82,7 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
         }
         holder.friendName.setText(friends.get(position).getName());
         mStorageRef = mStorage.getReference(friends.get(position).getPhotoUrl());
-        mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                bitmap = AppController.SetCircleMarkerIcon(bitmap);
-                bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
-                bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
-                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
-                holder.friendPhoto.setImageBitmap(smallMarker);
-            }
-        });
+        Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(holder.friendPhoto);
         holder.AddFriendUnfriend.setText("Unfriend");
         if (friends.get(position).getCurrentBeach() != null)
             holder.CurrentBeach.setText(friends.get(position).getCurrentBeach().getmBeachName());

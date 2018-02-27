@@ -42,6 +42,7 @@ import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -196,7 +197,7 @@ public class MainActivity extends AppCompatActivity
             FirebaseAuth.getInstance().signOut();
             finish();
             LoginManager.getInstance().logOut();
-
+            MapSingleton.createInstance();
             Intent SignUpLogInActivity = new Intent(getApplicationContext(), SignUpLogInActivity.class);
             startActivity(SignUpLogInActivity);
             return true;
