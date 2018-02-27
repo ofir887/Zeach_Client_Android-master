@@ -191,46 +191,58 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     }
 
     public void loginWithFireBaseAccount(String email, final String password) {
-        this.mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            DatabaseReference ref = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            Log.i(TAG, "Success " + user.getEmail().toString());
-                            ref.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    mZeachUser = dataSnapshot.getValue(User.class);
-                                }
+        final AlertDialog.Builder logInDialog = new AlertDialog.Builder(getContext());
+        if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
+            this.mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                DatabaseReference ref = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                Log.i(TAG, "Success " + user.getEmail().toString());
+                                ref.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        mZeachUser = dataSnapshot.getValue(User.class);
+                                    }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
 
-                                }
-                            });
-                            startMainActivity(true);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.i(TAG, "Failed to login", task.getException());
-                            Toast.makeText(getActivity(), "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            AlertDialog.Builder failedLoginDialog = new AlertDialog.Builder(getContext());
-                            failedLoginDialog.setTitle("Login Failed !");
-                            failedLoginDialog.setMessage("Try Again ");
-                            failedLoginDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
-                            failedLoginDialog.show();
+                                    }
+                                });
+                                startMainActivity(true);
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Log.i(TAG, "Failed to login", task.getException());
+                                Toast.makeText(getActivity(), "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                                AlertDialog.Builder failedLoginDialog = new AlertDialog.Builder(getContext());
+                                failedLoginDialog.setTitle("Login Failed !");
+                                failedLoginDialog.setMessage("Try Again ");
+                                failedLoginDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                                failedLoginDialog.show();
+                            }
                         }
-                    }
-                });
-
+                    });
+        } else {
+            logInDialog.setTitle("Login Failed");
+            logInDialog.setMessage("Failed. Try again !");
+            logInDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            logInDialog.show();
+        }
     }
 
 
