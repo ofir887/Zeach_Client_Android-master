@@ -24,9 +24,12 @@ import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
+import com.zeach.ofirmonis.zeach.interfaces.FriendsListener;
 
 import java.util.ArrayList;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_DELETE_FRIEND;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FRIENDS_LIST;
@@ -36,7 +39,7 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class FriendsListFragment extends Fragment implements View.OnClickListener {
+public class FriendsListFragment extends Fragment implements View.OnClickListener, FriendsListener {
     private static final String TAG = FriendsListFragment.class.getSimpleName();
     private View rootView;
     private User ZeachUser = new User();
@@ -56,6 +59,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
                     ZeachUser = user;
                     data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, ZeachUser.getUID(), FRIENDS_LIST));
                     getFriendsFromServer();
+                    MapSingleton.getInstance().updateUser(user, true);
                     break;
                 }
             }
@@ -71,7 +75,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     }
 
     public void getFriendsFromServer() {
-        friendListAdapter = new FriendListAdapter(getContext(), friends);
+        friendListAdapter = new FriendListAdapter(getContext(), friends, this);
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -142,6 +146,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
         if (mFriendsReciever != null) {
             IntentFilter intentFilter = new IntentFilter(ACTION_USER);
             intentFilter.addAction(ACTION_REQUEST_USER);
+            intentFilter.addAction(ACTION_DELETE_FRIEND);
             getActivity().registerReceiver(mFriendsReciever, intentFilter);
         }
         Intent intent = new Intent();
@@ -158,7 +163,15 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDetach() {
         Log.d(TAG, "Detach");
-
         super.onDetach();
+    }
+
+    @Override
+    public void onFriendRemoved(String aFriendUid) {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_DELETE_FRIEND);
+        intent.putExtra(IntentExtras.UID, aFriendUid);
+        getContext().sendBroadcast(intent);
+        MapSingleton.getInstance().getmUser().getFriendsList().remove(aFriendUid);
     }
 }

@@ -279,7 +279,6 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         this.rootView = inflater.inflate(R.layout.map_fragment, container, false);
-        mUser = new User();
         this.autoCompleteSearch = rootView.findViewById(R.id.beach_search_widget);
         mSearchBeachListView = rootView.findViewById(R.id.map_beach_list);
         this.autoCompleteSearch.setOnQueryTextListener(this);
@@ -303,6 +302,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             mUserDetailesReceived = MapSingleton.getInstance().ismUserDetailesReceived();
             mBeachesDetailsReceived = MapSingleton.getInstance().ismBeachesDetailsReceived();
             mUserLocationRecieved = MapSingleton.getInstance().ismUserLocationRecieved();
+            showFriendsOnMap();
             setUserLocationOnMap();
         }
         addBeachesAsPolygons();
@@ -348,7 +348,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
             setUserLocationOnMap();
         }
         if (mBeaches != null) {
-            showFriendsOnMap();
+            //    showFriendsOnMap();
             addBeachesAsPolygons();
         }
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);

@@ -18,6 +18,7 @@ import com.zeach.ofirmonis.zeach.Objects.Beach;
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
+import com.zeach.ofirmonis.zeach.interfaces.BeachListener;
 
 import java.util.ArrayList;
 
@@ -33,20 +34,14 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
 
     private static final String TAG = FavoriteBeachesAdapter.class.getSimpleName();
     private ArrayList<FavoriteBeach> mBeach;
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
+    private BeachListener mBeachListener;
 
-        }
-    };
 
-    public FavoriteBeachesAdapter(Context context, ArrayList<FavoriteBeach> beaches) {
+    public FavoriteBeachesAdapter(Context context, ArrayList<FavoriteBeach> beaches, BeachListener aBeachListener) {
         super(context, 0, beaches);
         mBeach = beaches;
-        if (mReceiver != null) {
-            IntentFilter intentFilter = new IntentFilter(ACTION_REMOVE_FAVORITE_BEACH);
-            context.registerReceiver(mReceiver, intentFilter);
-        }
+        mBeachListener = aBeachListener;
+
     }
 
     @Override
@@ -70,11 +65,7 @@ public class FavoriteBeachesAdapter extends ArrayAdapter<FavoriteBeach> {
             @Override
             public void onClick(View v) {
                 Log.i(TAG, String.format("Remove button clicked. removing favorite beach: %s", mBeach.get(position).getmBeachName()));
-                Intent intent = new Intent();
-                intent.setAction(ACTION_REMOVE_FAVORITE_BEACH);
-                intent.putExtra(IntentExtras.FAVORITE_BEACH, mBeach.get(position).getmBeachKey());
-                getContext().sendBroadcast(intent);
-                MapSingleton.getInstance().getmUser().getFavoriteBeaches().remove(mBeach.get(position).getmBeachKey());
+                mBeachListener.onBeachRemoved(mBeach.get(position).getmBeachKey());
             }
         });
         return convertView;

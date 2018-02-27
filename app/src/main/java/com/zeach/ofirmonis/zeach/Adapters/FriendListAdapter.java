@@ -20,17 +20,26 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
+import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
+import com.zeach.ofirmonis.zeach.Objects.Beach;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
+import com.zeach.ofirmonis.zeach.interfaces.FriendsListener;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_BEACHES;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_DELETE_FRIEND;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
 
 /**
  * Created by ofirmonis on 18/07/2017.
@@ -43,25 +52,14 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
     private ViewHolder holder;
+    private FriendsListener mFriendsListener;
 
-    private BroadcastReceiver adapterReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    };
-
-    public FriendListAdapter(Context context, ArrayList<Friend> friends) {
+    public FriendListAdapter(Context context, ArrayList<Friend> friends, FriendsListener aFriendsListener) {
         super(context, 0, friends);
         this.friends = friends;
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
-        if (adapterReceiver != null) {
-            IntentFilter intentFilter = new IntentFilter(ACTION_DELETE_FRIEND);
-            context.registerReceiver(adapterReceiver, intentFilter);
-        }
-        //
+        mFriendsListener = aFriendsListener;
     }
 
     @Override
@@ -82,23 +80,15 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
         }
         holder.friendName.setText(friends.get(position).getName());
         mStorageRef = mStorage.getReference(friends.get(position).getPhotoUrl());
-        final Handler handler = new Handler();
-        handler.post(new Runnable() {
+        mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
-            public void run() {
-                Log.i(TAG, "refreshing");
-                mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        bitmap = AppController.SetCircleMarkerIcon(bitmap);
-                        bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
-                        bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
-                        Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
-                        holder.friendPhoto.setImageBitmap(smallMarker);
-                    }
-                });
-                handler.postDelayed(this, 1000 * 60);
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
+                bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
+                holder.friendPhoto.setImageBitmap(smallMarker);
             }
         });
         holder.AddFriendUnfriend.setText("Unfriend");
@@ -108,11 +98,7 @@ public class FriendListAdapter extends ArrayAdapter<Friend> {
             @Override
             public void onClick(View v) {
                 Log.d("clicked", friends.get(position).getName());
-                Intent intent = new Intent();
-                intent.setAction(ACTION_DELETE_FRIEND);
-                intent.putExtra(IntentExtras.UID, friends.get(position).getUID());
-                getContext().sendBroadcast(intent);
-                MapSingleton.getInstance().getmUser().getFriendsList().remove(friends.get(position).getUID());
+                mFriendsListener.onFriendRemoved(friends.get(position).getUID());
             }
         });
         return convertView;

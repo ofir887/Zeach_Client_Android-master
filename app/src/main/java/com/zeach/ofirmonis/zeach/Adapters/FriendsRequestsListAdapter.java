@@ -33,13 +33,7 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
     private String UserId;
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
-    private BroadcastReceiver adapterReceiver = new BroadcastReceiver() {
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    };
 
     public FriendsRequestsListAdapter(Context context, ArrayList<Friend> friends, String userId, FragmentActivity activity) {
         super(context, 0, friends);
@@ -47,13 +41,6 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
         this.UserId = userId;
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
-        if (adapterReceiver != null) {
-            //Create an intent filter to listen to the broadcast sent with the action "ACTION_STRING_ACTIVITY"
-            IntentFilter intentFilter = new IntentFilter(ACTION_CONFIRM_FRIEND);
-            //  intentFilter.addAction(ACTION_DELETE_FRIEND);
-            //Map the intent filter to the receiver
-            context.registerReceiver(adapterReceiver, intentFilter);
-        }
     }
 
     @Override
@@ -84,7 +71,6 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
             public void onClick(View v) {
                 Log.d("clicked", friends.get(position).getName());
                 Friend friend = new Friend(friends.get(position).getName(), friends.get(position).getUID(), friends.get(position).getPhotoUrl());
-                //  AppController.getInstance().AddFriendRequest(UserId,friend);
                 Intent intent = new Intent();
                 intent.setAction(ACTION_CONFIRM_FRIEND);
                 Gson gson = new Gson();

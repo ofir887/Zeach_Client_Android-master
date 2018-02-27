@@ -15,12 +15,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.interfaces.FriendsListener;
 
 /**
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class FriendsFragment extends Fragment implements View.OnClickListener{
+public class FriendsFragment extends Fragment implements View.OnClickListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -30,10 +31,11 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
      */
     private ViewPager mViewPager;
     private android.support.v4.app.FragmentManager fragmentManager;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View rootView =inflater.inflate(R.layout.fragment_friends,container,false);
+        View rootView = inflater.inflate(R.layout.fragment_friends, container, false);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getChildFragmentManager());
         mViewPager = (ViewPager) rootView.findViewById(R.id.friends_container);
 
@@ -41,9 +43,6 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
         //mViewPager.beginFakeDrag(); //one solution for disable swipe
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.friends_tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-
-
 
 
         return rootView;
@@ -56,11 +55,13 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
 
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //  super.onActivityResult(requestCode, resultCode, data);
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -81,7 +82,6 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
      */
 
 
-
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -100,7 +100,6 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
             switch (position) {
                 case 0:
                     FriendsListFragment friendsList = new FriendsListFragment();
-
                     return friendsList;
                 case 1:
                     SearchUsersListFragment searchUsersListFragment = new SearchUsersListFragment();
@@ -123,7 +122,7 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch(position){
+            switch (position) {
                 case 0:
                     return "Friends";
                 case 1:
@@ -140,8 +139,8 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
     public void onClick(View v) {
 
 
-
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -152,9 +151,10 @@ public class FriendsFragment extends Fragment implements View.OnClickListener{
         super.onActivityCreated(savedInstanceState);
 
     }
+
     @Override
     public void onDetach() {
-        Log.d("nir","nir1222");
+        Log.d("nir", "nir1222");
 
         super.onDetach();
     }

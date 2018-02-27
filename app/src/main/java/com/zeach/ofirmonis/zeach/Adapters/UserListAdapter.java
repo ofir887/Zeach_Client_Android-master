@@ -20,6 +20,7 @@ import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
+import com.zeach.ofirmonis.zeach.interfaces.UsersListener;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -38,22 +39,15 @@ public class UserListAdapter extends ArrayAdapter<User> {
     private Map<String, Friend> mUserFriends;
     private static FirebaseStorage mStorage;
     private static StorageReference mStorageRef;
-    private BroadcastReceiver mFriendRequestReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case ACTION_ADD_FRIEND_REQUEST:
-                    break;
-            }
-        }
-    };
+    private UsersListener mUsersListener;
 
-    public UserListAdapter(Context context, ArrayList<User> users, Map<String, Friend> aUserFriends) {
+    public UserListAdapter(Context context, ArrayList<User> users, Map<String, Friend> aUserFriends, UsersListener aUsersListener) {
         super(context, 0, users);
         this.users = users;
         this.mUserFriends = aUserFriends;
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
+        mUsersListener = aUsersListener;
     }
 
     @Override
@@ -92,11 +86,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
                         Friend friend = new Friend(users.get(position).getName(), users.get(position).getUID(), users.get(position).getProfilePictureUri());
                         //  AppController.getInstance().AddFriendRequest(friend);
                         Log.i(TAG, String.format("Sending friend request. Friend to add:[%s]", friend));
-                        Intent intent = new Intent();
-                        intent.setAction(ACTION_ADD_FRIEND_REQUEST);
-                        intent.putExtra(IntentExtras.FRIEND, friend);
-                        getContext().sendBroadcast(intent);
-
+                        mUsersListener.onUserAdded(friend);
                     }
                 });
             }

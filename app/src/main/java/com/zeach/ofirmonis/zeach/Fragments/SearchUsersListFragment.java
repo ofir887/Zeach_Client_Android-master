@@ -21,13 +21,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.UserListAdapter;
 import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
+import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
+import com.zeach.ofirmonis.zeach.interfaces.UsersListener;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FRIEND_REQUEST;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
@@ -36,7 +39,7 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class SearchUsersListFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener {
+public class SearchUsersListFragment extends Fragment implements View.OnClickListener, SearchView.OnQueryTextListener, UsersListener {
 
     private static final String TAG = SearchUsersListFragment.class.getSimpleName();
     private View rootView;
@@ -75,7 +78,7 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
     }
 
     public void getUsersFromServer(final String str) {
-        userListAdapter = new UserListAdapter(getContext(), this.users, this.ZeachUser.getFriendsList());
+        userListAdapter = new UserListAdapter(getContext(), this.users, this.ZeachUser.getFriendsList(), this);
 
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
@@ -88,8 +91,6 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
                         if (user.getValue(User.class).getName().toLowerCase().contains(str))
                             users.add(user.getValue(User.class));
                 }
-
-
                 UsersListView.setAdapter(userListAdapter);
                 userListAdapter.notifyDataSetChanged();
             }
@@ -166,5 +167,14 @@ public class SearchUsersListFragment extends Fragment implements View.OnClickLis
             getUsersFromServer(newText);
         }
         return false;
+    }
+
+    @Override
+    public void onUserAdded(Friend aFriend) {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_ADD_FRIEND_REQUEST);
+        intent.putExtra(IntentExtras.FRIEND, aFriend);
+        getContext().sendBroadcast(intent);
+
     }
 }
