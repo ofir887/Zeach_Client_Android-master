@@ -22,4 +22,5 @@ public class Actions {
     public static final String ACTION_UPDATE_USER_PREFERENCES = "update_user_preferences";
     public static final String ACTION_UPDATE_USER_PROFILE = "update_user_profile";
     public static final String ACTION_UPDATE_USER_FEEDBACK = "update_user_feedback";
+    public static final String ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY = "shut_down_background_activity";
 }

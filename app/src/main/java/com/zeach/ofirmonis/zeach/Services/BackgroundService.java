@@ -74,6 +74,7 @@ import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REMOVE_FAVORITE
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_BEACHES;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_FAVORITE_BEACHES;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_SERVICE;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_FEEDBACK;
@@ -129,6 +130,7 @@ public class BackgroundService extends Service {
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
     private String mNearestBeach;
+    private boolean mBackgroundActivity;
 
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
@@ -263,14 +265,13 @@ public class BackgroundService extends Service {
                 } else {
                     mNearestBeach = findNearsetBeach(userCurrentLocation);
                     Log.i(TAG, String.format("Nearest beach found:[%s]", mNearestBeach));
-                    //TODO - send to map and show popup
                     sendBroadcast(ACTION_NEAREST_BEACH);
                 }
-                //  onDestroy();
-
-                //   }
             }
-            // onDestroy();
+            if (mBackgroundActivity && beaches.size() > 0 && mUser != null) {
+                Log.i(TAG, "Background Activity Started the service. Shutting Down...");
+                sendBroadcast(ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY);
+            }
 
         }
 
@@ -308,6 +309,7 @@ public class BackgroundService extends Service {
         Log.i(TAG, "onStartCommand");
         initializeLocationManager();
         getMultipleLocationUpdates();
+        mBackgroundActivity = intent.getBooleanExtra(IntentExtras.BACKGROUND_ACTIVITY, false);
         return START_STICKY;
     }
 
@@ -735,6 +737,9 @@ public class BackgroundService extends Service {
                 Log.i(TAG, "Sending nearest beach to map..");
                 new_intent.putExtra(NEAREST_BEACH, mNearestBeach);
                 new_intent.setAction(action);
+                break;
+            case ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY:
+                new_intent.setAction(ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY);
                 break;
         }
         sendBroadcast(new_intent);

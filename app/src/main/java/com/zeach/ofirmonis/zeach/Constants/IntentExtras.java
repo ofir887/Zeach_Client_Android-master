@@ -25,4 +25,5 @@ public class IntentExtras {
     public static final String NEAREST_BEACH = "nearest_beach";
     public static final String MAP = "map";
     public static final String BACKGROUND = "background";
+    public static final String BACKGROUND_ACTIVITY = "background_activity";
 }
