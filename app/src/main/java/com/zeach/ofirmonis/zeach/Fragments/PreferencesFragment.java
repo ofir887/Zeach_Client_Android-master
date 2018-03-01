@@ -105,7 +105,9 @@ public class PreferencesFragment extends Fragment implements View.OnClickListene
                 AppController.getInstance().getFacebookFriends();
 
             }
-            MapSingleton.getInstance().updateUser(mUser);
+            if (MapSingleton.getInstance() != null) {
+                MapSingleton.getInstance().updateUser(mUser);
+            }
             sendBroadcast();
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
             onDestroy();

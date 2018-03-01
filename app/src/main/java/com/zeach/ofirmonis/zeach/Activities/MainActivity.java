@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", true).commit();
         boolean moveToBackground = getIntent().getBooleanExtra("background", false);
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", true).commit();
         /*if (moveToBackground) {
             moveTaskToBack(true);
         }*/
@@ -195,6 +196,9 @@ public class MainActivity extends AppCompatActivity
             }
 
             FirebaseAuth.getInstance().signOut();
+            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", false).commit();
+            Intent backgroundService = new Intent(this, BackgroundService.class);
+            stopService(backgroundService);
             finish();
             LoginManager.getInstance().logOut();
             MapSingleton.createInstance();
