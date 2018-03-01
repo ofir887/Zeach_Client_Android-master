@@ -26,4 +26,5 @@ public class IntentExtras {
     public static final String MAP = "map";
     public static final String BACKGROUND = "background";
     public static final String BACKGROUND_ACTIVITY = "background_activity";
+    public static final String USER_GAVE_FEEDBACK = "gave_feedback";
 }

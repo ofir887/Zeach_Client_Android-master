@@ -66,6 +66,7 @@ import java.util.TreeMap;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FAVORITE_BEACH;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FRIEND_REQUEST;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_BEACHES;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_CHECK_IF_USER_GAVE_FEEDBACK;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_CONFIRM_FRIEND;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_DELETE_FRIEND;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_NEAREST_BEACH;
@@ -81,6 +82,7 @@ import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_FEE
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_PREFERENCES;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_PROFILE;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER_GAVE_FEEDBACK;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.ACCURATE;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.AWAITING_CONFIRMATION;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.BEACHES;
@@ -107,6 +109,7 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USER_ID;
 import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USER_TIMESTAMP;
 import static com.zeach.ofirmonis.zeach.Constants.IntentExtras.NEAREST_BEACH;
 import static com.zeach.ofirmonis.zeach.Constants.IntentExtras.RECEIVE_FAVORITE;
+import static com.zeach.ofirmonis.zeach.Constants.IntentExtras.USER_GAVE_FEEDBACK;
 
 
 /**
@@ -204,11 +207,41 @@ public class BackgroundService extends Service {
                     float rating = intent.getFloatExtra(IntentExtras.RATING, 0);
                     Log.i(TAG, String.format("Feedback received. accurate:[%b], easy to use:[%b], rating:[%f]", accurate, easyToUse, rating));
                     updateUserFeedback(accurate, easyToUse, rating);
+                    break;
+                case ACTION_CHECK_IF_USER_GAVE_FEEDBACK:
+                    Log.i(TAG, "Received request to check if feedback already sent. Checking...");
+                    checkIfUserGaveFeedback();
+                    break;
 
             }
-            //sendBroadcast();
         }
     };
+
+    private void checkIfUserGaveFeedback() {
+        DatabaseReference dataReference = data.getDatabase().getReference(FirebaseConstants.FEEDBACK);
+        final Intent intent = new Intent(ACTION_USER_GAVE_FEEDBACK);
+        dataReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean gaveFeedback = false;
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
+                    if (user.getKey().equals(mUser.getUID())) {
+                        gaveFeedback = true;
+                        break;
+                    }
+                }
+                intent.putExtra(USER_GAVE_FEEDBACK, gaveFeedback);
+                getApplicationContext().sendBroadcast(intent);
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     private void updateUserFeedback(boolean aAccurate, boolean aEasyToUse, float aRating) {
         data.child(FEEDBACK).child(mUser.getUID()).child(ACCURATE).setValue(aAccurate);
@@ -259,7 +292,7 @@ public class BackgroundService extends Service {
                 Log.i(TAG, "checking against:" + beaches.get(i).getBeachName());
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
-                    Log.i(TAG, "ofir is here fucking worikng !!!");
+                    Log.i(TAG, "User is in the beach. Tagging...");
                     updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), userCurrentLocation.longitude, userCurrentLocation.latitude);
                     //break;
                 } else {
@@ -671,6 +704,7 @@ public class BackgroundService extends Service {
             intentFilter.addAction(ACTION_UPDATE_USER_PROFILE);
             intentFilter.addAction(ACTION_UPDATE_USER_FEEDBACK);
             intentFilter.addAction(ACTION_REQUEST_BEACHES);
+            intentFilter.addAction(ACTION_CHECK_IF_USER_GAVE_FEEDBACK);
             registerReceiver(serviceReceiver, intentFilter);
         }
         //

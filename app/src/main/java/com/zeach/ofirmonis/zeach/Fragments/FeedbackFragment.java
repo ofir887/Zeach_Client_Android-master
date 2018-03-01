@@ -22,7 +22,10 @@ import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.User;
 
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_CHECK_IF_USER_GAVE_FEEDBACK;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_UPDATE_USER_FEEDBACK;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER_GAVE_FEEDBACK;
+import static com.zeach.ofirmonis.zeach.Constants.IntentExtras.USER_GAVE_FEEDBACK;
 
 
 /**
@@ -40,7 +43,22 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
     private BroadcastReceiver mFeedbackReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            Log.i(TAG, "Received check if user already gave feedback");
+            boolean gaveFeedback = intent.getBooleanExtra(USER_GAVE_FEEDBACK, false);
+            if (gaveFeedback) {
+                AlertDialog.Builder feedbackDialog = new AlertDialog.Builder(getContext());
+                feedbackDialog.setTitle("Feedback already sent !");
+                feedbackDialog.setMessage("Can't send another feedback !");
+                feedbackDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+                        onDestroy();
+                    }
+                });
+                feedbackDialog.show();
+            }
         }
     };
 
@@ -122,8 +140,10 @@ public class FeedbackFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
         if (mFeedbackReceiver != null) {
-            IntentFilter intentFilter = new IntentFilter(ACTION_UPDATE_USER_FEEDBACK);
+            IntentFilter intentFilter = new IntentFilter(ACTION_USER_GAVE_FEEDBACK);
             getContext().registerReceiver(mFeedbackReceiver, intentFilter);
+            Intent intent = new Intent(ACTION_CHECK_IF_USER_GAVE_FEEDBACK);
+            getContext().sendBroadcast(intent);
         }
     }
 
