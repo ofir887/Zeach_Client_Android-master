@@ -40,9 +40,9 @@ public class BackgroundActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_background);
         boolean isLoggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("isLoggedIn", false);
+        IntentFilter intentFilter = new IntentFilter(ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY);
+        registerReceiver(mShutDownReceiver, intentFilter);
         if (isLoggedIn) {
-            IntentFilter intentFilter = new IntentFilter(ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY);
-            registerReceiver(mShutDownReceiver, intentFilter);
             Log.i(TAG, "Starting service...");
             moveTaskToBack(true);
             backgroundService = new Intent(this, BackgroundService.class);
@@ -50,6 +50,7 @@ public class BackgroundActivity extends AppCompatActivity {
             startService(backgroundService);
         } else {
             Log.i(TAG, "User not logged in. canceling...");
+            finish();
         }
     }
 
