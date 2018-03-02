@@ -1,8 +1,6 @@
 package com.zeach.ofirmonis.zeach.Adapters;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +14,6 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
 import com.zeach.ofirmonis.zeach.Objects.User;
@@ -25,7 +22,6 @@ import com.zeach.ofirmonis.zeach.interfaces.UsersListener;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FRIEND_REQUEST;
 
 /**
  * Created by ofirmonis on 18/07/2017.
@@ -82,9 +78,8 @@ public class UserListAdapter extends ArrayAdapter<User> {
                 holder.AddAsFriend.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.d("clicked", users.get(position).getName());
+                        Log.i(TAG, String.format("Add button pressed. sending request to: [%s]", users.get(position).getName()));
                         Friend friend = new Friend(users.get(position).getName(), users.get(position).getUID(), users.get(position).getProfilePictureUri());
-                        //  AppController.getInstance().AddFriendRequest(friend);
                         Log.i(TAG, String.format("Sending friend request. Friend to add:[%s]", friend));
                         mUsersListener.onUserAdded(friend);
                     }

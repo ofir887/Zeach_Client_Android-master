@@ -28,7 +28,6 @@ import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 import com.zeach.ofirmonis.zeach.interfaces.UsersListener;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FRIEND_REQUEST;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_USER;

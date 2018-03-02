@@ -1,13 +1,6 @@
 package com.zeach.ofirmonis.zeach.Adapters;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,29 +12,16 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
-import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
-import com.zeach.ofirmonis.zeach.Objects.Beach;
-import com.zeach.ofirmonis.zeach.Objects.User;
-import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 import com.zeach.ofirmonis.zeach.interfaces.FriendsListener;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_BEACHES;
-import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_DELETE_FRIEND;
-import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
 
 /**
  * Created by ofirmonis on 18/07/2017.

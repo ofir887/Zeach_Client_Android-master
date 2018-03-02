@@ -22,7 +22,6 @@ import com.zeach.ofirmonis.zeach.Fragments.LoginFragment;
 import com.zeach.ofirmonis.zeach.Fragments.SignUpFragment;
 import com.zeach.ofirmonis.zeach.R;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class SignUpLogInActivity extends AppCompatActivity {
     /**

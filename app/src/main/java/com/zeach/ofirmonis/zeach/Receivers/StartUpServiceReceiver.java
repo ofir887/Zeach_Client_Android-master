@@ -29,12 +29,13 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         Intent activity = new Intent(context, BackgroundActivity.class);
         activity.putExtra(IntentExtras.BACKGROUND, true);
 
-        /*Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60 * 15;
+        //repeat every 15 minutes
+        long interval = 1000 * 60 * 1;
         PendingIntent pendingIntent = PendingIntent.getActivity(context, BackgroundService.ID,
                 activity, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), interval, pendingIntent);*/
+                calendar.getTimeInMillis(), interval, pendingIntent);
     }
 }

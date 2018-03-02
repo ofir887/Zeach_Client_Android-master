@@ -32,6 +32,8 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 
 public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener {
 
+    private static final String TAG = FriendsRequestsListFragment.class.getSimpleName();
+
     private View rootView;
     private User ZeachUser;
     private ArrayList<Friend> friendsRequests = new ArrayList();
@@ -119,7 +121,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
     @Override
     public void onDetach() {
-        Log.d("nir", "nir1222");
+        Log.d(TAG, "Fragment has detach");
 
         super.onDetach();
     }

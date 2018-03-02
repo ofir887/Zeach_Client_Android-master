@@ -6,14 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
@@ -63,7 +59,6 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FAVORITE_BEACH;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_BEACHES;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_NEAREST_BEACH;
-import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REQUEST_BEACHES;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
 
@@ -101,7 +96,7 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_USER: {
-                    Log.d(MapFragment.class.getSimpleName(), "lets see");
+                    Log.d(MapFragment.class.getSimpleName(), "User message received");
                     User user = (User) intent.getSerializableExtra(IntentExtras.USER);
                     mUser = user;
                     Log.d(MapFragment.class.getSimpleName(), user.toString());
@@ -199,40 +194,50 @@ public class MapFragment extends android.support.v4.app.Fragment implements OnMa
                     strokeColor(color).strokeWidth(0));
             mPolygons.add(aPolygon);
             mPolygons2.put(mBeaches.get(i).getBeachKey(), aPolygon);
-            final int finalI = i;
+        }
+        if (mGoogleMap != null) {
             mGoogleMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
                 @Override
                 public void onPolygonClick(Polygon polygon) {
-                    if (aPolygon.getId().equals(polygon.getId())) {
-                        final Beach beach = mBeaches.get(finalI);
-                        Log.d(TAG, mBeaches.get(finalI).getBeachName() + " beach pressed");
-                        AlertDialog.Builder beachAlert = new AlertDialog.Builder(getContext());
-                        beachAlert.setTitle(beach.getBeachName());
-                        beachAlert.setMessage(String.format("Beach occupation Status: %s, Number Of Friends in the beach: %s",
-                                beach.getTraffic(), beach.getFriends().size()));
-                        if (!mUser.getFavoriteBeaches().containsKey(beach.getBeachKey())) {
-                            beachAlert.setPositiveButton("Add To Favorite", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Log.i(TAG, "Adding beach to favorite beach list");
-                                    FavoriteBeach favoriteBeach = new FavoriteBeach(beach.getBeachKey(), beach.getBeachName(), beach.getCountry());
-                                    Intent intent = new Intent();
-                                    intent.setAction(ACTION_ADD_FAVORITE_BEACH);
-                                    Gson gson = new Gson();
-                                    String favorite = gson.toJson(favoriteBeach);
-                                    intent.putExtra(IntentExtras.FAVORITE_BEACH, favorite);
-                                    getContext().sendBroadcast(intent);
+                    for (String beachKey : mPolygons2.keySet()) {
+                        Polygon polygon1 = mPolygons2.get(beachKey);
+                        if (polygon1.getId().equals(polygon.getId())) {
+                            Log.i(TAG, String.format("Polygon [%s] pressed", polygon.toString()));
+                            for (int i = 0; i < mBeaches.size(); i++) {
+                                if (mBeaches.get(i).getBeachKey().equals(beachKey)) {
+                                    final Beach beach = mBeaches.get(i);
+                                    Log.d(TAG, mBeaches.get(i).getBeachName() + " beach pressed");
+                                    AlertDialog.Builder beachAlert = new AlertDialog.Builder(getContext());
+                                    beachAlert.setTitle(beach.getBeachName());
+                                    beachAlert.setMessage(String.format("Beach occupation Status: %s, Number Of Friends in the beach: %s",
+                                            beach.getTraffic(), beach.getFriends().size()));
+                                    if (!mUser.getFavoriteBeaches().containsKey(beach.getBeachKey())) {
+                                        beachAlert.setPositiveButton("Add To Favorite", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Log.i(TAG, "Adding beach to favorite beach list");
+                                                FavoriteBeach favoriteBeach = new FavoriteBeach(beach.getBeachKey(), beach.getBeachName(), beach.getCountry());
+                                                Intent intent = new Intent();
+                                                intent.setAction(ACTION_ADD_FAVORITE_BEACH);
+                                                Gson gson = new Gson();
+                                                String favorite = gson.toJson(favoriteBeach);
+                                                intent.putExtra(IntentExtras.FAVORITE_BEACH, favorite);
+                                                getContext().sendBroadcast(intent);
+                                            }
+                                        });
+                                    }
+                                    beachAlert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                                    beachAlert.show();
                                 }
-                            });
-                        }
-                        beachAlert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
                             }
-                        });
-                        beachAlert.show();
+                        }
                     }
+
                 }
             });
         }

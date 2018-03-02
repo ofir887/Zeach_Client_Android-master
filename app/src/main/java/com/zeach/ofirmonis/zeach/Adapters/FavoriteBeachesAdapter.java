@@ -1,30 +1,21 @@
 package com.zeach.ofirmonis.zeach.Adapters;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
-import com.zeach.ofirmonis.zeach.Objects.Beach;
+
 import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 import com.zeach.ofirmonis.zeach.interfaces.BeachListener;
 
 import java.util.ArrayList;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
-import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_REMOVE_FAVORITE_BEACH;
 
 /**
  * Created by ofirmonis on 21/10/2017.

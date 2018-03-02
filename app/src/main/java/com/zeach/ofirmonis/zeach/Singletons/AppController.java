@@ -50,6 +50,10 @@ public class AppController {
         User = user;
     }
 
+    public static void createInstance() {
+        mInstance = new AppController();
+    }
+
     public static AppController getInstance() {
         if (null == mInstance) {
             mInstance = new AppController();

@@ -39,7 +39,6 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 public class FavoriteBeachesFragment extends Fragment implements BeachListener {
     private FavoriteBeachesAdapter favoriteBeachesAdapter;
     private static final String TAG = FavoriteBeachesFragment.class.getSimpleName();
-    ArrayList mBeaches = new ArrayList();
     private ArrayList<FavoriteBeach> mFavoriteBeaches = new ArrayList<>();
     private ListView beachListView;
     private DatabaseReference data;

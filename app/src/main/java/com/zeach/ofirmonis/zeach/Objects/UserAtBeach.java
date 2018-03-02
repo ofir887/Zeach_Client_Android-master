@@ -1,9 +1,6 @@
 package com.zeach.ofirmonis.zeach.Objects;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 /**
  * Created by ofirmonis on 12/10/2017.

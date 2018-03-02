@@ -6,8 +6,6 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -56,7 +54,6 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private User zeachUser;
-    private ProgressBar spinner;
     private View header;
     private FirebaseStorage mStorage;
     private StorageReference mStorageRef;
@@ -69,7 +66,7 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ACTION_USER: {
-                    Log.d(TAG, "lets see");
+                    Log.d(TAG, "User message received");
                     User user = (User) intent.getSerializableExtra(IntentExtras.USER);
                     zeachUser = user;
                     Log.d(TAG, user.toString());
@@ -85,14 +82,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", true).commit();
-        boolean moveToBackground = getIntent().getBooleanExtra("background", false);
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", true).commit();
-        /*if (moveToBackground) {
-            moveTaskToBack(true);
-        }*/
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
-        this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
         //
@@ -187,12 +179,12 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Log.d("logout", "logout");
+            Log.i(TAG, "logout");
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
             for (UserInfo profile : user.getProviderData()) {
 
-                Log.d("Provider", "Provider: " + profile.getProviderId());
+                Log.i(TAG, "Provider: " + profile.getProviderId());
             }
 
             FirebaseAuth.getInstance().signOut();
@@ -202,6 +194,7 @@ public class MainActivity extends AppCompatActivity
             finish();
             LoginManager.getInstance().logOut();
             MapSingleton.createInstance();
+            AppController.createInstance();
             Intent SignUpLogInActivity = new Intent(getApplicationContext(), SignUpLogInActivity.class);
             startActivity(SignUpLogInActivity);
             return true;
@@ -221,13 +214,10 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.map) {
             Log.i(TAG, "fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
-
             // Handle the camera action
         } else if (id == R.id.favorite_beaches) {
             Log.i(TAG, "favorite fragment pressed");
-
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FavoriteBeachesFragment()).commit();
-
         } else if (id == R.id.friends) {
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FriendsFragment()).commit();
 
@@ -239,7 +229,6 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "feedback fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FeedbackFragment()).commit();
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

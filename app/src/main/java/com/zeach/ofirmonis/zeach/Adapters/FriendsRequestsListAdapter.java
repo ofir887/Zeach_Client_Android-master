@@ -1,9 +1,7 @@
 package com.zeach.ofirmonis.zeach.Adapters;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -28,6 +26,8 @@ import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_CONFIRM_FRIEND;
 
 
 public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
+
+    private static final String TAG = FriendsRequestsListAdapter.class.getSimpleName();
 
     private ArrayList<Friend> friends = new ArrayList<>();
     private String UserId;
@@ -62,14 +62,12 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
             holder.userName.setText(friends.get(position).getName());
         if (friends.get(position).getPhotoUrl() != null) {
             holder.userPhoto.setImageURI(Uri.parse(friends.get(position).getPhotoUrl()));
-            //   mStorageRef = mStorage.getReference(friends.get(position).getPhotoUrl());
-            //   Glide.with(getContext()).using(new FirebaseImageLoader()).load(mStorageRef).into(holder.userPhoto);
         }
         holder.Confirm.setText("Confirm");
         holder.Confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("clicked", friends.get(position).getName());
+                Log.i(TAG, String.format("Confirm button pressed. adding friend:[%s]", friends.get(position).getName()));
                 Friend friend = new Friend(friends.get(position).getName(), friends.get(position).getUID(), friends.get(position).getPhotoUrl());
                 Intent intent = new Intent();
                 intent.setAction(ACTION_CONFIRM_FRIEND);
@@ -90,8 +88,6 @@ public class FriendsRequestsListAdapter extends ArrayAdapter<Friend> {
         ImageView userPhoto;
         TextView userName;
         Button Confirm;
-        Button Remove;
-
     }
 
 

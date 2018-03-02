@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -84,9 +83,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
                 friendListAdapter.notifyDataSetChanged();
                 for (DataSnapshot friend : dataSnapshot.getChildren()) {
                     final Friend friend1 = friend.getValue(Friend.class);
-
                     friends.add(friend1);
-                    //  Log.d("fgf",friend.toString());
                 }
                 friendsListView.setAdapter(friendListAdapter);
                 friendListAdapter.notifyDataSetChanged();
@@ -104,7 +101,7 @@ public class FriendsListFragment extends Fragment implements View.OnClickListene
         super.setUserVisibleHint(isVisibleToUser);
         if (this.isVisible())
             if (!isVisibleToUser) {
-                Log.d("not", "visible anymore");
+                Log.i(TAG, "not visible anymore");
             }
     }
 

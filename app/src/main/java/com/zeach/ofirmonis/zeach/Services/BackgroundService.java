@@ -31,8 +31,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
@@ -44,15 +42,11 @@ import com.zeach.ofirmonis.zeach.Objects.FavoriteBeach;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
 import com.zeach.ofirmonis.zeach.Objects.UserAtBeach;
 import com.zeach.ofirmonis.zeach.Objects.User;
-import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
 import java.util.TreeMap;
 
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_ADD_FAVORITE_BEACH;
@@ -121,17 +114,14 @@ public class BackgroundService extends Service {
     private static final String TAG = BackgroundService.class.getSimpleName();
     public static final int ID = 0;
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000 * 15;
+    private static final int LOCATION_INTERVAL = 1000 * 60;
     private static final float LOCATION_DISTANCE = 0;
-    private Timer timer;
     private ArrayList<Beach> beaches;
     private DatabaseReference data;
     private FirebaseAuth mAuth;
     private FirebaseUser mFirebaseUser;
     private User mUser;
     private LatLng mLocation;
-    private FirebaseStorage mStorage;
-    private StorageReference mStorageRef;
     private String mNearestBeach;
     private boolean mBackgroundActivity;
 
@@ -232,8 +222,6 @@ public class BackgroundService extends Service {
                 }
                 intent.putExtra(USER_GAVE_FEEDBACK, gaveFeedback);
                 getApplicationContext().sendBroadcast(intent);
-
-
             }
 
             @Override
@@ -286,20 +274,21 @@ public class BackgroundService extends Service {
                 Log.i(TAG, "Activity is active. sending broadcast...");
                 sendBroadcast(ACTION_STRING_ACTIVITY);
             }
-            //  updateUserInBeach(beaches.get(0), mFirebaseUser.getUid());
+            boolean isUserInBeach = false;
             for (int i = 0; i < beaches.size(); i++) {
-                boolean isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
+                isUserInBeach = RayCast.isLatLngInside(beaches.get(i).getBeachCoordinates(), userCurrentLocation);
                 Log.i(TAG, "checking against:" + beaches.get(i).getBeachName());
                 if (isUserInBeach) {
                     //Asign user in this beach and break loop after it
                     Log.i(TAG, "User is in the beach. Tagging...");
                     updateUserInBeach(beaches.get(i), mFirebaseUser.getUid(), userCurrentLocation.longitude, userCurrentLocation.latitude);
-                    //break;
-                } else {
-                    mNearestBeach = findNearsetBeach(userCurrentLocation);
-                    Log.i(TAG, String.format("Nearest beach found:[%s]", mNearestBeach));
-                    sendBroadcast(ACTION_NEAREST_BEACH);
+                    break;
                 }
+            }
+            if (!isUserInBeach && beaches.size() > 0) {
+                mNearestBeach = findNearsetBeach(userCurrentLocation);
+                Log.i(TAG, String.format("Nearest beach found:[%s]", mNearestBeach));
+                sendBroadcast(ACTION_NEAREST_BEACH);
             }
             if (mBackgroundActivity && beaches.size() > 0 && mUser != null) {
                 Log.i(TAG, "Background Activity Started the service. Shutting Down...");
@@ -360,7 +349,6 @@ public class BackgroundService extends Service {
     }
 
     private void sendUserFavoriteBeaches() {
-        // ArrayList <FavoriteBeach> favoriteBeaches = new ArrayList(mUser.getFavoriteBeaches().values());
         sendBroadcast(ACTION_RECEIVE_FAVORITE_BEACHES);
     }
 
@@ -406,7 +394,6 @@ public class BackgroundService extends Service {
         DatabaseReference ref = data.getDatabase().getReference();
         Log.i(TAG, String.format("Removing user favorite beach. Beach Id:[%s]", aBeachId));
         ref.child(USERS).child(mUser.getUID()).child(FirebaseConstants.FAVORITE_BEACHES).child(aBeachId).removeValue();
-        // getUserDetailsFromServer();
     }
 
     private void AddFriendRequest(Friend friend) {
@@ -418,27 +405,8 @@ public class BackgroundService extends Service {
         data.child(USERS).child(friend.getUID()).child(FRIENDS_REQUESTS).child(mUser.getUID()).setValue(destinationFriend);
     }
 
-    private void getSingleLocationUpdate() {
-        Looper looper = null;
-        try {
-            mLocationManager.requestSingleUpdate(
-                    LocationManager.NETWORK_PROVIDER, mLocationListeners[1], looper);
-        } catch (java.lang.SecurityException ex) {
-            Log.i(TAG, "fail to request location update, ignore", ex);
-        } catch (IllegalArgumentException ex) {
-            Log.i(TAG, "network provider does not exist, " + ex.getMessage());
-        }
-        /*try {
-            mLocationManager.requestSingleUpdate(
-                    "gps", mLocationListeners[0], looper);
-        } catch (java.lang.SecurityException ex) {
-            Log.i(TAG, "fail to request location update, ignore", ex);
-        } catch (IllegalArgumentException ex) {
-            Log.i(TAG, "gps provider does not exist " + ex.getMessage());
-        }*/
-    }
 
-    private void getSingleLocationUpdate2() {
+    private void getSingleLocationUpdate() {
         Looper looper = null;
         try {
             mLocationManager.requestSingleUpdate(
@@ -491,7 +459,6 @@ public class BackgroundService extends Service {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 beaches.clear();
-                //TODO - change string to constants (beachid and...)
                 for (final DataSnapshot beach : dataSnapshot.getChildren()) {
                     String mBeachKey = (String) beach.child(BEACH_ID).getValue();
                     String mBeachName = (String) beach.child(BEACHES_NAME).getValue();
@@ -503,7 +470,6 @@ public class BackgroundService extends Service {
                     if (PreferenceManager.getDefaultSharedPreferences(getApplication()).getBoolean("isActive", false)) {
                         //get Friends
                         if (mUser != null && !mUser.isProfilePrivate() && beach.child(PEOPLE_LIST).exists()) {
-                            final DatabaseReference userRef = data.getDatabase().getReference(USERS);
                             for (final Map.Entry<String, Friend> entry : mUser.getFriendsList().entrySet()) {
                                 if (beach.child(PEOPLE_LIST).hasChild(entry.getKey())) {
                                     boolean privateProfile = beach.child(PEOPLE_LIST).child(entry.getKey()).child(PRIVATE_PROFILE).getValue(boolean.class);
@@ -532,25 +498,17 @@ public class BackgroundService extends Service {
                         HashMap<String, Double> coords = entry.getValue();
                         LatLng latlng = new LatLng(coords.get(LATITUDE), coords.get(LONGITUDE));
                         beachCoords.add(latlng);
-                        Log.i("Beach1", latlng.toString());
+                        Log.i(TAG, String.format("Beach coords: [%s]", latlng.toString()));
                     }
 
-                    Beach beach1 = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry, currentDevices);
-                    if (beaches.contains(beach1)) {
-                        beaches.set(beaches.indexOf(beach1), beach1);
+                    Beach beachToAdd = new Beach(mBeachKey, mBeachListenerID, beachCoords, mBeachName, friends, mTraffic, mCountry, currentDevices);
+                    if (beaches.contains(beachToAdd)) {
+                        beaches.set(beaches.indexOf(beachToAdd), beachToAdd);
                     } else {
-                        beaches.add(beach1);
+                        beaches.add(beachToAdd);
                     }
-                    //    Handler handler = new Handler();
-                    //    Runnable runnable = new Runnable() {
-                    //       @Override
-                    //      public void run() {
-                    Log.i("Beach1", beach1.toString());
+                    Log.i(TAG, String.format("Beach: [%s]", beachToAdd.toString()));
                     sendBroadcast(ACTION_BEACHES);
-                    //        }
-                    //      };
-                    //     handler.postDelayed(runnable, 1000);
-                    //sendBroadcast(ACTION_BEACHES);
                 }
             }
 
@@ -639,8 +597,6 @@ public class BackgroundService extends Service {
                     e.printStackTrace();
                 }
                 sendBroadcast(ACTION_USER);
-
-
             }
 
             @Override
@@ -660,28 +616,7 @@ public class BackgroundService extends Service {
         Log.i(TAG, String.format("Removing request after adding"));
         ref.child(USERS).child(mUser.getUID()).child(FRIENDS_REQUESTS).child(aFriend.getUID()).removeValue();
         ref.child(USERS).child(aFriend.getUID()).child(AWAITING_CONFIRMATION).child(mUser.getUID()).removeValue();
-        //   getBeachesFromFirebase();
     }
-
-
-    private static String tempFileImage(Context context, Bitmap bitmap, String name) {
-
-        File outputDir = context.getCacheDir();
-        File imageFile = new File(outputDir, name + ".jpg");
-
-        OutputStream os;
-        try {
-            os = new FileOutputStream(imageFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
-            os.flush();
-            os.close();
-        } catch (Exception e) {
-            Log.i(context.getClass().getSimpleName(), "Error writing file", e);
-        }
-
-        return imageFile.getAbsolutePath();
-    }
-
 
     @Override
     public void onCreate() {
@@ -712,8 +647,6 @@ public class BackgroundService extends Service {
         this.data = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mAuth.getCurrentUser();
-        mStorage = FirebaseStorage.getInstance();
-        mStorageRef = mStorage.getReference();
         beaches = new ArrayList<Beach>();
         getUserDetailsFromServer();
 
@@ -723,8 +656,6 @@ public class BackgroundService extends Service {
             public void run() {
                 if (checkPermission(getApplicationContext())) {
                     getBeachesFromFirebase();
-                    //    initializeLocationManager();
-                    //     getSingleLocationUpdate();
                     getMultipleLocationUpdates();
                 }
             }

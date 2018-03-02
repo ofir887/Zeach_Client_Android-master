@@ -24,6 +24,7 @@ import com.zeach.ofirmonis.zeach.interfaces.FriendsListener;
 public class FriendsFragment extends Fragment implements View.OnClickListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
+    private static final String TAG = FriendsFragment.class.getSimpleName();
 
 
     /**
@@ -58,7 +59,6 @@ public class FriendsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //  super.onActivityResult(requestCode, resultCode, data);
 
     }
 
@@ -138,7 +138,6 @@ public class FriendsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
 
-
     }
 
     @Override
@@ -149,13 +148,11 @@ public class FriendsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
     }
 
     @Override
     public void onDetach() {
-        Log.d("nir", "nir1222");
-
+        Log.d(TAG, "Fragment detached");
         super.onDetach();
     }
 }
