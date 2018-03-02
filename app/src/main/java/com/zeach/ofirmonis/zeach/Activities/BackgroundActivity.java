@@ -39,12 +39,12 @@ public class BackgroundActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_background);
+        moveTaskToBack(true);
         boolean isLoggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("isLoggedIn", false);
         IntentFilter intentFilter = new IntentFilter(ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY);
         registerReceiver(mShutDownReceiver, intentFilter);
         if (isLoggedIn) {
             Log.i(TAG, "Starting service...");
-            moveTaskToBack(true);
             backgroundService = new Intent(this, BackgroundService.class);
             backgroundService.putExtra(IntentExtras.BACKGROUND_ACTIVITY, true);
             startService(backgroundService);
