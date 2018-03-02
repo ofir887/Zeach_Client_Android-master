@@ -32,7 +32,7 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //repeat every 15 minutes
-        long interval = 1000 * 60 * 5;
+        long interval = 1000 * 60 * 15;
         PendingIntent pendingIntent = PendingIntent.getActivity(context, BackgroundService.ID,
                 activity, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,

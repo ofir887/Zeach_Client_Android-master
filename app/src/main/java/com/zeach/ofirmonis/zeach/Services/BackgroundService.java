@@ -330,7 +330,9 @@ public class BackgroundService extends Service {
         Log.i(TAG, "onStartCommand");
         initializeLocationManager();
         getMultipleLocationUpdates();
-        mBackgroundActivity = intent.getBooleanExtra(IntentExtras.BACKGROUND_ACTIVITY, false);
+        if (intent != null) {
+            mBackgroundActivity = intent.getBooleanExtra(IntentExtras.BACKGROUND_ACTIVITY, false);
+        }
         return START_STICKY;
     }
 
