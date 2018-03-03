@@ -46,7 +46,7 @@ public class BackgroundActivity extends AppCompatActivity {
         mWakeLock = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "wakeLock");
         mWakeLock.acquire();
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         moveTaskToBack(true);
         boolean isLoggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("isLoggedIn", false);
         IntentFilter intentFilter = new IntentFilter(ACTION_SHUT_DOWN_BACKGROUND_ACTIVITY);
