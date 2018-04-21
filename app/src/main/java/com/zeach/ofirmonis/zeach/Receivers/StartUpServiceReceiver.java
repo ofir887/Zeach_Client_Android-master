@@ -21,6 +21,7 @@ import java.util.Calendar;
 public class StartUpServiceReceiver extends BroadcastReceiver {
 
     private static String TAG = StartUpServiceReceiver.class.getSimpleName();
+    private static final int INTERVAL = 1000 * 60 * 15;
     private Context mContext;
 
     @Override
@@ -34,10 +35,9 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //repeat every 15 minutes
-        long interval = 1000 * 60 * 5;
         PendingIntent pendingIntent = PendingIntent.getActivity(context, BackgroundService.ID,
                 activity, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), interval, pendingIntent);
+                calendar.getTimeInMillis(), INTERVAL, pendingIntent);
     }
 }

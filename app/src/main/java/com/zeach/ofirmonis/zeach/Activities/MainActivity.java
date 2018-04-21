@@ -22,7 +22,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.login.LoginManager;
@@ -45,6 +44,8 @@ import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
 
+import java.util.Calendar;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
@@ -55,6 +56,9 @@ import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.PERSON_ICON;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final int ALARM_MANAGER_INTERVAL = 1000 * 60 * 1;
+
     private User zeachUser;
     private View header;
     private FirebaseStorage mStorage;
@@ -151,7 +155,25 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onPause() {
+        Log.i(TAG, "On pause");
+        Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+        backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", true).commit();
+        Log.i(TAG, "Setting alarm manager flag to true");
+        Calendar calendar = Calendar.getInstance();
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        //repeat every 15 minutes
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(), ALARM_MANAGER_INTERVAL, pendingIntent);
+        super.onPause();
+    }
+
+    @Override
     protected void onStop() {
+        Log.i(TAG, "On stop");
         super.onStop();
         Intent intent = new Intent();
         sendBroadcast(intent);
