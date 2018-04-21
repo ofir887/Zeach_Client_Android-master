@@ -8,7 +8,7 @@ import java.util.Map;
  * Created by ofirmonis on 24/06/2017.
  */
 
-public class ZeachUser implements Serializable {
+public class User implements Serializable {
     private String Name;
     private String Email;
     private String UID;
@@ -17,25 +17,24 @@ public class ZeachUser implements Serializable {
     private String Provider;
     private String ProfilePictureUri;
     private Map<String, Friend> FriendsList = new HashMap<>();
-    private Map<String, String> FavoriteBeachesList;
+    private Map<String, FavoriteBeach> FavoriteBeaches = new HashMap<>();
     private UserAtBeach CurrentBeach;
     private boolean isProfilePrivate;
-    //private CurrentBeach CurrentBeach1;
 
 
-    public ZeachUser() {
+    public User() {
         //
     }
 
     //For facebook signup
-    public ZeachUser(String name, String email, String UID, String provider, String profilePictureUri, String facebookUID) {
+    public User(String name, String email, String UID, String provider, String profilePictureUri, String facebookUID) {
         this.Name = name;
         this.Email = email;
         this.UID = UID;
         this.Provider = provider;
         this.ProfilePictureUri = profilePictureUri;
         this.FriendsList = new HashMap<>();
-        this.FavoriteBeachesList = new HashMap<>();
+        this.FavoriteBeaches = new HashMap<>();
         //  this.CurrentBeach = "Not In any Beach"; // need to change
         this.CurrentBeach = new UserAtBeach();
         this.FacebookUID = facebookUID;
@@ -44,14 +43,14 @@ public class ZeachUser implements Serializable {
     }
 
     //For Firebase SignUp
-    public ZeachUser(String email, String UID, String provider) {
+    public User(String email, String UID, String provider) {
         this.Email = email;
         this.UID = UID;
         this.Provider = provider;
         this.ProfilePictureUri = null;
         this.Name = "";
         this.FriendsList = new HashMap<>();
-        this.FavoriteBeachesList = new HashMap<>();
+        this.FavoriteBeaches = new HashMap<>();
         this.CurrentBeach = new UserAtBeach();
         //  this.CurrentBeach = "Not In any Beach"; // need to change
         // this.CurrentBeach1 = new CurrentBeach();
@@ -100,8 +99,8 @@ public class ZeachUser implements Serializable {
     }
 
     //not good need to think about child in has map it is in the same key!!
-    public void AddFriendToList(String uid, String name, String photoUrl, UserAtBeach currentBeach) {
-        Friend friend = new Friend(name, uid, photoUrl, currentBeach);
+    public void AddFriendToList(String uid, String name, String photoUrl) {
+        Friend friend = new Friend(name, uid, photoUrl);
         this.FriendsList.put(uid, friend);
         //this.FriendsList.put("FriendName",name);
     }
@@ -114,17 +113,17 @@ public class ZeachUser implements Serializable {
         FriendsList = friendsList;
     }
 
-    public void AddBeachToList(String beachUid) {
-        this.FavoriteBeachesList.put("BeachUid", beachUid);
+    public void AddBeachToList(FavoriteBeach aFavoriteBeach) {
+        this.FavoriteBeaches.put(aFavoriteBeach.getmBeachKey(), aFavoriteBeach);
 
     }
 
-    public Map<String, String> getFavoriteBeachesList() {
-        return FavoriteBeachesList;
+    public Map<String, FavoriteBeach> getFavoriteBeaches() {
+        return FavoriteBeaches;
     }
 
-    public void setFavoriteBeachesList(Map<String, String> favoriteBeachesList) {
-        FavoriteBeachesList = favoriteBeachesList;
+    public void setFavoriteBeaches(Map<String, FavoriteBeach> favoriteBeachesList) {
+        FavoriteBeaches = favoriteBeachesList;
     }
 
     public UserAtBeach getCurrentBeach() {
@@ -176,7 +175,7 @@ public class ZeachUser implements Serializable {
                 ", Provider='" + Provider + '\'' +
                 ", ProfilePictureUri='" + ProfilePictureUri + '\'' +
                 ", FriendsList=" + FriendsList +
-                ", FavoriteBeachesList=" + FavoriteBeachesList +
+                ", FavoriteBeaches=" + FavoriteBeaches +
                 ", CurrentBeach='" + CurrentBeach + '\'' +
                 ", isProfilePrivate=" + isProfilePrivate +
 

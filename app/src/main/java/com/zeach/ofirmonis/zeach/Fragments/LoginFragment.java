@@ -1,7 +1,8 @@
 package com.zeach.ofirmonis.zeach.Fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -11,7 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -19,10 +20,11 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -34,35 +36,35 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Activities.MainActivity;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
-import com.zeach.ofirmonis.zeach.Objects.Beach;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
+import com.zeach.ofirmonis.zeach.Singletons.AppController;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONObject;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.facebook.GraphRequest.TAG;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 
 /**
  * Created by ofirmonis on 31/05/2017.
  */
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
+
+    private static final String TAG = LoginFragment.class.getSimpleName();
+
     private CallbackManager callbackManager;
     private LoginButton loginButton;
     private FirebaseAuth mAuth;
     private DatabaseReference data;
     private View rootView;
     private Button FirebaseLoginButton;
-    private TextView EmailTextView;
-    private TextView PasswordTextView;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private EditText mEmailTextField;
+    private EditText mPasswordTextField;
+    private User mZeachUser;
 
     @Nullable
     @Override
@@ -70,31 +72,44 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         this.rootView = inflater.inflate(R.layout.login_fragment, container, false);
         loginButton = (LoginButton) rootView.findViewById(R.id.login_button);
         FirebaseLoginButton = (Button) this.rootView.findViewById(R.id.firebase_login_button);
-        this.data = FirebaseDatabase.getInstance().getReference();
-        EmailTextView = (TextView) this.rootView.findViewById(R.id.email_login_textfield);
-        PasswordTextView = (TextView) this.rootView.findViewById(R.id.password_login_textfield);
+        data = FirebaseDatabase.getInstance().getReference();
+        mEmailTextField = this.rootView.findViewById(R.id.email_login_textfield);
+        mPasswordTextField = this.rootView.findViewById(R.id.password_login_textfield);
         FirebaseLoginButton.setOnClickListener(this);
-        loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setReadPermissions("email", "public_profile", "user_birthday", "user_friends");
         loginButton.setFragment(this);
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d("ok", "yesss" + loginResult.getAccessToken().getToken().toString());
+                Log.i(TAG, "yesss" + loginResult.getAccessToken().getToken().toString());
                 Profile profile = Profile.getCurrentProfile();
-                //image = Profile.getCurrentProfile().getProfilePictureUri(200,200);
-                Log.d("Profile", profile.getName() + " " + profile.getId());
-                //need to check if user exsits if no create one !!!
-                //handleFacebookAccessToken(loginResult.getAccessToken());
+                mZeachUser = new User(profile.getName(), null, null, null, profile.getProfilePictureUri(350, 350).toString(), profile.getId());
+                Log.i(TAG, profile.getName() + " " + profile.getId());
+
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(
+                                    JSONObject object,
+                                    GraphResponse response) {
+                            }
+                        });
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id,name,link");
+                request.setParameters(parameters);
+                request.executeAsync();
+                handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
-                Log.d("ok", "no");
+                Log.i(TAG, "onCancel");
             }
 
             @Override
             public void onError(FacebookException error) {
-                Log.d("ok", "no");
+                Log.i(TAG, "OnError");
             }
         });
 
@@ -113,13 +128,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
-
-        //super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
-        // Log.d(TAG, "handleFacebookAccessToken:" + token);
-
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
@@ -127,44 +138,23 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            //data.child("Users").child(user.getUid()).
-                            //  updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            // Log.w(TAG, "signInWithCredential:failure", task.getException());
-
-                            // updateUI(null);
-                        }
-
-                        // ...
-                    }
-                });
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v == FirebaseLoginButton) {
-            String email = this.EmailTextView.getText().toString();
-            String password = this.PasswordTextView.getText().toString();
-            loginWithFireBaseAccount(email, password);
-        }
-    }
-
-    public void loginWithFireBaseAccount(String email, String password) {
-        this.mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            DatabaseReference ref = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            Log.d(TAG, "signInWithEmail:success " + user.getEmail().toString());
-                            ref.addValueEventListener(new ValueEventListener() {
+                            final FirebaseUser user = mAuth.getCurrentUser();
+                            data = FirebaseDatabase.getInstance().getReference();
+                            DatabaseReference searchId = data.getDatabase().getReference();
+                            searchId.child(USERS).child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-
+                                    if (dataSnapshot.exists()) {
+                                        Log.i(TAG, "User exists. Sending to Map fragment" + dataSnapshot.getValue());
+                                        mZeachUser = dataSnapshot.getValue(User.class);
+                                        SendUserAndMoveToMap();
+                                    } else {
+                                        Log.i(TAG, "User not exists. Sending to profile fragment");
+                                        mZeachUser.setEmail(user.getEmail());
+                                        mZeachUser.setUID(user.getUid());
+                                        mZeachUser.setProvider(user.getProviderData().get(0).toString());
+                                        SendUserAndMoveToProfileFragment();
+                                    }
                                 }
 
                                 @Override
@@ -173,62 +163,87 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                                 }
                             });
 
-                            Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(mainActivity);
-                            getActivity().finish();
-
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(getActivity(), "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "Task Failed");
                         }
-
-                        // ...
                     }
                 });
-
     }
 
-    /*public void getBeachesFromFirebase() {
-        DatabaseReference ref = data.getDatabase().getReference("Beaches/Country/Israel");
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot beach : dataSnapshot.getChildren()) {
-                    String mBeachKey = (String) beach.child("BeachID").getValue();
-                    String mBeachName = (String) beach.child("BeachName").getValue();
-                    String mBeachListenerID = (String) beach.child("BeachListenerID").getValue();
-                    long currentOccupationEstimation = (long) beach.child("Result").getValue();
-                    // int beachMaxCapacity = (int)beach.child("Capacity").getValue();
+    public void SendUserAndMoveToProfileFragment() {
+        this.data = FirebaseDatabase.getInstance().getReference();
+        data.child(USERS).child(this.mZeachUser.getUID()).setValue(this.mZeachUser);
+        startMainActivity(false);
+    }
 
-                    HashMap<String, HashMap<String, Double>> mBeachCoords = (HashMap<String, HashMap<String, Double>>)
-                            beach.child("Coords").getValue();
-                    ArrayList<LatLng> beachCoords = new ArrayList<LatLng>();
-                    for (Map.Entry<String, HashMap<String, Double>> entry : mBeachCoords.entrySet()) {
-                        HashMap<String, Double> coords = entry.getValue();
-                        LatLng latlng = new LatLng(coords.get("lat"), coords.get("lng"));
-                        beachCoords.add(latlng);
-                        Log.d("Beach1", latlng.toString());
-                    }
-                    final Beach beach1 = new Beach(mBeachKey, mBeachListenerID, currentOccupationEstimation, beachCoords, mBeachName);
-                    Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
+    public void SendUserAndMoveToMap() {
+        startMainActivity(true);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == FirebaseLoginButton) {
+            String email = this.mEmailTextField.getText().toString();
+            String password = this.mPasswordTextField.getText().toString();
+            loginWithFireBaseAccount(email, password);
+        }
+    }
+
+    public void loginWithFireBaseAccount(String email, final String password) {
+        final AlertDialog.Builder logInDialog = new AlertDialog.Builder(getContext());
+        if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
+            this.mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
                         @Override
-                        public void run() {
-                            Log.d("Beach1", beach1.toString());
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                DatabaseReference ref = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                Log.i(TAG, "Success " + user.getEmail().toString());
+                                ref.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        mZeachUser = dataSnapshot.getValue(User.class);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                                startMainActivity(true);
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Log.i(TAG, "Failed to login", task.getException());
+                                Toast.makeText(getActivity(), "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                                AlertDialog.Builder failedLoginDialog = new AlertDialog.Builder(getContext());
+                                failedLoginDialog.setTitle("Login Failed !");
+                                failedLoginDialog.setMessage("Try Again ");
+                                failedLoginDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                                failedLoginDialog.show();
+                            }
                         }
-                    };
-                    handler.postDelayed(runnable, 1000);
+                    });
+        } else {
+            logInDialog.setTitle("Login Failed");
+            logInDialog.setMessage("Failed. Try again !");
+            logInDialog.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
                 }
-            }
+            });
+            logInDialog.show();
+        }
+    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }*/
 
     @Override
     public void onStart() {
@@ -236,15 +251,13 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            DatabaseReference ref = data.getDatabase().getReference("Users/" + mAuth.getCurrentUser().getUid());
-            Log.d("ofofo", "ggg");
+            DatabaseReference ref = data.getDatabase().getReference(String.format("%s/%s", USERS, mAuth.getCurrentUser().getUid()));
+            Log.i(TAG, "User is defined in this device. login..");
             ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    ZeachUser = dataSnapshot.getValue(ZeachUser.class);
-                    AppSavedObjects.getInstance().setUser(ZeachUser);
-//                                              Log.d("ofofo",ZeachUser.toString());
-
+                    mZeachUser = dataSnapshot.getValue(User.class);
+                    AppController.getInstance().setUser(mZeachUser);
                 }
 
                 @Override
@@ -253,20 +266,18 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 }
             });
 
-
-            //this.ZeachUser = new User()
-
-            //getBeachesFromFirebase();
-            Intent mainActivity = new Intent(getActivity(), MainActivity.class);
-            startActivity(mainActivity);
-            getActivity().finish();
-/*
-            Intent profileActivity = new Intent(getActivity(),ProfileActivity.class);
-            getActivity().finish();
-            startActivity(profileActivity);
-            getActivity().finish();*/
+            startMainActivity(true);
 
         }
+    }
+
+    private void startMainActivity(boolean aOpenMap) {
+        AppController.getInstance().setUser(this.mZeachUser);
+        Intent mainActivity = new Intent(getActivity(), MainActivity.class);
+        mainActivity.putExtra(IntentExtras.MAP, aOpenMap);
+        mainActivity.putExtra(IntentExtras.BACKGROUND, getActivity().getIntent().getBooleanExtra(IntentExtras.BACKGROUND, false));
+        startActivity(mainActivity);
+        getActivity().finish();
     }
 
 }

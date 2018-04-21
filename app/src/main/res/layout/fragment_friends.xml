@@ -24,6 +24,7 @@
         android:id="@+id/friends_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
         android:background="#ffc4ae" />
 
     </android.support.design.widget.AppBarLayout>

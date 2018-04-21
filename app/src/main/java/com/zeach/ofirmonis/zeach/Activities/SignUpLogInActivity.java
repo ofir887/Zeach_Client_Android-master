@@ -1,9 +1,15 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -12,17 +18,20 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.zeach.ofirmonis.zeach.Fragments.SignInFragment;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Fragments.LoginFragment;
+import com.zeach.ofirmonis.zeach.Fragments.SignUpFragment;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
-public class SignInLogInActivity extends AppCompatActivity {
-    private FirebaseAuth mAuth;
+
+public class SignUpLogInActivity extends AppCompatActivity {
+
+    private static final String TAG = SignUpLogInActivity.class.getSimpleName();
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -30,7 +39,6 @@ public class SignInLogInActivity extends AppCompatActivity {
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     *
      */
 
 
@@ -45,7 +53,21 @@ public class SignInLogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_log_in);
-
+        boolean moveToBackground = getIntent().getBooleanExtra(IntentExtras.BACKGROUND, false);
+        if (moveToBackground) {
+            moveTaskToBack(true);
+        }
+        boolean isAlarmManagerOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alarm_manager_on", false);
+        if (isAlarmManagerOn) {
+            Log.i(TAG, "Alarm manager is on. cancelling...");
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+            backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                    backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(pendingIntent);
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", false).commit();
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -58,16 +80,29 @@ public class SignInLogInActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        checkPermissions();
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 10:
+                checkPermissions();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void checkPermissions() {
+        // first check for permissions
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.INTERNET}
+                        , 10);
             }
-        });
-
+            return;
+        }
     }
 
 
@@ -98,7 +133,6 @@ public class SignInLogInActivity extends AppCompatActivity {
      */
 
 
-
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -113,9 +147,9 @@ public class SignInLogInActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    SignInFragment SignIn= new SignInFragment();
+                    SignUpFragment SignUp = new SignUpFragment();
 
-                    return SignIn;
+                    return SignUp;
                 case 1:
                     LoginFragment Login = new LoginFragment();
                     return Login;
@@ -133,7 +167,7 @@ public class SignInLogInActivity extends AppCompatActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch(position){
+            switch (position) {
                 case 0:
                     return "Sign In";
                 case 1:
@@ -142,11 +176,12 @@ public class SignInLogInActivity extends AppCompatActivity {
             return null;
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        android.app.Fragment fragment = getFragmentManager().findFragmentById(R.layout.signin_fragment);
-      //  fragment.onActivityResult(requestCode, resultCode, data);
+        android.app.Fragment fragment = getFragmentManager().findFragmentById(R.layout.signup_fragment);
+        //  fragment.onActivityResult(requestCode, resultCode, data);
     }
 
 }

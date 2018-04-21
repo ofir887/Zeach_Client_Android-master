@@ -16,20 +16,26 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.zeach.ofirmonis.zeach.Adapters.FriendsRequestsListAdapter;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.R;
 
 import java.util.ArrayList;
+
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.FRIENDS_REQUESTS;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.USERS;
 
 /**
  * Created by ofirmonis on 31/05/2017.
  */
 
-public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener{
+public class FriendsRequestsListFragment extends Fragment implements View.OnClickListener {
+
+    private static final String TAG = FriendsRequestsListFragment.class.getSimpleName();
 
     private View rootView;
-    private com.zeach.ofirmonis.zeach.Objects.ZeachUser ZeachUser;
+    private User ZeachUser;
     private ArrayList<Friend> friendsRequests = new ArrayList();
     private FriendsRequestsListAdapter friendsRequestsListAdapter;
     private ListView UsersListView;
@@ -39,25 +45,25 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        this.rootView  =inflater.inflate(R.layout.fragment_friends_requests,container,false);
-        this.UsersListView = (ListView)rootView.findViewById(R.id.freinds_requests_list);
+        this.rootView = inflater.inflate(R.layout.fragment_friends_requests, container, false);
+        this.UsersListView = (ListView) rootView.findViewById(R.id.freinds_requests_list);
 
 
-        this.ZeachUser = AppSavedObjects.getInstance().getUser();
-        this.data = FirebaseDatabase.getInstance().getReference("Users/" + this.ZeachUser.getUID()+"/FriendsRequset/");
+        this.ZeachUser = AppController.getInstance().getUser();
+        this.data = FirebaseDatabase.getInstance().getReference(String.format("%s/%s/%s", USERS, ZeachUser.getUID(), FRIENDS_REQUESTS));
         getFriendsRequestsFromServer();
         return this.rootView;
     }
 
-    public void getFriendsRequestsFromServer(){
-        this.friendsRequestsListAdapter = new FriendsRequestsListAdapter(getContext(),this.friendsRequests,this.ZeachUser.getUID(),getActivity());
+    public void getFriendsRequestsFromServer() {
+        this.friendsRequestsListAdapter = new FriendsRequestsListAdapter(getContext(), this.friendsRequests, this.ZeachUser.getUID(), getActivity());
         this.data.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 friendsRequests.clear();
 
                 friendsRequestsListAdapter.notifyDataSetChanged();
-                for(DataSnapshot user: dataSnapshot.getChildren()){
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
                     friendsRequests.add(user.getValue(Friend.class));
                 }
 
@@ -77,8 +83,8 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (this.isVisible())
-            if (!isVisibleToUser){
-                Log.d("not","visible anymore");
+            if (!isVisibleToUser) {
+                Log.d("not", "visible anymore");
             }
     }
 
@@ -88,6 +94,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //  super.onActivityResult(requestCode, resultCode, data);
@@ -100,6 +107,7 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
 
 
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -110,9 +118,10 @@ public class FriendsRequestsListFragment extends Fragment implements View.OnClic
         super.onActivityCreated(savedInstanceState);
 
     }
+
     @Override
     public void onDetach() {
-        Log.d("nir","nir1222");
+        Log.d(TAG, "Fragment has detach");
 
         super.onDetach();
     }

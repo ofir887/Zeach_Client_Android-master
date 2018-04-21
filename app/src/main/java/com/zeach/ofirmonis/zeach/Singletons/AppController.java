@@ -1,4 +1,4 @@
-package com.zeach.ofirmonis.zeach;
+package com.zeach.ofirmonis.zeach.Singletons;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -6,13 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
-import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.google.firebase.database.ChildEventListener;
@@ -23,69 +21,44 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.zeach.ofirmonis.zeach.Constants.FirebaseConstants;
 import com.zeach.ofirmonis.zeach.Objects.Friend;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by ofirmonis on 18/07/2017.
  */
 
-public class AppSavedObjects {
-    private static AppSavedObjects mInstance = null;
+public class AppController {
+    private static AppController mInstance;
 
     public static JSONArray arr;
 
-    public ZeachUser User;
+    public com.zeach.ofirmonis.zeach.Objects.User User;
 
-    protected AppSavedObjects() {
+    protected AppController() {
     }
 
-    public ZeachUser getUser() {
+    public com.zeach.ofirmonis.zeach.Objects.User getUser() {
         return User;
     }
 
-    public void setUser(ZeachUser user) {
+    public void setUser(com.zeach.ofirmonis.zeach.Objects.User user) {
         User = user;
     }
 
-    public static AppSavedObjects getInstance() {
+    public static void createInstance() {
+        mInstance = new AppController();
+    }
+
+    public static AppController getInstance() {
         if (null == mInstance) {
-            mInstance = new AppSavedObjects();
+            mInstance = new AppController();
         }
         return mInstance;
-    }
-
-    public void UpdateUserInfo() {
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
-        //  AppSavedObjects.getInstance().setUser(this.ZeachUser);
-        // Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
-        Map<String, ZeachUser> user = new HashMap<String, ZeachUser>();
-        user.put(this.User.getUID(), this.User);
-        data.child("Users").child(this.User.getUID()).setValue(this.User);
-        //Add seperate parent ! need to check if this is good or can out this on Users in nested map
-        //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
-        /*
-        Intent profileActivity = new Intent(getActivity(),ProfileActivity.class);
-        profileActivity.putExtra("User",User);
-        getActivity().finish();
-        startActivity(profileActivity);*/
-    }
-
-    //add friend to awaiting aproval.
-    public void AddFriendRequest(String userId, Friend friend) {
-        DatabaseReference data = FirebaseDatabase.getInstance().getReference();
-        //create awaiting confirmation on current user
-        data.child("Users").child(this.User.getUID()).child("AwaitngConfirmation").child(friend.getUID()).setValue(friend);
-        //create awaiting confirmation on current user
-        Friend destinationFriend = new Friend(this.User.getName(), this.User.getUID(), this.User.getProfilePictureUri());
-        data.child("Users").child(friend.getUID()).child("FriendsRequest").child(this.User.getUID()).setValue(destinationFriend);
     }
 
     public void getFacebookFriends() {
@@ -120,15 +93,15 @@ public class AppSavedObjects {
         for (int i = 0; i < data1.length(); i++) {
             Query UserId = null;
             try {
-                UserId = searchUserId.child(FirebaseConstants.USERS).orderByChild(FirebaseConstants.FACEBOOK_UID).equalTo(data1.getJSONObject(i).getString(FirebaseConstants.ID));
+                UserId = searchUserId.child(FirebaseConstants.USERS).orderByChild(FirebaseConstants.FACEBOOK_UID).equalTo(data1.getJSONObject(i).getString("id"));
                 UserId.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("found", dataSnapshot.toString());
-                        ZeachUser desired = dataSnapshot.getValue(ZeachUser.class);
-                        Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        com.zeach.ofirmonis.zeach.Objects.User desired = dataSnapshot.getValue(com.zeach.ofirmonis.zeach.Objects.User.class);
+                        Friend f = new Friend(desired.getName(), desired.getUID(), desired.getProfilePictureUri());
                         data.child(String.format("%s/", FirebaseConstants.USERS)).child(getUser().getUID()).child(String.format("/%s", FirebaseConstants.FRIENDS_LIST)).child(desired.getUID()).setValue(f);
-                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri(), desired.getCurrentBeach());
+                        User.AddFriendToList(desired.getUID(), desired.getName(), desired.getProfilePictureUri());
 
 
                     }
@@ -153,7 +126,6 @@ public class AppSavedObjects {
 
                     }
                 });
-                //    ZeachUser.AddFriendToList(String.valueOf(uid[0]),data1.getJSONObject(i).getString("name"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -192,6 +164,7 @@ public class AppSavedObjects {
 
 
     }
+
 
     public static Bitmap SetCircleMarkerIcon(Bitmap bitmap) {
 
@@ -282,17 +255,6 @@ public class AppSavedObjects {
                 paint // Paint
         );
 
-        /*
-            public void recycle ()
-                Free the native object associated with this bitmap, and clear the reference to the
-                pixel data. This will not free the pixel data synchronously; it simply allows it to
-                be garbage collected if there are no other references. The bitmap is marked as
-                "dead", meaning it will throw an exception if getPixels() or setPixels() is called,
-                and will draw nothing. This operation cannot be reversed, so it should only be
-                called if you are sure there are no further uses for the bitmap. This is an advanced
-                call, and normally need not be called, since the normal GC process will free up this
-                memory when there are no more references to this bitmap.
-        */
         srcBitmap.recycle();
 
         // Return the circular bitmap with shadow

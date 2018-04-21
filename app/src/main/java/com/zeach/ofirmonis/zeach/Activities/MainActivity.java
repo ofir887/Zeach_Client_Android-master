@@ -1,8 +1,13 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.content.Intent;
@@ -17,54 +22,103 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.login.LoginManager;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
-import com.koushikdutta.ion.Ion;
-import com.zeach.ofirmonis.zeach.AppSavedObjects;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
+import com.zeach.ofirmonis.zeach.Fragments.FeedbackFragment;
+import com.zeach.ofirmonis.zeach.Singletons.AppController;
 import com.zeach.ofirmonis.zeach.Fragments.FavoriteBeachesFragment;
 import com.zeach.ofirmonis.zeach.Fragments.FriendsFragment;
 import com.zeach.ofirmonis.zeach.Fragments.ProfileFragment;
 import com.zeach.ofirmonis.zeach.Fragments.MapFragment;
 import com.zeach.ofirmonis.zeach.R;
-import com.zeach.ofirmonis.zeach.Objects.ZeachUser;
+import com.zeach.ofirmonis.zeach.Objects.User;
 import com.zeach.ofirmonis.zeach.Services.BackgroundService;
+import com.zeach.ofirmonis.zeach.Singletons.MapSingleton;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Calendar;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_STRING_ACTIVITY;
+import static com.zeach.ofirmonis.zeach.Constants.Actions.ACTION_USER;
+import static com.zeach.ofirmonis.zeach.Constants.FirebaseConstants.PERSON_ICON;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    private ZeachUser zeachUser;
+    private static final String TAG = MainActivity.class.getSimpleName();
 
-    private ProgressBar spinner;
+    private static final int ALARM_MANAGER_INTERVAL = 1000 * 60 * 1;
+
+    private User zeachUser;
+    private View header;
+    private FirebaseStorage mStorage;
+    private StorageReference mStorageRef;
+    private boolean mOpenMap;
+
+
+    private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_USER: {
+                    Log.d(TAG, "User message received");
+                    User user = (User) intent.getSerializableExtra(IntentExtras.USER);
+                    zeachUser = user;
+                    Log.d(TAG, user.toString());
+                    setDrawerProfileInforamtion();
+                    break;
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.spinner = (ProgressBar) findViewById(R.id.progress_bar);
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", true).commit();
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", true).commit();
+        boolean isAlarmManagerOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alarm_manager_on", false);
+        if (isAlarmManagerOn) {
+            Log.i(TAG, "Alarm manager is on. cancelling...");
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+            backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                    backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(pendingIntent);
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", false).commit();
+        }
+        mStorage = FirebaseStorage.getInstance();
+        mStorageRef = mStorage.getReference();
         Intent backgroundService = new Intent(this, BackgroundService.class);
         startService(backgroundService);
-        // this.spinner.setVisibility(View.VISIBLE);
-        //  getUser();
+        //
+        if (activityReceiver != null) {
+            IntentFilter intentFilter = new IntentFilter(ACTION_STRING_ACTIVITY);
+            intentFilter.addAction(ACTION_USER);
+            registerReceiver(activityReceiver, intentFilter);
+        }
+
+        mOpenMap = getIntent().getBooleanExtra(IntentExtras.MAP, false);
+        Log.i(TAG, String.format("opening map:[%b]", mOpenMap));
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
-        //mAuth = FirebaseAuth.getInstance();
+        if (mOpenMap) {
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+        } else {
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -73,43 +127,64 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View header = navigationView.getHeaderView(0);
-        TextView navigationName = (TextView) header.findViewById(R.id.profileName);
-        //  String name = AppSavedObjects.getInstance().getUser().getName();
-        //   navigationName.setText(this.ZeachUser.getName());
+        header = navigationView.getHeaderView(0);
         navigationView.setNavigationItemSelectedListener(this);
-        String user = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString("user", "");
-        try {
-            JSONObject jsn = new JSONObject(user);
-            navigationName.setText(jsn.getString("name"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
-        new AppSavedObjects.DownloadImageTask(image).execute("https://graph.facebook.com/10209101466959698/picture?height=200&width=200&migration_overrides=%7Boctober_2012%3Atrue%7D");
 
     }
 
-    public void setNameAtDrawer(View view) {
-        //  TextView navigationName = (TextView).findViewById(R.id.userName);
-        //  navigationName.setText(AppSavedObjects.getInstance().getUser().getName());
+    public void setDrawerProfileInforamtion() {
+        TextView navigationName = (TextView) header.findViewById(R.id.profileName);
+        navigationName.setText(zeachUser.getName());
+        final CircleImageView image = (CircleImageView) header.findViewById(R.id.imageViewP);
+        if (zeachUser.getProfilePictureUri().startsWith("https://")) {
+            mStorageRef = mStorage.getReference(PERSON_ICON);
+        } else {
+            mStorageRef = mStorage.getReference(zeachUser.getProfilePictureUri());
+        }
+        mStorageRef.getBytes(512 * 512).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                bitmap = AppController.SetCircleMarkerIcon(bitmap);
+                bitmap = AppController.addBorderToCircularBitmap(bitmap, 5, Color.BLACK);
+                bitmap = AppController.addShadowToCircularBitmap(bitmap, 4, Color.LTGRAY);
+                Bitmap smallMarker = Bitmap.createScaledBitmap(bitmap, 200, 200, true);
+                image.setImageBitmap(smallMarker);
+            }
+        });
     }
 
-    public void getUser() {
-        //this.zeachUser = AppSavedObjects.getInstance().getUser();
-        while (this.zeachUser == null) {
-            this.zeachUser = AppSavedObjects.getInstance().getUser();
-            this.spinner.setVisibility(View.VISIBLE);
-        }
-        this.spinner.setVisibility(View.GONE);
+    @Override
+    protected void onPause() {
+        Log.i(TAG, "On pause");
+        Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+        backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", true).commit();
+        Log.i(TAG, "Setting alarm manager flag to true");
+        Calendar calendar = Calendar.getInstance();
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        //repeat every 15 minutes
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(), ALARM_MANAGER_INTERVAL, pendingIntent);
+        super.onPause();
+    }
 
+    @Override
+    protected void onStop() {
+        Log.i(TAG, "On stop");
+        super.onStop();
+        Intent intent = new Intent();
+        sendBroadcast(intent);
     }
 
     @Override
     protected void onDestroy() {
+        unregisterReceiver(activityReceiver);
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", false);
         stopService(new Intent(this, BackgroundService.class));
+        Log.i(TAG, "on destroy");
         super.onDestroy();
     }
 
@@ -139,21 +214,35 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Log.d("logout", "logout");
+            Log.i(TAG, "logout");
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
             for (UserInfo profile : user.getProviderData()) {
 
-                Log.d("Provider", "Provider: " + profile.getProviderId());
+                Log.i(TAG, "Provider: " + profile.getProviderId());
             }
 
-            // Log.d("log" , mAuth.getCurrentUser().getProviderId());
             FirebaseAuth.getInstance().signOut();
+            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", false).commit();
+            Intent backgroundService = new Intent(this, BackgroundService.class);
+            stopService(backgroundService);
+            boolean isAlarmManagerOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alarm_manager_on", false);
+            if (isAlarmManagerOn) {
+                Log.i(TAG, "Alarm manager is on. cancelling...");
+                AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+                Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+                backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                        backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+                alarmManager.cancel(pendingIntent);
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", false).commit();
+            }
             finish();
             LoginManager.getInstance().logOut();
-
-            Intent SignInLogInActivity = new Intent(getApplicationContext(), SignInLogInActivity.class);
-            startActivity(SignInLogInActivity);
+            MapSingleton.createInstance();
+            AppController.createInstance();
+            Intent SignUpLogInActivity = new Intent(getApplicationContext(), SignUpLogInActivity.class);
+            startActivity(SignUpLogInActivity);
             return true;
         }
 
@@ -166,48 +255,29 @@ public class MainActivity extends AppCompatActivity
 
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        MapFragment map = new MapFragment();
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
         if (id == R.id.map) {
-            Log.d("fragment", "fragment pressed");
+            Log.i(TAG, "fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
-
             // Handle the camera action
         } else if (id == R.id.favorite_beaches) {
-            Log.d("fragment", "favorite fragment pressed");
+            Log.i(TAG, "favorite fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FavoriteBeachesFragment()).commit();
-
         } else if (id == R.id.friends) {
             fragmentManager.beginTransaction().replace(R.id.content_frame, new FriendsFragment()).commit();
 
         } else if (id == R.id.profile) {
-            Log.d("fragment", "favorite fragment pressed");
+            Log.i(TAG, "favorite fragment pressed");
             fragmentManager.beginTransaction().replace(R.id.content_frame, new ProfileFragment()).commit();
 
         } else if (id == R.id.feedback) {
-
-        } else if (id == R.id.nav_send) {
-
+            Log.i(TAG, "feedback fragment pressed");
+            fragmentManager.beginTransaction().replace(R.id.content_frame, new FeedbackFragment()).commit();
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    /*
-    public void UpdateUserInfo(){
-       // this.data = FirebaseDatabase.getInstance().getReference();
-        AppSavedObjects.getInstance().setUser(this.ZeachUser);
-        Log.d("singleton",AppSavedObjects.getInstance().getUser().toString());
-        Map<String,ZeachUser> user = new HashMap<String,ZeachUser>();
-        user.put(this.ZeachUser.getUID(),this.ZeachUser);
-        this.data.child("Users").child(this.ZeachUser.getUID()).setValue(this.ZeachUser);
-        //Add seperate parent ! need to check if this is good or can out this on Users in nested map
-        //data.child("Users").child(this.User.getUID()).child("Friends").push().child("ofir");
-        /*
-        Intent profileActivity = new Intent(getActivity(),ProfileActivity.class);
-        profileActivity.putExtra("User",User);
-        getActivity().finish();
-        startActivity(profileActivity);
 
-    }*/
 }

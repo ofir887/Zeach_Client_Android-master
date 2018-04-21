@@ -11,29 +11,21 @@
     <com.google.android.gms.maps.MapView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
-        android:id="@+id/map"
-        />
+        android:id="@+id/map"></com.google.android.gms.maps.MapView>
 
-    <Button
-        android:id="@+id/beach_search_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Search"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true" />
 
-    <AutoCompleteTextView
-        android:id="@+id/autoCompleteSearchTextView"
+    <android.support.v7.widget.SearchView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/beach_search_button"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="11dp"
-        android:text="Enter Beach Name"
-        android:layout_toStartOf="@+id/beach_search_button" />
+        android:id="@+id/beach_search_widget" />
 
-
-
+    <ListView
+        android:id="@+id/map_beach_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:layout_below="@+id/beach_search_widget" />
 
 </RelativeLayout>
