@@ -1,5 +1,7 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -83,6 +85,17 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isActive", true).commit();
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", true).commit();
+        boolean isAlarmManagerOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alarm_manager_on", false);
+        if (isAlarmManagerOn) {
+            Log.i(TAG, "Alarm manager is on. cancelling...");
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+            backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                    backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(pendingIntent);
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", false).commit();
+        }
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReference();
         Intent backgroundService = new Intent(this, BackgroundService.class);
@@ -191,6 +204,17 @@ public class MainActivity extends AppCompatActivity
             PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("isLoggedIn", false).commit();
             Intent backgroundService = new Intent(this, BackgroundService.class);
             stopService(backgroundService);
+            boolean isAlarmManagerOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alarm_manager_on", false);
+            if (isAlarmManagerOn) {
+                Log.i(TAG, "Alarm manager is on. cancelling...");
+                AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+                Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+                backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                        backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+                alarmManager.cancel(pendingIntent);
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", false).commit();
+            }
             finish();
             LoginManager.getInstance().logOut();
             MapSingleton.createInstance();

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.zeach.ofirmonis.zeach.Activities.BackgroundActivity;
@@ -28,11 +29,12 @@ public class StartUpServiceReceiver extends BroadcastReceiver {
         Log.i(TAG, "StartUp service receiver has catch. starting gps background service..");
         Intent activity = new Intent(context, BackgroundActivity.class);
         activity.putExtra(IntentExtras.BACKGROUND, true);
-
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("alarm_manager_on", true).commit();
+        Log.i(TAG, "Setting alarm manager flag to true");
         Calendar calendar = Calendar.getInstance();
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //repeat every 15 minutes
-        long interval = 1000 * 60 * 15;
+        long interval = 1000 * 60 * 5;
         PendingIntent pendingIntent = PendingIntent.getActivity(context, BackgroundService.ID,
                 activity, PendingIntent.FLAG_CANCEL_CURRENT);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,

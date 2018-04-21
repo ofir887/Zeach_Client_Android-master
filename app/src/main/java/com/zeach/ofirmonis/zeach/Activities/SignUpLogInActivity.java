@@ -1,8 +1,12 @@
 package com.zeach.ofirmonis.zeach.Activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -14,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -21,9 +26,12 @@ import com.zeach.ofirmonis.zeach.Constants.IntentExtras;
 import com.zeach.ofirmonis.zeach.Fragments.LoginFragment;
 import com.zeach.ofirmonis.zeach.Fragments.SignUpFragment;
 import com.zeach.ofirmonis.zeach.R;
+import com.zeach.ofirmonis.zeach.Services.BackgroundService;
 
 
 public class SignUpLogInActivity extends AppCompatActivity {
+
+    private static final String TAG = SignUpLogInActivity.class.getSimpleName();
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -31,7 +39,6 @@ public class SignUpLogInActivity extends AppCompatActivity {
      * loaded fragment in memory. If this becomes too memory intensive, it
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     *
      */
 
 
@@ -49,6 +56,17 @@ public class SignUpLogInActivity extends AppCompatActivity {
         boolean moveToBackground = getIntent().getBooleanExtra(IntentExtras.BACKGROUND, false);
         if (moveToBackground) {
             moveTaskToBack(true);
+        }
+        boolean isAlarmManagerOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alarm_manager_on", false);
+        if (isAlarmManagerOn) {
+            Log.i(TAG, "Alarm manager is on. cancelling...");
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+            Intent backgroundActivity = new Intent(this, BackgroundActivity.class);
+            backgroundActivity.putExtra(IntentExtras.BACKGROUND, true);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, BackgroundService.ID,
+                    backgroundActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+            alarmManager.cancel(pendingIntent);
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("alarm_manager_on", false).commit();
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -115,7 +133,6 @@ public class SignUpLogInActivity extends AppCompatActivity {
      */
 
 
-
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -150,7 +167,7 @@ public class SignUpLogInActivity extends AppCompatActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch(position){
+            switch (position) {
                 case 0:
                     return "Sign In";
                 case 1:
@@ -159,11 +176,12 @@ public class SignUpLogInActivity extends AppCompatActivity {
             return null;
         }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         android.app.Fragment fragment = getFragmentManager().findFragmentById(R.layout.signup_fragment);
-      //  fragment.onActivityResult(requestCode, resultCode, data);
+        //  fragment.onActivityResult(requestCode, resultCode, data);
     }
 
 }
