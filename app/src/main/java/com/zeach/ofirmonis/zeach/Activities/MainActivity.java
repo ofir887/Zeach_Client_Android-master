@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int ALARM_MANAGER_INTERVAL = 1000 * 60 * 1;
+    private static final int ALARM_MANAGER_INTERVAL = 1000 * 60 * 15;
 
     private User zeachUser;
     private View header;
